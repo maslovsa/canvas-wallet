@@ -9,22 +9,41 @@
 <body>
   <div id="app">
     <div id="status-banner" class="status-banner"></div>
-    <div id="registry-source-banner" class="registry-source-banner"></div>
 
-    <div class="app-grid">
-      <div id="sidebar" class="sidebar"></div>
+    <div id="gallery-view" class="gallery-view">
+      <header class="gallery-header">
+        <h1>Token UI Studio &amp; Multi-Chain Registry</h1>
+        <p>Pick a token list to view and edit — or upload your own registry.json.</p>
+      </header>
+      <div id="gallery-cards" class="gallery-cards"></div>
+      <div class="gallery-upload">
+        <label class="upload-btn" for="upload-input">Upload your own list</label>
+        <input id="upload-input" type="file" accept="application/json,.json" hidden />
+      </div>
+    </div>
 
-      <div class="simulator-column">
-        <div class="simulator-toolbar">
-          <button id="chrome-style-toggle" class="toolbar-btn">Toggle iOS/Android</button>
-          <button id="chrome-theme-toggle" class="toolbar-btn">Toggle Light/Dark</button>
-        </div>
-        <div id="phone-frame" class="phone-frame"></div>
-        <div id="gallery" class="gallery"></div>
-        <div id="deploy-panel" class="deploy-panel"></div>
+    <div id="studio-view" class="studio-view" hidden>
+      <div class="studio-toolbar">
+        <button id="back-to-gallery" class="toolbar-btn">&larr; Back to Gallery</button>
+        <div id="registry-source-banner" class="registry-source-banner"></div>
+        <button id="download-list-btn" class="toolbar-btn">Download list JSON</button>
       </div>
 
-      <div id="editor-container" class="editor-panel"></div>
+      <div class="app-grid">
+        <div id="sidebar" class="sidebar"></div>
+
+        <div class="simulator-column">
+          <div class="simulator-toolbar">
+            <button id="chrome-style-toggle" class="toolbar-btn">Toggle iOS/Android</button>
+            <button id="chrome-theme-toggle" class="toolbar-btn">Toggle Light/Dark</button>
+          </div>
+          <div id="phone-frame" class="phone-frame"></div>
+          <div id="template-chips" class="gallery"></div>
+          <div id="deploy-panel" class="deploy-panel"></div>
+        </div>
+
+        <div id="editor-container" class="editor-panel"></div>
+      </div>
     </div>
   </div>
   <script type="module" src="/src/main.ts"></script>

@@ -3,9 +3,9 @@
 Live: **https://maslovsa.github.io/canvas-wallet/**
 
 An open-source, schema-validated Server-Driven UI (SDUI) authoring tool for
-wallet token cards — an editor, a live mobile-wallet simulator, and a
-GitHub-PR-based publishing flow, on top of a standard token-list-shaped
-registry.
+wallet token cards — a Gallery of token lists (à la [tokenlists.org](https://tokenlists.org/)),
+an editor, a live mobile-wallet simulator, and a GitHub-PR-based publishing
+flow, on top of a standard token-list-shaped registry.
 
 The customization layer (`ui`, `actions`, `widgets`) is intentionally a
 fixed, closed vocabulary — never arbitrary code, never arbitrary HTML — so a
@@ -23,8 +23,9 @@ npm install
 npm run dev
 ```
 
-Open the printed local URL, pick a network and token, and edit the JSON on
-the right to see the live simulator and trust-score panel update.
+Open the printed local URL, pick a list from the Gallery (or upload your
+own), then pick a network and token, and edit the JSON on the right to see
+the live simulator and trust-score panel update.
 
 ## Deploying
 
@@ -36,23 +37,24 @@ already done for this repo: Settings → Pages → Source: "GitHub Actions".)
 ## Project layout
 
 ```
-public/registry.json         The REAL, PR-editable registry — this is what
-                               the deployed app actually loads at runtime
-public/networks.json          Network branding lookup (name/synonyms → logo)
-registry.schema.json          Canonical schema — single source of truth
-src/generated/                TypeScript types generated from the schema
-src/presets/                  In-memory fallback registry + gallery templates
-src/networks/                 Network-name → logo lookup (synonym-aware)
-src/registry-client/          Fetch, cache, governance-check, version-gate
-src/widgets/                  Widget renderer + action executor (type→handler)
-src/trust-score/               Advisory checks: contrast, homograph, domain-mismatch
-src/share-link/                 Compressed URL-fragment share links
-src/deploy-flow/                GitHub PR-prep / download fallback
-src/icon/                        Icon loading with a domain allowlist
-src/ui/                           Sidebar, phone-frame simulator, editor
-fixtures/                         Adversarial + valid test fixtures for CI (not real data)
-scripts/validate-fixtures.ts      Shared validator (used locally and by CI)
-.github/workflows/                validate-registry.yml (PR gate), deploy.yml
+public/lists/manifest.json    Gallery index — id/name/description/file per list
+public/lists/*.json            The REAL, PR-editable lists — what the Gallery
+                                 cards link to and the app loads at runtime
+public/networks.json           Network branding lookup (name/synonyms → logo)
+registry.schema.json           Canonical schema — single source of truth
+src/generated/                 TypeScript types generated from the schema
+src/presets/                   In-memory fallback (default list) + starter templates
+src/networks/                  Network-name → logo lookup (synonym-aware)
+src/registry-client/           Fetch, cache, governance-check, version-gate, manifest
+src/widgets/                   Widget renderer + action executor (type→handler)
+src/trust-score/                Advisory checks: contrast, homograph, domain-mismatch
+src/share-link/                  Compressed URL-fragment share links
+src/deploy-flow/                 GitHub PR-prep / download fallback
+src/icon/                         Icon loading with a domain allowlist
+src/ui/                            Sidebar, phone-frame simulator, editor, gallery cards
+fixtures/                          Adversarial + valid test fixtures for CI (not real data)
+scripts/validate-fixtures.ts       Shared validator (used locally and by CI)
+.github/workflows/                 validate-registry.yml (PR gate), deploy.yml
 ```
 
 ## Scripts
@@ -61,7 +63,7 @@ scripts/validate-fixtures.ts      Shared validator (used locally and by CI)
 |---|---|
 | `npm run dev` | Vite dev server |
 | `npm test` | Vitest unit + integration tests |
-| `npm run validate:fixtures` | Schema + icon-allowlist check against `public/registry.json` + `fixtures/` (same check CI runs) |
+| `npm run validate:fixtures` | Schema + icon-allowlist check against `public/lists/*.json` + `fixtures/` (same check CI runs) |
 | `npm run build` | Type-check + production build |
 | `npm run test:e2e` | Playwright smoke test |
 

@@ -9,17 +9,39 @@ visual customization can never be arbitrary code or arbitrary HTML: it's
 always one of a small set of pre-approved widget/action types, checked by a
 schema, reviewed by a human before it ships.
 
-## Adding or editing a token
+## The Gallery — multiple lists, not one registry
+
+The Studio's main page is a Gallery (inspired by [tokenlists.org](https://tokenlists.org/)):
+each card is one **list** — a full `registry.schema.json`-shaped file under
+[`public/lists/`](./public/lists/) — showing its name, description, token
+count, and network count. Opening a card takes you into the familiar
+sidebar/simulator/editor view scoped to just that list. There's also an
+"Upload your own list" option (reads a local file client-side, nothing is
+uploaded anywhere) and, for power users, a direct `?registry=owner/repo`
+URL parameter that points the Studio at an external GitHub repo's
+`registry.json` instead (the multi-registry client — see below).
+
+### Adding a token to an existing list
 
 1. Fork this repo.
-2. Edit [`public/registry.json`](./public/registry.json) — add your token
-   under the right network's `tokens` array, or edit an existing one.
-   Follows [`registry.schema.json`](./registry.schema.json). The Studio
-   itself (`npm run dev`) gives you live validation, a trust-score panel,
-   and a rendered preview while you author it — the app loads this exact
-   file at runtime (same-origin, no backend), so what you see locally is
-   what ships.
+2. Edit the relevant file under `public/lists/` (e.g.
+   [`public/lists/trust-wallet-showcase.json`](./public/lists/trust-wallet-showcase.json))
+   — add your token under the right network's `tokens` array, or edit an
+   existing one. Follows [`registry.schema.json`](./registry.schema.json).
+   The Studio itself (`npm run dev`) gives you live validation, a
+   trust-score panel, and a rendered preview while you author it — the app
+   loads these exact files at runtime (same-origin, no backend), so what
+   you see locally is what ships.
 3. Open a pull request.
+
+### Adding a whole new list
+
+1. Add `public/lists/{your-list-id}.json` (schema-shaped).
+2. Add an entry to [`public/lists/manifest.json`](./public/lists/manifest.json)
+   with `id`, `name`, `description`, and `file` — this is what makes it show
+   up as a Gallery card. `manifest.json` itself is NOT registry-schema-validated
+   (it's a list-of-lists, not a Registry).
+3. Open a pull request — CI validates the new list file same as any other.
 
 ### Token and network logos
 
@@ -36,10 +58,10 @@ file from the token registry since it's presentation metadata, not part of
 the schema. Add an entry there (with `synonyms` for alternate spellings) if
 you're adding a new network — the lookup never guesses at a match.
 
-This is a single shared file rather than one-file-per-token, so two PRs
-touching different tokens at the same time can conflict on merge — if that
-becomes a real problem as the registry grows, splitting into per-token files
-is tracked as a possible follow-up, not done today.
+Each list is a single shared file rather than one-file-per-token, so two PRs
+touching different tokens in the same list at the same time can conflict on
+merge — if that becomes a real problem as a list grows, splitting that list
+into per-token files is tracked as a possible follow-up, not done today.
 
 ## What happens to your PR
 
@@ -103,7 +125,7 @@ beyond what GitHub's API can report.
 npm install            # also generates src/generated/registry-schema.d.ts
 npm run dev             # Vite dev server
 npm test                 # Vitest unit + integration tests
-npm run validate:fixtures  # the same check CI runs against public/registry.json + fixtures/
+npm run validate:fixtures  # the same check CI runs against public/lists/*.json + fixtures/
 npm run build             # type-check + production build
 ```
 

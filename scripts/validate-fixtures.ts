@@ -5,9 +5,11 @@
 // (CEO review Section 5 finding).
 //
 // Validates:
-//  1. public/registry.json — the repo's REAL, PR-editable registry (see
-//     CONTRIBUTING.md) — passes schema validation. This is the actual
-//     production gate; everything else below is test fixtures.
+//  1. Every public/lists/*.json (except manifest.json, which isn't a
+//     Registry — it's the Gallery's list-of-lists index) — the repo's REAL,
+//     PR-editable lists (see CONTRIBUTING.md) — pass schema validation.
+//     This is the actual production gate; everything else below is test
+//     fixtures.
 //  2. Every fixtures/valid/*.json passes schema validation.
 //  3. Every fixtures/adversarial/*.json is REJECTED by schema validation —
 //     these are deliberately malformed (unknown widget/action type, bad
@@ -16,7 +18,7 @@
 //  4. fixtures/canary-bad.json specifically must always fail — if it ever
 //     passes, the CI schema gate itself has silently broken (CEO review
 //     Section 8 finding).
-//  5. Every icon URL referenced anywhere in public/registry.json or
+//  5. Every icon/logo URL referenced anywhere in public/lists/*.json or
 //     fixtures/valid/*.json is on the domain allowlist (enforced here, not
 //     just client-side — design doc's resolved Open Question on icon policy).
 import { readdirSync, readFileSync } from "node:fs";
@@ -94,10 +96,10 @@ function validateFile(path: string, expectValid: boolean): void {
   }
 }
 
-function validateDir(dir: string, expectValid: boolean): void {
+function validateDir(dir: string, expectValid: boolean, exclude: Set<string> = new Set()): void {
   let files: string[];
   try {
-    files = readdirSync(dir).filter((f) => f.endsWith(".json"));
+    files = readdirSync(dir).filter((f) => f.endsWith(".json") && !exclude.has(f));
   } catch {
     return;
   }
@@ -106,7 +108,7 @@ function validateDir(dir: string, expectValid: boolean): void {
   }
 }
 
-validateFile(join(ROOT, "public", "registry.json"), true);
+validateDir(join(ROOT, "public", "lists"), true, new Set(["manifest.json"]));
 validateDir(join(ROOT, "fixtures", "valid"), true);
 validateDir(join(ROOT, "fixtures", "adversarial"), false);
 

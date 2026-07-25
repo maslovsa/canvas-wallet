@@ -12,7 +12,7 @@ const token: Token = {
   status: "active",
 };
 
-const source: RegistrySource = { owner: "acme", repo: "registry", isDefault: false };
+const source: RegistrySource = { kind: "github", owner: "acme", repo: "registry" };
 
 describe("share-link encode/decode round trip", () => {
   it("round-trips a token and its registry source", async () => {

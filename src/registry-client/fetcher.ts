@@ -3,7 +3,7 @@ import { parseRegistry, RegistryParseError, RegistrySchemaError } from "../schem
 import { getDefaultBranchCached, RateLimitSignal, NotFoundSignal, NetworkSignal } from "./session-cache.ts";
 import { isSchemaVersionSupported } from "./schema-version-gate.ts";
 import { RegistryClientError } from "./errors.ts";
-import { DEFAULT_REGISTRY } from "../presets/presets.ts";
+import { DEFAULT_REGISTRY, DEFAULT_LIST_ID } from "../presets/presets.ts";
 
 export interface FetchRegistryResult {
   registry: Registry;
@@ -32,42 +32,57 @@ function parseAndCheckVersion(registryJsonText: string): Registry {
 /**
  * Fetch a registry from `source`.
  *
- * The default source loads `registry.json` — the repo's own real,
- * PR-editable registry (see CONTRIBUTING.md) — from the SAME origin the
- * app itself was served from (bundled under `public/`, not fetched from
- * GitHub's API). That still satisfies the CEO review's offline/
- * degraded-mode requirement: it never depends on api.github.com or
- * raw.githubusercontent.com, so it's immune to GitHub rate limits/outages —
- * only a fully broken deploy would affect it, and even then this falls back
- * to the in-memory DEFAULT_REGISTRY constant so the Studio never shows a
- * blank app.
+ * "bundled" loads `lists/{listId}.json` — one of the Gallery's built-in
+ * lists (see public/lists/manifest.json) — from the SAME origin the app
+ * itself was served from, not fetched from GitHub's API. That satisfies the
+ * CEO review's offline/degraded-mode requirement: it never depends on
+ * api.github.com or raw.githubusercontent.com, so it's immune to GitHub
+ * rate limits/outages. For the default list specifically (DEFAULT_LIST_ID)
+ * a broken fetch falls back to the in-memory DEFAULT_REGISTRY constant so
+ * the Studio never shows a fully blank app even on a broken deploy.
  *
- * Any other (multi-registry) source goes through GitHub's contents API
- * with cached default_branch lookups (CEO review item 2 detail).
+ * "github" goes through GitHub's contents API with cached default_branch
+ * lookups (CEO review item 2 detail) — this is the multi-registry client,
+ * a distinct feature from the bundled Gallery lists.
+ *
+ * "uploaded" sources never reach this function — main.ts reads and
+ * validates the local file directly via parseRegistry(), since there's
+ * nothing to fetch.
  */
 export async function fetchRegistry(
   source: RegistrySource,
   fetchImpl: typeof fetch = fetch,
 ): Promise<FetchRegistryResult> {
-  if (source.isDefault) {
+  if (source.kind === "bundled") {
     try {
       const base = import.meta.env.BASE_URL;
-      const res = await fetchImpl(`${base}registry.json`);
+      const res = await fetchImpl(`${base}lists/${source.listId}.json`);
       if (!res.ok) throw new NetworkSignal();
       const registry = parseAndCheckVersion(await res.text());
       return { registry, source };
     } catch {
       // Same-origin fetch failed (broken deploy, offline dev server edge
-      // case) or the published registry.json is malformed — fall back to
-      // the bundled in-memory presets rather than show a blank app.
-      return { registry: DEFAULT_REGISTRY, source };
+      // case) or the published list is malformed. Only the default list has
+      // an in-memory fallback — an arbitrary bundled list with no fallback
+      // data re-throws so the UI can show a real error instead of secretly
+      // swapping in unrelated tokens.
+      if (source.listId === DEFAULT_LIST_ID) {
+        return { registry: DEFAULT_REGISTRY, source };
+      }
+      throw new RegistryClientError("not_found", `Could not load the "${source.listId}" list.`);
     }
   }
 
+  if (source.kind !== "github") {
+    // "uploaded" sources are never expected here — main.ts reads and
+    // validates those directly via parseRegistry(), with no fetch at all.
+    throw new RegistryClientError("not_found", "Uploaded sources cannot be re-fetched.");
+  }
+  const { owner, repo } = source;
   let registryJsonText: string;
   try {
-    const { defaultBranch } = await getDefaultBranchCached(source.owner, source.repo, fetchImpl);
-    const rawUrl = `https://raw.githubusercontent.com/${source.owner}/${source.repo}/${defaultBranch}/registry.json`;
+    const { defaultBranch } = await getDefaultBranchCached(owner, repo, fetchImpl);
+    const rawUrl = `https://raw.githubusercontent.com/${owner}/${repo}/${defaultBranch}/registry.json`;
     const res = await fetchImpl(rawUrl);
     if (res.status === 404) throw new NotFoundSignal();
     if (res.status === 403 || res.status === 429) throw new RateLimitSignal();
@@ -78,7 +93,7 @@ export async function fetchRegistry(
       throw new RegistryClientError("rate_limited", "Rate-limited by GitHub while fetching the registry.");
     }
     if (err instanceof NotFoundSignal) {
-      throw new RegistryClientError("not_found", `No registry.json found at ${source.owner}/${source.repo}.`);
+      throw new RegistryClientError("not_found", `No registry.json found at ${owner}/${repo}.`);
     }
     if (err instanceof NetworkSignal || err instanceof TypeError) {
       throw new RegistryClientError("network_error", "Network request to the registry failed.");

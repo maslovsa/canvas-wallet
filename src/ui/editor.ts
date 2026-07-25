@@ -51,6 +51,15 @@ export class Editor {
     this.renderTrustScore(token);
   }
 
+  /** Resets to an empty state — call whenever the selection becomes "no token" (switching network/list/gallery), so the editor never keeps showing a token that's no longer selected. */
+  clear(): void {
+    this.textarea.value = "";
+    this.lastValidJson = "";
+    this.hasUnsavedChanges = false;
+    this.renderDiagnostics([]);
+    this.trustScoreEl.innerHTML = "";
+  }
+
   private handlePaste(event: ClipboardEvent): void {
     const pasted = event.clipboardData?.getData("text") ?? "";
     if (pasted.length > MAX_PASTE_LENGTH) {

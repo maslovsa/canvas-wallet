@@ -1,0 +1,17 @@
+{
+  "_comment": "Gallery index — NOT registry-schema-validated (this file's shape isn't a Registry, it's a list-of-lists). Each entry's `file` is fetched relative to this directory (public/lists/) when a Gallery card is opened.",
+  "lists": [
+    {
+      "id": "trust-wallet-showcase",
+      "name": "Trust Wallet SDUI Showcase",
+      "description": "Hand-authored tokens demonstrating the full SDUI widget/action vocabulary — mint/redeem banners, staking, notices — alongside real ETH, WETH, and Trust Wallet Token.",
+      "file": "trust-wallet-showcase.json"
+    },
+    {
+      "id": "uniswap-default",
+      "name": "Uniswap Labs Default (sample)",
+      "description": "Real, well-known Ethereum tokens borrowed from Uniswap's official default token list — real addresses, real logos, minimal styling. Shows what importing an existing real-world token list looks like.",
+      "file": "uniswap-default.json"
+    }
+  ]
+}

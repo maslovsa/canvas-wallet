@@ -1,0 +1,132 @@
+{
+  "schemaVersion": "1.0.0",
+  "networks": [
+    {
+      "name": "Ethereum",
+      "tokens": [
+        {
+          "name": "USD Coin",
+          "symbol": "USDC",
+          "type": "ERC20",
+          "id": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+          "decimals": 6,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48/logo.png",
+          "website": "https://www.circle.com/usdc",
+          "description": "Fully-reserved US dollar stablecoin issued by Circle.",
+          "status": "active",
+          "tags": ["stablecoin"],
+          "explorer": "https://etherscan.io/token/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+          "ui": {
+            "theme": { "primaryColor": "#2775CA", "badgeText": "Stablecoin" },
+            "background": { "type": "solid", "colors": ["#0B1E33"] }
+          }
+        },
+        {
+          "name": "Tether USD",
+          "symbol": "USDT",
+          "type": "ERC20",
+          "id": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+          "decimals": 6,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xdAC17F958D2ee523a2206206994597C13D831ec7/logo.png",
+          "website": "https://tether.to",
+          "description": "The largest stablecoin by market cap, pegged 1:1 to the US dollar.",
+          "status": "active",
+          "tags": ["stablecoin"],
+          "explorer": "https://etherscan.io/token/0xdAC17F958D2ee523a2206206994597C13D831ec7",
+          "ui": {
+            "theme": { "primaryColor": "#26A17B", "badgeText": "Stablecoin" },
+            "background": { "type": "solid", "colors": ["#0B1E17"] }
+          }
+        },
+        {
+          "name": "Dai Stablecoin",
+          "symbol": "DAI",
+          "type": "ERC20",
+          "id": "0x6B175474E89094C44Da98b954EedeAC495271d0F",
+          "decimals": 18,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x6B175474E89094C44Da98b954EedeAC495271d0F/logo.png",
+          "website": "https://makerdao.com",
+          "description": "Decentralized, crypto-collateralized stablecoin from MakerDAO.",
+          "status": "active",
+          "tags": ["stablecoin"],
+          "explorer": "https://etherscan.io/token/0x6B175474E89094C44Da98b954EedeAC495271d0F",
+          "ui": {
+            "theme": { "primaryColor": "#F5AC37", "badgeText": "Stablecoin" },
+            "background": { "type": "solid", "colors": ["#2B1F0B"] }
+          }
+        },
+        {
+          "name": "Wrapped BTC",
+          "symbol": "WBTC",
+          "type": "ERC20",
+          "id": "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
+          "decimals": 8,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599/logo.png",
+          "website": "https://wbtc.network",
+          "description": "ERC-20 representation of Bitcoin, 1:1 custodial-backed.",
+          "status": "active",
+          "tags": ["wrapped"],
+          "explorer": "https://etherscan.io/token/0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
+          "ui": {
+            "theme": { "primaryColor": "#F09242", "badgeText": "Wrapped 1:1" },
+            "background": { "type": "solid", "colors": ["#2B1B0B"] }
+          },
+          "widgets": [
+            { "type": "key_value", "title": "Peg", "items": [{ "label": "Backing", "value": "1:1 BTC custodial" }] }
+          ]
+        },
+        {
+          "name": "Uniswap",
+          "symbol": "UNI",
+          "type": "ERC20",
+          "id": "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
+          "decimals": 18,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984/logo.png",
+          "website": "https://uniswap.org",
+          "description": "Governance token of the Uniswap Protocol.",
+          "status": "active",
+          "tags": ["governance", "dex"],
+          "explorer": "https://etherscan.io/token/0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
+          "ui": {
+            "theme": { "primaryColor": "#FF007A", "badgeText": "Governance" },
+            "background": { "type": "solid", "colors": ["#2B0B1D"] }
+          }
+        },
+        {
+          "name": "ChainLink Token",
+          "symbol": "LINK",
+          "type": "ERC20",
+          "id": "0x514910771AF9Ca656af840dff83E8264EcF986CA",
+          "decimals": 18,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x514910771AF9Ca656af840dff83E8264EcF986CA/logo.png",
+          "website": "https://chain.link",
+          "description": "Native token of the Chainlink decentralized oracle network.",
+          "status": "active",
+          "tags": ["oracle"],
+          "explorer": "https://etherscan.io/token/0x514910771AF9Ca656af840dff83E8264EcF986CA",
+          "ui": {
+            "theme": { "primaryColor": "#2A5ADA", "badgeText": "Oracle" },
+            "background": { "type": "solid", "colors": ["#0B1330"] }
+          }
+        },
+        {
+          "name": "Aave",
+          "symbol": "AAVE",
+          "type": "ERC20",
+          "id": "0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9",
+          "decimals": 18,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9/logo.png",
+          "website": "https://aave.com",
+          "description": "Governance token of the Aave lending protocol.",
+          "status": "active",
+          "tags": ["governance", "lending"],
+          "explorer": "https://etherscan.io/token/0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9",
+          "ui": {
+            "theme": { "primaryColor": "#B6509E", "badgeText": "Governance" },
+            "background": { "type": "solid", "colors": ["#210B1E"] }
+          }
+        }
+      ]
+    }
+  ]
+}

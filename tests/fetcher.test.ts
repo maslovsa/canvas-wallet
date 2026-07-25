@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { fetchRegistry } from "../src/registry-client/fetcher.ts";
-import { DEFAULT_REGISTRY } from "../src/presets/presets.ts";
+import { DEFAULT_REGISTRY, DEFAULT_LIST_ID } from "../src/presets/presets.ts";
 import type { RegistrySource } from "../src/types.ts";
 
 // Integration test for the fetch -> validate -> (would-be render) pipeline —
@@ -11,27 +11,28 @@ beforeEach(() => {
   sessionStorage.clear();
 });
 
-describe("fetchRegistry (default source)", () => {
-  const source: RegistrySource = { owner: "", repo: "", isDefault: true };
+describe("fetchRegistry (bundled source)", () => {
+  const source: RegistrySource = { kind: "bundled", listId: DEFAULT_LIST_ID };
 
-  it("loads the real registry.json via a same-origin fetch (never a GitHub domain)", async () => {
+  it("loads the real list JSON via a same-origin fetch (never a GitHub domain)", async () => {
     const published = { schemaVersion: "1.0.0", networks: [{ name: "Ethereum", tokens: [] }] };
     const fetchImpl = vi.fn().mockResolvedValue({ ok: true, text: async () => JSON.stringify(published) });
     const result = await fetchRegistry(source, fetchImpl);
     expect(result.registry.networks[0]?.name).toBe("Ethereum");
     expect(fetchImpl).toHaveBeenCalledTimes(1);
     const requestedUrl = fetchImpl.mock.calls[0]?.[0] as string;
+    expect(requestedUrl).toContain(`lists/${DEFAULT_LIST_ID}.json`);
     expect(requestedUrl).not.toContain("github.com");
     expect(requestedUrl).not.toContain("githubusercontent.com");
   });
 
-  it("falls back to the in-memory DEFAULT_REGISTRY if the same-origin fetch fails", async () => {
+  it("falls back to the in-memory DEFAULT_REGISTRY if the same-origin fetch fails (default list only)", async () => {
     const fetchImpl = vi.fn().mockRejectedValue(new TypeError("network error"));
     const result = await fetchRegistry(source, fetchImpl);
     expect(result.registry).toEqual(DEFAULT_REGISTRY);
   });
 
-  it("falls back to DEFAULT_REGISTRY if the published registry.json is malformed", async () => {
+  it("falls back to DEFAULT_REGISTRY if the published list JSON is malformed (default list only)", async () => {
     const fetchImpl = vi.fn().mockResolvedValue({ ok: true, text: async () => "{ not json" });
     const result = await fetchRegistry(source, fetchImpl);
     expect(result.registry).toEqual(DEFAULT_REGISTRY);
@@ -42,10 +43,15 @@ describe("fetchRegistry (default source)", () => {
     const result = await fetchRegistry(source, fetchImpl);
     expect(result.registry).toEqual(DEFAULT_REGISTRY);
   });
+
+  it("does NOT fall back for a non-default bundled list — throws instead of silently swapping in unrelated tokens", async () => {
+    const otherSource: RegistrySource = { kind: "bundled", listId: "uniswap-default" };
+    const fetchImpl = vi.fn().mockRejectedValue(new TypeError("network error"));
+    await expect(fetchRegistry(otherSource, fetchImpl)).rejects.toMatchObject({ code: "not_found" });
+  });
 });
 
-describe("fetchRegistry (remote/multi-registry source)", () => {
-
+describe("fetchRegistry (github/multi-registry source)", () => {
   it("fetches, validates, and returns a remote registry end-to-end", async () => {
     const validRegistry = {
       schemaVersion: "1.0.0",
@@ -55,7 +61,7 @@ describe("fetchRegistry (remote/multi-registry source)", () => {
       .fn()
       .mockResolvedValueOnce({ status: 200, ok: true, json: async () => ({ default_branch: "main" }) })
       .mockResolvedValueOnce({ status: 200, ok: true, text: async () => JSON.stringify(validRegistry) });
-    const source: RegistrySource = { owner: "acme", repo: "registry", isDefault: false };
+    const source: RegistrySource = { kind: "github", owner: "acme", repo: "registry" };
     const result = await fetchRegistry(source, fetchImpl);
     expect(result.registry.networks[0]?.name).toBe("Ethereum");
   });
@@ -65,7 +71,7 @@ describe("fetchRegistry (remote/multi-registry source)", () => {
       .fn()
       .mockResolvedValueOnce({ status: 200, ok: true, json: async () => ({ default_branch: "main" }) })
       .mockResolvedValueOnce({ status: 200, ok: true, text: async () => "{ not json" });
-    const source: RegistrySource = { owner: "acme", repo: "registry", isDefault: false };
+    const source: RegistrySource = { kind: "github", owner: "acme", repo: "registry" };
     await expect(fetchRegistry(source, fetchImpl)).rejects.toMatchObject({ code: "parse_error" });
   });
 
@@ -79,7 +85,7 @@ describe("fetchRegistry (remote/multi-registry source)", () => {
       .fn()
       .mockResolvedValueOnce({ status: 200, ok: true, json: async () => ({ default_branch: "main" }) })
       .mockResolvedValueOnce({ status: 403, ok: false });
-    const source: RegistrySource = { owner: "acme", repo: "registry", isDefault: false };
+    const source: RegistrySource = { kind: "github", owner: "acme", repo: "registry" };
     await expect(fetchRegistry(source, fetchImpl)).rejects.toMatchObject({
       code: "rate_limited",
       name: "RegistryClientError",
@@ -95,7 +101,7 @@ describe("fetchRegistry (remote/multi-registry source)", () => {
         ok: true,
         text: async () => JSON.stringify({ schemaVersion: "9.9.9", networks: [] }),
       });
-    const source: RegistrySource = { owner: "acme", repo: "registry", isDefault: false };
+    const source: RegistrySource = { kind: "github", owner: "acme", repo: "registry" };
     await expect(fetchRegistry(source, fetchImpl)).rejects.toMatchObject({ code: "schema_version_unrecognized" });
   });
 });

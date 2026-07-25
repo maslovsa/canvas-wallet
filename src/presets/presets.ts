@@ -192,10 +192,18 @@ const lpToken: Token = {
 /** The 3 named v1 presets shown by default. */
 export const NAMED_PRESETS: readonly Token[] = [usdtYield, twtGovernance, rwaBond];
 
-/** Additional hand-authored templates for the gallery beyond the 3 named presets. */
-export const GALLERY_TEMPLATES: readonly Token[] = [memeCoin, lpToken];
+/**
+ * Additional hand-authored starter templates for "+ Add / Create token"
+ * within a list (per-token starting points) — a different concept from the
+ * list-level Gallery (public/lists/manifest.json), which picks a whole
+ * list to view, not a single token template.
+ */
+export const STARTER_TEMPLATES: readonly Token[] = [memeCoin, lpToken];
 
-/** Bundled default registry — works fully offline, no GitHub API calls. */
+/** id of the bundled list this file backs — matches public/lists/trust-wallet-showcase.json and its manifest entry. */
+export const DEFAULT_LIST_ID = "trust-wallet-showcase";
+
+/** In-memory fallback for DEFAULT_LIST_ID — works fully offline, no GitHub API calls, used only if the same-origin fetch of that one list ever fails. */
 export const DEFAULT_REGISTRY: Registry = {
   schemaVersion: "1.0.0",
   networks: [

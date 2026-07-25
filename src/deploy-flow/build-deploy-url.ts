@@ -1,4 +1,4 @@
-import type { Token, RegistrySource } from "../types.ts";
+import type { Token } from "../types.ts";
 import { getDefaultBranchCached, RateLimitSignal, NotFoundSignal, NetworkSignal } from "../registry-client/session-cache.ts";
 
 const MAX_PREFILL_LENGTH = 4000; // Conservative threshold — design doc Next Steps #3.
@@ -15,9 +15,11 @@ export interface DeployPlan {
  * Builds either a GitHub "propose new file" prefilled URL, or a download
  * fallback — never guesses a branch name, and always falls back cleanly if
  * the default_branch lookup fails or the encoded config is too large.
+ * Only meaningful for a `{kind: "github"}` source — bundled/uploaded lists
+ * use the plain "download the whole list" flow instead (see main.ts).
  */
 export async function buildDeployPlan(
-  source: RegistrySource,
+  target: { owner: string; repo: string },
   network: string,
   token: Token,
   fetchImpl: typeof fetch = fetch,
@@ -27,7 +29,7 @@ export async function buildDeployPlan(
 
   let defaultBranch: string;
   try {
-    defaultBranch = (await getDefaultBranchCached(source.owner, source.repo, fetchImpl)).defaultBranch;
+    defaultBranch = (await getDefaultBranchCached(target.owner, target.repo, fetchImpl)).defaultBranch;
   } catch (err) {
     const reason =
       err instanceof RateLimitSignal
@@ -41,7 +43,7 @@ export async function buildDeployPlan(
   }
 
   const encoded = encodeURIComponent(json);
-  const url = `https://github.com/${source.owner}/${source.repo}/new/${defaultBranch}?filename=${encodeURIComponent(filename)}&value=${encoded}`;
+  const url = `https://github.com/${target.owner}/${target.repo}/new/${defaultBranch}?filename=${encodeURIComponent(filename)}&value=${encoded}`;
 
   if (url.length > MAX_PREFILL_LENGTH) {
     return {

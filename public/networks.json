@@ -10,6 +10,26 @@
       "canonicalName": "BNB Smart Chain",
       "synonyms": ["bsc", "bnb", "bnb smart chain", "binance smart chain", "smartchain", "smart chain"],
       "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/smartchain/info/logo.png"
+    },
+    {
+      "canonicalName": "Tron",
+      "synonyms": ["tron", "trx"],
+      "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/tron/info/logo.png"
+    },
+    {
+      "canonicalName": "Polygon",
+      "synonyms": ["polygon", "matic", "polygon pos"],
+      "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/polygon/info/logo.png"
+    },
+    {
+      "canonicalName": "Optimism",
+      "synonyms": ["optimism", "op", "op mainnet"],
+      "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/optimism/info/logo.png"
+    },
+    {
+      "canonicalName": "Plasma",
+      "synonyms": ["plasma", "xpl"],
+      "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/plasma/info/logo.png"
     }
   ]
 }
