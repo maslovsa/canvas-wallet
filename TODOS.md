@@ -35,3 +35,35 @@ confirmed still deferred during the 11-section deep review's TODOS pass.
 
 **Depends on / blocked by:** None — can be built anytime after the base
 editor + simulator exist.
+
+## P3: PR preview deploys
+
+**What:** Let a PR reviewer see the actual rendered token card (not just raw
+JSON) before approving a token-config PR.
+
+**Why:** Strengthens the CODEOWNERS-required human review step — the actual
+backstop for anything schema validation can't catch (misleading badge text,
+a card that just "looks wrong"). Right now a reviewer only sees a JSON diff.
+
+**Pros:** Directly complements the CODEOWNERS review process by giving the
+named reviewer a much clearer signal than raw JSON.
+
+**Cons:** GitHub Pages supports only ONE deploy source per repo — either
+"deploy from a branch" or "deploy via Actions" (this repo uses Actions, set
+up 2026-07-25). A per-PR preview mechanism (e.g. the common
+`rossjrw/pr-preview-action`, which deploys to a branch) risks conflicting
+with the working Actions-based deploy. Needs either a conflict-free
+approach or a deliberate architecture change, not a quick add.
+
+**Context:** Surfaced as CEO review Section 9 finding, left unresolved at
+review time. Raised again post-deploy (2026-07-25) and explicitly deferred
+rather than risk the live deploy mechanism — see the tradeoff above.
+
+**Effort estimate:** M (human team) → CC+gstack: ~1-2h, plus real testing
+against a live Pages deploy to confirm no conflict.
+
+**Priority:** P3
+
+**Depends on / blocked by:** A second active contributor actually needing
+this (the CODEOWNERS self-approval note in CONTRIBUTING.md already flags
+that solo review has bigger gaps than "no visual preview").
