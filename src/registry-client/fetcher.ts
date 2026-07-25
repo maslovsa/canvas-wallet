@@ -10,18 +10,58 @@ export interface FetchRegistryResult {
   source: RegistrySource;
 }
 
+function parseAndCheckVersion(registryJsonText: string): Registry {
+  let registry: Registry;
+  try {
+    registry = parseRegistry(registryJsonText);
+  } catch (err) {
+    if (err instanceof RegistryParseError || err instanceof RegistrySchemaError) {
+      throw new RegistryClientError("parse_error", err.message);
+    }
+    throw err;
+  }
+  if (!isSchemaVersionSupported(registry.schemaVersion)) {
+    throw new RegistryClientError(
+      "schema_version_unrecognized",
+      `Registry schemaVersion "${registry.schemaVersion}" is not supported by this Studio build.`,
+    );
+  }
+  return registry;
+}
+
 /**
- * Fetch a registry from `source`. The default/bundled registry never touches
- * the network (CEO review Section 1: offline/degraded-mode fallback). Any
- * other source goes through GitHub's contents API with cached
- * default_branch lookups (CEO review item 2 detail).
+ * Fetch a registry from `source`.
+ *
+ * The default source loads `registry.json` — the repo's own real,
+ * PR-editable registry (see CONTRIBUTING.md) — from the SAME origin the
+ * app itself was served from (bundled under `public/`, not fetched from
+ * GitHub's API). That still satisfies the CEO review's offline/
+ * degraded-mode requirement: it never depends on api.github.com or
+ * raw.githubusercontent.com, so it's immune to GitHub rate limits/outages —
+ * only a fully broken deploy would affect it, and even then this falls back
+ * to the in-memory DEFAULT_REGISTRY constant so the Studio never shows a
+ * blank app.
+ *
+ * Any other (multi-registry) source goes through GitHub's contents API
+ * with cached default_branch lookups (CEO review item 2 detail).
  */
 export async function fetchRegistry(
   source: RegistrySource,
   fetchImpl: typeof fetch = fetch,
 ): Promise<FetchRegistryResult> {
   if (source.isDefault) {
-    return { registry: DEFAULT_REGISTRY, source };
+    try {
+      const base = import.meta.env.BASE_URL;
+      const res = await fetchImpl(`${base}registry.json`);
+      if (!res.ok) throw new NetworkSignal();
+      const registry = parseAndCheckVersion(await res.text());
+      return { registry, source };
+    } catch {
+      // Same-origin fetch failed (broken deploy, offline dev server edge
+      // case) or the published registry.json is malformed — fall back to
+      // the bundled in-memory presets rather than show a blank app.
+      return { registry: DEFAULT_REGISTRY, source };
+    }
   }
 
   let registryJsonText: string;
@@ -46,25 +86,5 @@ export async function fetchRegistry(
     throw err;
   }
 
-  let registry: Registry;
-  try {
-    registry = parseRegistry(registryJsonText);
-  } catch (err) {
-    if (err instanceof RegistryParseError) {
-      throw new RegistryClientError("parse_error", err.message);
-    }
-    if (err instanceof RegistrySchemaError) {
-      throw new RegistryClientError("parse_error", err.message);
-    }
-    throw err;
-  }
-
-  if (!isSchemaVersionSupported(registry.schemaVersion)) {
-    throw new RegistryClientError(
-      "schema_version_unrecognized",
-      `Registry schemaVersion "${registry.schemaVersion}" is not supported by this Studio build.`,
-    );
-  }
-
-  return { registry, source };
+  return { registry: parseAndCheckVersion(registryJsonText), source };
 }

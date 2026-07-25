@@ -5,17 +5,20 @@
 // (CEO review Section 5 finding).
 //
 // Validates:
-//  1. Every fixtures/valid/*.json passes schema validation.
-//  2. Every fixtures/adversarial/*.json is REJECTED by schema validation —
+//  1. public/registry.json — the repo's REAL, PR-editable registry (see
+//     CONTRIBUTING.md) — passes schema validation. This is the actual
+//     production gate; everything else below is test fixtures.
+//  2. Every fixtures/valid/*.json passes schema validation.
+//  3. Every fixtures/adversarial/*.json is REJECTED by schema validation —
 //     these are deliberately malformed (unknown widget/action type, bad
 //     schemaVersion, etc.) and asserting they fail is what makes this a
 //     real regression test for the validator itself.
-//  3. fixtures/canary-bad.json specifically must always fail — if it ever
+//  4. fixtures/canary-bad.json specifically must always fail — if it ever
 //     passes, the CI schema gate itself has silently broken (CEO review
 //     Section 8 finding).
-//  4. Every icon URL referenced anywhere in fixtures/valid/*.json is on the
-//     domain allowlist (enforced here, not just client-side — design doc's
-//     resolved Open Question on icon policy).
+//  5. Every icon URL referenced anywhere in public/registry.json or
+//     fixtures/valid/*.json is on the domain allowlist (enforced here, not
+//     just client-side — design doc's resolved Open Question on icon policy).
 import { readdirSync, readFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -99,6 +102,7 @@ function validateDir(dir: string, expectValid: boolean): void {
   }
 }
 
+validateFile(join(ROOT, "public", "registry.json"), true);
 validateDir(join(ROOT, "fixtures", "valid"), true);
 validateDir(join(ROOT, "fixtures", "adversarial"), false);
 

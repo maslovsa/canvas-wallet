@@ -12,11 +12,19 @@ schema, reviewed by a human before it ships.
 ## Adding or editing a token
 
 1. Fork this repo.
-2. Add or edit `{network}/{symbol}.json` under the registry directory,
-   following [`registry.schema.json`](./registry.schema.json). The Studio
+2. Edit [`public/registry.json`](./public/registry.json) — add your token
+   under the right network's `tokens` array, or edit an existing one.
+   Follows [`registry.schema.json`](./registry.schema.json). The Studio
    itself (`npm run dev`) gives you live validation, a trust-score panel,
-   and a rendered preview while you author it.
+   and a rendered preview while you author it — the app loads this exact
+   file at runtime (same-origin, no backend), so what you see locally is
+   what ships.
 3. Open a pull request.
+
+This is a single shared file rather than one-file-per-token, so two PRs
+touching different tokens at the same time can conflict on merge — if that
+becomes a real problem as the registry grows, splitting into per-token files
+is tracked as a possible follow-up, not done today.
 
 ## What happens to your PR
 
@@ -80,7 +88,7 @@ beyond what GitHub's API can report.
 npm install            # also generates src/generated/registry-schema.d.ts
 npm run dev             # Vite dev server
 npm test                 # Vitest unit + integration tests
-npm run validate:fixtures  # the same check CI runs against fixtures/
+npm run validate:fixtures  # the same check CI runs against public/registry.json + fixtures/
 npm run build             # type-check + production build
 ```
 

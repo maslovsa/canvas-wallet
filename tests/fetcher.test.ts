@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { fetchRegistry } from "../src/registry-client/fetcher.ts";
+import { DEFAULT_REGISTRY } from "../src/presets/presets.ts";
 import type { RegistrySource } from "../src/types.ts";
 
 // Integration test for the fetch -> validate -> (would-be render) pipeline —
@@ -10,14 +11,40 @@ beforeEach(() => {
   sessionStorage.clear();
 });
 
-describe("fetchRegistry", () => {
-  it("returns the bundled default registry with zero network calls", async () => {
-    const fetchImpl = vi.fn();
-    const source: RegistrySource = { owner: "", repo: "", isDefault: true };
+describe("fetchRegistry (default source)", () => {
+  const source: RegistrySource = { owner: "", repo: "", isDefault: true };
+
+  it("loads the real registry.json via a same-origin fetch (never a GitHub domain)", async () => {
+    const published = { schemaVersion: "1.0.0", networks: [{ name: "Ethereum", tokens: [] }] };
+    const fetchImpl = vi.fn().mockResolvedValue({ ok: true, text: async () => JSON.stringify(published) });
     const result = await fetchRegistry(source, fetchImpl);
-    expect(result.registry.networks.length).toBeGreaterThan(0);
-    expect(fetchImpl).not.toHaveBeenCalled();
+    expect(result.registry.networks[0]?.name).toBe("Ethereum");
+    expect(fetchImpl).toHaveBeenCalledTimes(1);
+    const requestedUrl = fetchImpl.mock.calls[0]?.[0] as string;
+    expect(requestedUrl).not.toContain("github.com");
+    expect(requestedUrl).not.toContain("githubusercontent.com");
   });
+
+  it("falls back to the in-memory DEFAULT_REGISTRY if the same-origin fetch fails", async () => {
+    const fetchImpl = vi.fn().mockRejectedValue(new TypeError("network error"));
+    const result = await fetchRegistry(source, fetchImpl);
+    expect(result.registry).toEqual(DEFAULT_REGISTRY);
+  });
+
+  it("falls back to DEFAULT_REGISTRY if the published registry.json is malformed", async () => {
+    const fetchImpl = vi.fn().mockResolvedValue({ ok: true, text: async () => "{ not json" });
+    const result = await fetchRegistry(source, fetchImpl);
+    expect(result.registry).toEqual(DEFAULT_REGISTRY);
+  });
+
+  it("falls back to DEFAULT_REGISTRY on a non-ok response (e.g. 404 on a broken deploy)", async () => {
+    const fetchImpl = vi.fn().mockResolvedValue({ ok: false, status: 404 });
+    const result = await fetchRegistry(source, fetchImpl);
+    expect(result.registry).toEqual(DEFAULT_REGISTRY);
+  });
+});
+
+describe("fetchRegistry (remote/multi-registry source)", () => {
 
   it("fetches, validates, and returns a remote registry end-to-end", async () => {
     const validRegistry = {
