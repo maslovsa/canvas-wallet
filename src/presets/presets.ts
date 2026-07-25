@@ -189,6 +189,29 @@ const lpToken: Token = {
   ],
 };
 
+const tronNative: Token = {
+  name: "TRON",
+  symbol: "TRX",
+  type: "NATIVE",
+  id: "native",
+  decimals: 6,
+  logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/tron/info/logo.png",
+  website: "https://tron.network",
+  description: "The native asset of the Tron network. Demonstrates an image-type background (domain-allowlisted, same as token logos) and the price_chart widget (live CoinGecko data, no API key).",
+  status: "active",
+  tags: ["native"],
+  explorer: "https://tronscan.org",
+  ui: {
+    theme: { primaryColor: "#FF060A", badgeText: "Native" },
+    background: {
+      type: "image",
+      url: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/tron/info/logo.png",
+      overlayColor: "#1A0000",
+    },
+  },
+  widgets: [{ type: "price_chart", coingeckoId: "tron", days: 1 }],
+};
+
 /** The 3 named v1 presets shown by default. */
 export const NAMED_PRESETS: readonly Token[] = [usdtYield, twtGovernance, rwaBond];
 
@@ -209,5 +232,6 @@ export const DEFAULT_REGISTRY: Registry = {
   networks: [
     { name: "Ethereum", tokens: [nativeEth, wrappedEth, usdtYield, rwaBond, memeCoin, lpToken] },
     { name: "BSC", tokens: [twtGovernance] },
+    { name: "Tron", tokens: [tronNative] },
   ],
 };

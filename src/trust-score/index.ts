@@ -22,10 +22,14 @@ export function computeTrustScore(token: Token): TrustScoreFinding[] {
   const findings: TrustScoreFinding[] = [];
 
   if (token.ui?.theme?.badgeText && token.ui.theme.primaryColor && token.ui.background) {
+    const bg = token.ui.background;
+    // An "image" background has no color stops to check contrast against —
+    // only its overlayColor (shown while loading/on fetch failure), if set.
+    const backgroundColors = bg.type === "image" ? (bg.overlayColor ? [bg.overlayColor] : []) : bg.colors;
     const contrast = checkBadgeContrast(
       "#FFFFFF", // badge text renders white-on-color per the design; check against that.
       token.ui.theme.primaryColor,
-      token.ui.background.colors,
+      backgroundColors,
     );
     if (!contrast.passes) {
       findings.push({

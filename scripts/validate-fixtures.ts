@@ -21,6 +21,12 @@
 //  5. Every icon/logo URL referenced anywhere in public/lists/*.json or
 //     fixtures/valid/*.json is on the domain allowlist (enforced here, not
 //     just client-side — design doc's resolved Open Question on icon policy).
+//  6. Every ui.background.url (type: "image") is on that same domain
+//     allowlist. Checked structurally (walking networks[].tokens[].ui),
+//     NOT via the generic icon/logo key-walker below — "url" is also used by
+//     action definitions (actionExternalUrl.url, actionDeeplink.url, link
+//     URLs) where arbitrary domains are expected and correct, so a blanket
+//     key-name match on "url" would wrongly flag those.
 import { readdirSync, readFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -64,6 +70,25 @@ function collectIconUrls(data: unknown): string[] {
   return urls;
 }
 
+interface RegistryLike {
+  networks?: Array<{
+    tokens?: Array<{
+      ui?: { background?: { type?: string; url?: string } };
+    }>;
+  }>;
+}
+
+function collectBackgroundImageUrls(data: unknown): string[] {
+  const urls: string[] = [];
+  for (const network of (data as RegistryLike).networks ?? []) {
+    for (const token of network.tokens ?? []) {
+      const bg = token.ui?.background;
+      if (bg?.type === "image" && typeof bg.url === "string") urls.push(bg.url);
+    }
+  }
+  return urls;
+}
+
 function validateFile(path: string, expectValid: boolean): void {
   const raw = readFileSync(path, "utf-8");
   let data: unknown;
@@ -83,7 +108,7 @@ function validateFile(path: string, expectValid: boolean): void {
   );
 
   if (expectValid && valid) {
-    for (const url of collectIconUrls(data)) {
+    for (const url of [...collectIconUrls(data), ...collectBackgroundImageUrls(data)]) {
       let hostname: string;
       try {
         hostname = new URL(url).hostname;

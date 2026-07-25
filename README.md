@@ -10,7 +10,11 @@ flow, on top of a standard token-list-shaped registry.
 The customization layer (`ui`, `actions`, `widgets`) is intentionally a
 fixed, closed vocabulary — never arbitrary code, never arbitrary HTML — so a
 token's card can be visually distinctive without becoming a phishing vector.
-See [`docs/designs/token-ui-studio.md`](./docs/designs/token-ui-studio.md)
+The one deliberate exception is the `price_chart` widget, which fetches
+public CoinGecko price data (no API key, nothing secret shipped) and always
+falls back to a clearly-labeled placeholder chart if that fetch fails — see
+`CONTRIBUTING.md`. See
+[`docs/designs/token-ui-studio.md`](./docs/designs/token-ui-studio.md)
 for the full design rationale, and [`CONTRIBUTING.md`](./CONTRIBUTING.md) for
 how a token gets added and reviewed.
 

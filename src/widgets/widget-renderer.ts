@@ -1,5 +1,6 @@
 import type { Widget, Token } from "../types.ts";
 import { loadIcon } from "../icon/icon-loader.ts";
+import { fetchPriceHistory, generatePlaceholderSeries, buildSparkline } from "./price-chart.ts";
 
 // type -> render-function lookup table (CEO review Section 1 recommendation)
 // instead of if/else branching. Adding a 5th widget type means adding one
@@ -93,11 +94,73 @@ const renderNotice: WidgetRenderer<Extract<Widget, { type: "notice" }>> = (widge
   return el;
 };
 
+const SPARKLINE_WIDTH = 260;
+const SPARKLINE_HEIGHT = 56;
+
+function renderSparklineInto(container: HTMLElement, prices: number[], isPlaceholder: boolean): void {
+  container.innerHTML = "";
+  const { pathD, latest, changePct, isRising } = buildSparkline(prices, SPARKLINE_WIDTH, SPARKLINE_HEIGHT);
+
+  const stats = document.createElement("div");
+  stats.className = "price-chart-stats";
+  const price = document.createElement("span");
+  price.className = "price-chart-price";
+  price.textContent = isPlaceholder ? "~" : `$${latest < 1 ? latest.toPrecision(3) : latest.toFixed(2)}`;
+  const change = document.createElement("span");
+  change.className = `price-chart-change ${isRising ? "price-chart-up" : "price-chart-down"}`;
+  change.textContent = `${isRising ? "+" : ""}${changePct.toFixed(2)}%`;
+  stats.append(price, change);
+  container.append(stats);
+
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("viewBox", `0 0 ${SPARKLINE_WIDTH} ${SPARKLINE_HEIGHT}`);
+  svg.classList.add("price-chart-svg");
+  const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  path.setAttribute("d", pathD);
+  path.setAttribute("class", isRising ? "price-chart-line-up" : "price-chart-line-down");
+  svg.append(path);
+  container.append(svg);
+
+  if (isPlaceholder) {
+    const caption = document.createElement("div");
+    caption.className = "price-chart-caption";
+    caption.textContent = "Sample chart — live price unavailable right now.";
+    container.append(caption);
+  }
+}
+
+const renderPriceChart: WidgetRenderer<Extract<Widget, { type: "price_chart" }>> = (widget, token) => {
+  const el = document.createElement("div");
+  el.className = "widget widget-price-chart";
+
+  const title = document.createElement("div");
+  title.className = "widget-title";
+  title.textContent = widget.title ?? `${token.symbol} price`;
+  el.append(title);
+
+  const body = document.createElement("div");
+  body.className = "price-chart-body";
+  body.textContent = "Loading price…";
+  el.append(body);
+
+  const days = widget.days ?? 1;
+  fetchPriceHistory(widget.coingeckoId, days).then((prices) => {
+    if (prices && prices.length > 1) {
+      renderSparklineInto(body, prices, false);
+    } else {
+      renderSparklineInto(body, generatePlaceholderSeries(widget.coingeckoId), true);
+    }
+  });
+
+  return el;
+};
+
 const RENDERERS: { [K in Widget["type"]]: WidgetRenderer<Extract<Widget, { type: K }>> } = {
   banner: renderBanner,
   action_group: renderActionGroup,
   key_value: renderKeyValue,
   notice: renderNotice,
+  price_chart: renderPriceChart,
 };
 
 /**

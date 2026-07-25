@@ -1,0 +1,29 @@
+{
+  "schemaVersion": "1.0.0",
+  "networks": [
+    {
+      "name": "Tron",
+      "tokens": [
+        {
+          "name": "TRON",
+          "symbol": "TRX",
+          "type": "NATIVE",
+          "id": "native",
+          "decimals": 6,
+          "website": "https://tron.network",
+          "status": "active",
+          "tags": ["native"],
+          "ui": {
+            "theme": { "primaryColor": "#FF060A", "badgeText": "Native" },
+            "background": {
+              "type": "image",
+              "url": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/tron/info/logo.png",
+              "overlayColor": "#1A0000"
+            }
+          },
+          "widgets": [{ "type": "price_chart", "coingeckoId": "tron", "days": 1 }]
+        }
+      ]
+    }
+  ]
+}

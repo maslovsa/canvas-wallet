@@ -89,20 +89,59 @@
           }
         },
         "background": {
-          "type": "object",
-          "required": ["type", "colors"],
-          "additionalProperties": false,
-          "description": "v1 supports solid/gradient only. image_pattern is explicitly excluded (tracking/phishing vector) — see design doc.",
-          "properties": {
-            "type": { "type": "string", "enum": ["solid", "gradient"] },
-            "colors": {
-              "type": "array",
-              "minItems": 1,
-              "maxItems": 8,
-              "items": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" }
-            },
-            "angle": { "type": "number", "minimum": 0, "maximum": 360 }
-          }
+          "description": "solid/gradient are free-form colors. image was originally excluded entirely (tracking/phishing vector: an arbitrary external image loads on every card view, and could impersonate a trusted brand's skin) — re-scoped rather than dropped: image.url is subject to the SAME domain allowlist as token/widget icons (src/icon/domain-allowlist.ts), enforced client-side (src/icon/icon-loader.ts) and by scripts/validate-fixtures.ts in CI. A free-form image_pattern (arbitrary domain, tiled) remains excluded — see fixtures/adversarial/image-pattern-excluded.json.",
+          "oneOf": [
+            { "$ref": "#/definitions/backgroundSolid" },
+            { "$ref": "#/definitions/backgroundGradient" },
+            { "$ref": "#/definitions/backgroundImage" }
+          ]
+        }
+      }
+    },
+    "backgroundSolid": {
+      "type": "object",
+      "required": ["type", "colors"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "solid" },
+        "colors": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" }
+        }
+      }
+    },
+    "backgroundGradient": {
+      "type": "object",
+      "required": ["type", "colors"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "gradient" },
+        "colors": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" }
+        },
+        "angle": { "type": "number", "minimum": 0, "maximum": 360 }
+      }
+    },
+    "backgroundImage": {
+      "type": "object",
+      "required": ["type", "url"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "image" },
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "description": "Domain-allowlisted (src/icon/domain-allowlist.ts), same as token.logo and widget icons. Rendered cover-fit behind the card content via src/icon/icon-loader.ts (size-limited, same as any other icon fetch)."
+        },
+        "overlayColor": {
+          "type": "string",
+          "pattern": "^#[0-9a-fA-F]{6}$",
+          "description": "Shown immediately while the image loads, and as the fallback if the URL is off-allowlist or the fetch fails — a background image must never silently disappear into a broken/blank card."
         }
       }
     },
@@ -152,7 +191,8 @@
         { "$ref": "#/definitions/widgetBanner" },
         { "$ref": "#/definitions/widgetActionGroup" },
         { "$ref": "#/definitions/widgetKeyValue" },
-        { "$ref": "#/definitions/widgetNotice" }
+        { "$ref": "#/definitions/widgetNotice" },
+        { "$ref": "#/definitions/widgetPriceChart" }
       ]
     },
     "widgetBanner": {
@@ -218,6 +258,28 @@
         "type": { "const": "notice" },
         "message": { "type": "string", "minLength": 1, "maxLength": 200 },
         "severity": { "type": "string", "enum": ["info", "warning"] }
+      }
+    },
+    "widgetPriceChart": {
+      "type": "object",
+      "required": ["type", "coingeckoId"],
+      "additionalProperties": false,
+      "description": "The only widget that performs a live network call: fetches public, unauthenticated historical price data from api.coingecko.com (no API key — none needed, none shipped; see CONTRIBUTING.md). Falls back to a clearly-labeled generated placeholder sparkline if the fetch fails (offline, rate-limited, unrecognized id).",
+      "properties": {
+        "type": { "const": "price_chart" },
+        "coingeckoId": {
+          "type": "string",
+          "pattern": "^[a-z0-9-]+$",
+          "minLength": 1,
+          "maxLength": 64,
+          "description": "CoinGecko coin id, e.g. \"tron\", \"ethereum\" (NOT the ticker symbol). Constrained to lowercase/digits/hyphen so it can only ever be a path segment, never a URL/query injection."
+        },
+        "title": { "type": "string", "maxLength": 80 },
+        "days": {
+          "type": "integer",
+          "enum": [1, 7, 30, 90, 365],
+          "description": "Range of price history to request, in days. Defaults to 1 (24h) if omitted."
+        }
       }
     }
   }

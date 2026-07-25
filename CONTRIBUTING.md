@@ -52,6 +52,40 @@ card — subject to the same domain allowlist as widget icons
 lettered avatar rather than a blank space — don't invent a fake logo URL
 just to fill it in.
 
+### Background images
+
+`ui.background` supports `solid`, `gradient`, or `image`
+(`{ "type": "image", "url": "...", "overlayColor": "#..." }`, cover-fit
+behind the card). This was originally excluded entirely (see git history) as
+a tracking/phishing vector — an arbitrary external image loading on every
+card view can beacon per-view, or dress up a fake token to look like a
+trusted brand. It's back, re-scoped: `image.url` is subject to the exact
+same domain allowlist as `logo` and widget icons, enforced both client-side
+(reuses `src/icon/icon-loader.ts` — same size cap and fetch/fallback
+behavior as any other icon) and by `scripts/validate-fixtures.ts` in CI. A
+free-form *tiled pattern* from an arbitrary domain remains excluded — see
+`fixtures/adversarial/image-pattern-excluded.json`. `overlayColor` is
+required to render immediately (before the image loads) and as the fallback
+if the URL is off-allowlist or the fetch fails — a background must never
+silently go blank.
+
+### The price_chart widget — the one widget with a live network call
+
+Every other widget/action is rendered from data already in the registry
+JSON — no network call at authoring time or render time. `price_chart` is
+the deliberate exception: it fetches public, unauthenticated historical
+price data from CoinGecko's `/coins/{id}/market_chart` endpoint, keyed by a
+schema-regex-constrained `coingeckoId` (`^[a-z0-9-]+$` — a CoinGecko coin
+id like `"tron"`, not a ticker symbol; this also means it can only ever be a
+path segment, never a URL/query injection). No API key is used or shipped —
+none is needed for this endpoint at reasonable, human-driven request
+volumes, and a static GitHub Pages site can't keep a client-side key secret
+anyway (anyone can read it out of the shipped JS bundle). If the fetch fails
+(offline, rate-limited, unrecognized id), the widget falls back to a
+generated placeholder sparkline, always visibly captioned "Sample chart —
+live price unavailable right now." — it's never presented as real market
+data. See `src/widgets/price-chart.ts`.
+
 Network branding (name → logo) is looked up from
 [`public/networks.json`](./public/networks.json), deliberately a separate
 file from the token registry since it's presentation metadata, not part of

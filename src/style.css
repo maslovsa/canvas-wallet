@@ -251,20 +251,79 @@ body {
   gap: 8px;
 }
 
+/* Phone chassis — an actual device standing in portrait, not just a
+   card with an app-style header. .phone-frame is the outer bezel/body;
+   .phone-screen is the clipped, scrollable display area inside it. */
 .phone-frame {
-  width: 300px;
-  border: 3px solid #333;
-  border-radius: 28px;
-  overflow: hidden;
+  position: relative;
+  width: 320px;
+  height: 664px;
+  background: #1c1c1e;
+  border-radius: 48px;
+  padding: 12px;
+  box-shadow:
+    0 24px 60px rgba(0, 0, 0, 0.45),
+    0 0 0 2px #050505;
+}
+.phone-frame.chrome-android {
+  border-radius: 30px;
+  background: #202124;
+}
+
+/* Side buttons — decorative nubs on the bezel, cosmetic only. */
+.phone-frame::before,
+.phone-frame::after {
+  content: "";
+  position: absolute;
+  background: #050505;
+}
+.phone-frame::before {
+  left: -2px;
+  top: 130px;
+  width: 2px;
+  height: 56px;
+  border-radius: 2px 0 0 2px;
+}
+.phone-frame::after {
+  right: -2px;
+  top: 170px;
+  width: 2px;
+  height: 90px;
+  border-radius: 0 2px 2px 0;
+}
+.phone-frame.chrome-android::before,
+.phone-frame.chrome-android::after {
+  height: 70px;
+}
+
+.phone-screen {
+  position: relative;
+  width: 100%;
+  height: 100%;
   background: #fafafa;
   color: #111;
+  border-radius: 36px;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
-.phone-frame.theme-dark {
+.phone-frame.theme-dark .phone-screen {
   background: #17181c;
   color: #eee;
 }
-.phone-frame.chrome-android {
-  border-radius: 14px;
+.phone-frame.chrome-android .phone-screen {
+  border-radius: 20px;
+}
+
+.phone-home-indicator {
+  position: absolute;
+  bottom: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 120px;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.35);
+  pointer-events: none;
 }
 
 .phone-empty-state {
@@ -275,16 +334,20 @@ body {
 }
 
 .phone-notch {
-  height: 18px;
-  background: #333;
-  margin: 0 70px;
-  border-radius: 0 0 10px 10px;
+  position: sticky;
+  top: 0;
+  height: 22px;
+  background: #1c1c1e;
+  margin: 0 90px;
+  border-radius: 0 0 12px 12px;
+  z-index: 2;
 }
 .chrome-android .phone-notch {
-  margin: 0 110px;
+  margin: 8px auto 0;
   border-radius: 50%;
   width: 10px;
   height: 10px;
+  background: #050505;
 }
 
 .card-header {
@@ -383,6 +446,7 @@ body {
 
 .card-body {
   padding: 12px;
+  padding-bottom: 28px; /* keeps the last widget clear of .phone-home-indicator */
 }
 
 .widget {
@@ -457,6 +521,55 @@ body {
 }
 .widget-notice-warning {
   background: rgba(229, 72, 77, 0.15);
+}
+
+.widget-price-chart {
+  background: rgba(127, 127, 127, 0.06);
+}
+.price-chart-body {
+  font-size: 12px;
+  opacity: 0.7;
+}
+.price-chart-stats {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.price-chart-price {
+  font-size: 16px;
+  font-weight: 700;
+}
+.price-chart-change {
+  font-size: 12px;
+  font-weight: 600;
+}
+.price-chart-up {
+  color: #2fae5b;
+}
+.price-chart-down {
+  color: var(--danger);
+}
+.price-chart-svg {
+  width: 100%;
+  height: 56px;
+  display: block;
+}
+.price-chart-line-up {
+  fill: none;
+  stroke: #2fae5b;
+  stroke-width: 2;
+}
+.price-chart-line-down {
+  fill: none;
+  stroke: var(--danger);
+  stroke-width: 2;
+}
+.price-chart-caption {
+  margin-top: 4px;
+  font-size: 10px;
+  color: var(--text-dim);
+  font-style: italic;
 }
 
 .gallery {

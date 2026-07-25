@@ -6,6 +6,9 @@ export type {
   Network,
   Token,
   Ui,
+  BackgroundSolid,
+  BackgroundGradient,
+  BackgroundImage,
   Action,
   ActionExternalUrl,
   ActionDeeplink,
@@ -15,6 +18,7 @@ export type {
   WidgetActionGroup,
   WidgetKeyValue,
   WidgetNotice,
+  WidgetPriceChart,
 } from "./generated/registry-schema.d.ts";
 
 // Where the currently-viewed list came from. "bundled" (public/lists/{id}.json,
