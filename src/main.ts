@@ -10,12 +10,14 @@ import { NAMED_PRESETS, GALLERY_TEMPLATES } from "./presets/presets.ts";
 import { buildDeployPlan } from "./deploy-flow/build-deploy-url.ts";
 import { encodeSharePayload } from "./share-link/encode.ts";
 import { decodeShareFragment, ShareLinkDecodeError } from "./share-link/decode.ts";
+import { loadNetworkRegistry, findNetworkInfo, type NetworkInfo } from "./networks/network-registry.ts";
 
 const DEFAULT_SOURCE: RegistrySource = { owner: "", repo: "", isDefault: true };
 
 interface AppState {
   source: RegistrySource;
   registry: Registry | null;
+  networks: NetworkInfo[];
   selectedNetwork: string;
   selectedToken: Token | undefined;
   chromeStyle: ChromeStyle;
@@ -26,6 +28,7 @@ interface AppState {
 const state: AppState = {
   source: DEFAULT_SOURCE,
   registry: null,
+  networks: [],
   selectedNetwork: "",
   selectedToken: undefined,
   chromeStyle: "ios",
@@ -44,7 +47,7 @@ function el(id: string): HTMLElement {
 function renderAll(): void {
   if (!state.registry) return;
 
-  renderSidebar(el("sidebar"), state.registry, state.selectedNetwork, state.selectedToken?.symbol, {
+  renderSidebar(el("sidebar"), state.registry, state.networks, state.selectedNetwork, state.selectedToken?.symbol, {
     onSelectNetwork: (network) => selectNetwork(network),
     onSelectToken: (token) => selectToken(token, { confirmDiscard: true }),
     onAddToken: () => selectToken(blankToken(), { confirmDiscard: true }),
@@ -53,6 +56,8 @@ function renderAll(): void {
   renderPhoneFrame(el("phone-frame"), state.selectedToken, {
     chromeStyle: state.chromeStyle,
     chromeTheme: state.chromeTheme,
+    networkName: state.selectedNetwork,
+    networkInfo: findNetworkInfo(state.networks, state.selectedNetwork),
   });
 
   renderRegistrySourceBanner();
@@ -220,10 +225,17 @@ async function loadSource(source: RegistrySource): Promise<void> {
 }
 
 async function init(): Promise<void> {
+  state.networks = await loadNetworkRegistry();
+
   editor = new Editor(el("editor-container"), {
     onValidToken: (token) => {
       state.selectedToken = token;
-      renderPhoneFrame(el("phone-frame"), token, { chromeStyle: state.chromeStyle, chromeTheme: state.chromeTheme });
+      renderPhoneFrame(el("phone-frame"), token, {
+        chromeStyle: state.chromeStyle,
+        chromeTheme: state.chromeTheme,
+        networkName: state.selectedNetwork,
+        networkInfo: findNetworkInfo(state.networks, state.selectedNetwork),
+      });
     },
   });
 

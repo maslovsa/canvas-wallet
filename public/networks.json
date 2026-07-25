@@ -1,0 +1,15 @@
+{
+  "_comment": "Network branding lookup — separate from registry.json on purpose: this is presentation metadata (name synonyms + logo), not part of the token-registry schema. Logos sourced from the Trust Wallet assets repo (already on our icon domain allowlist, src/icon/domain-allowlist.ts) rather than a generic multi-hundred-chain dataset (e.g. ethereum-lists/chains), since we only need the handful of networks this registry actually lists — every URL below was checked to return 200.",
+  "networks": [
+    {
+      "canonicalName": "Ethereum",
+      "synonyms": ["ethereum", "eth", "mainnet", "ethereum mainnet"],
+      "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/info/logo.png"
+    },
+    {
+      "canonicalName": "BNB Smart Chain",
+      "synonyms": ["bsc", "bnb", "bnb smart chain", "binance smart chain", "smartchain", "smart chain"],
+      "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/smartchain/info/logo.png"
+    }
+  ]
+}

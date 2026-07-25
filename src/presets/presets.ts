@@ -6,6 +6,49 @@ import type { Registry, Token } from "../types.ts";
 //
 // v1 template gallery ships with a small fixed set of hand-authored
 // templates (not an open-ended import) — CEO review item 5 detail.
+//
+// Real tokens below (ETH, WETH, TWT) use verified mainnet addresses and
+// logos from the Trust Wallet assets repo (already domain-allowlisted).
+// Fictional demo tokens (USDY, RWAB, MEME, LP-USDY-ETH) intentionally have
+// no `logo` — there's no real logo to link to, and inventing one would be
+// exactly the kind of unverifiable claim this project's trust-score panel
+// exists to flag. A missing logo falls back to a lettered avatar in the UI.
+
+const nativeEth: Token = {
+  name: "Ethereum",
+  symbol: "ETH",
+  type: "NATIVE",
+  id: "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
+  decimals: 18,
+  logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/info/logo.png",
+  website: "https://ethereum.org",
+  description: "The native asset of the Ethereum network.",
+  status: "active",
+  tags: ["native"],
+  explorer: "https://etherscan.io",
+  ui: {
+    theme: { primaryColor: "#627EEA", badgeText: "Native" },
+    background: { type: "gradient", colors: ["#0B0E11", "#1C2440"], angle: 135 },
+  },
+};
+
+const wrappedEth: Token = {
+  name: "Wrapped Ether",
+  symbol: "WETH",
+  type: "ERC20",
+  id: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+  decimals: 18,
+  logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2/logo.png",
+  website: "https://weth.io",
+  description: "ERC-20 wrapper for native ETH — 1 WETH is always redeemable for 1 ETH.",
+  status: "active",
+  tags: ["wrapped"],
+  explorer: "https://etherscan.io/token/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+  ui: {
+    theme: { primaryColor: "#627EEA", badgeText: "Wrapped 1:1" },
+    background: { type: "gradient", colors: ["#0B0E11", "#1C2440"], angle: 135 },
+  },
+};
 
 const usdtYield: Token = {
   name: "USDT Yield",
@@ -51,6 +94,7 @@ const twtGovernance: Token = {
   type: "BEP20",
   id: "0x4B0F1812e5Df2A09796481Ff14017e6005508003",
   decimals: 18,
+  logo: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/smartchain/assets/0x4B0F1812e5Df2A09796481Ff14017e6005508003/logo.png",
   website: "https://trustwallet.com",
   description: "Utility token to increase adoption of cryptocurrency.",
   status: "active",
@@ -155,7 +199,7 @@ export const GALLERY_TEMPLATES: readonly Token[] = [memeCoin, lpToken];
 export const DEFAULT_REGISTRY: Registry = {
   schemaVersion: "1.0.0",
   networks: [
-    { name: "Ethereum", tokens: [usdtYield, rwaBond, memeCoin, lpToken] },
+    { name: "Ethereum", tokens: [nativeEth, wrappedEth, usdtYield, rwaBond, memeCoin, lpToken] },
     { name: "BSC", tokens: [twtGovernance] },
   ],
 };

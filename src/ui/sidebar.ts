@@ -1,4 +1,6 @@
 import type { Registry, Token } from "../types.ts";
+import { createLogoBadge } from "./logo-badge.ts";
+import { findNetworkInfo, type NetworkInfo } from "../networks/network-registry.ts";
 
 // Virtualized above ~200 tokens per network (CEO review Section 7 finding).
 // Simple windowing: render only rows within [scrollTop, scrollTop+viewport]
@@ -16,6 +18,7 @@ export interface SidebarCallbacks {
 export function renderSidebar(
   container: HTMLElement,
   registry: Registry,
+  networks: readonly NetworkInfo[],
   selectedNetwork: string,
   selectedTokenSymbol: string | undefined,
   callbacks: SidebarCallbacks,
@@ -32,7 +35,11 @@ export function renderSidebar(
   for (const network of registry.networks) {
     const tab = document.createElement("button");
     tab.className = "network-tab" + (network.name === selectedNetwork ? " active" : "");
-    tab.textContent = network.name;
+    const info = findNetworkInfo(networks, network.name);
+    tab.append(createLogoBadge(info?.logo, network.name, "network-tab-logo"));
+    const label = document.createElement("span");
+    label.textContent = network.name;
+    tab.append(label);
     tab.addEventListener("click", () => callbacks.onSelectNetwork(network.name));
     networkTabs.append(tab);
   }
@@ -71,7 +78,10 @@ function renderTokenRow(token: Token, active: boolean, onSelect: (token: Token) 
   const row = document.createElement("div");
   row.className = "token-row" + (active ? " active" : "");
   row.style.height = `${ROW_HEIGHT_PX}px`;
-  row.textContent = `${token.symbol} — ${token.name}`;
+  row.append(createLogoBadge(token.logo, token.symbol, "token-row-logo"));
+  const label = document.createElement("span");
+  label.textContent = `${token.symbol} — ${token.name}`;
+  row.append(label);
   row.addEventListener("click", () => onSelect(token));
   return row;
 }

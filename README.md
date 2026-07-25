@@ -38,9 +38,11 @@ already done for this repo: Settings → Pages → Source: "GitHub Actions".)
 ```
 public/registry.json         The REAL, PR-editable registry — this is what
                                the deployed app actually loads at runtime
+public/networks.json          Network branding lookup (name/synonyms → logo)
 registry.schema.json          Canonical schema — single source of truth
 src/generated/                TypeScript types generated from the schema
 src/presets/                  In-memory fallback registry + gallery templates
+src/networks/                 Network-name → logo lookup (synonym-aware)
 src/registry-client/          Fetch, cache, governance-check, version-gate
 src/widgets/                  Widget renderer + action executor (type→handler)
 src/trust-score/               Advisory checks: contrast, homograph, domain-mismatch

@@ -40,6 +40,11 @@
         "type": { "type": "string", "minLength": 1 },
         "id": { "type": "string", "minLength": 1, "description": "Contract/token address." },
         "decimals": { "type": "integer", "minimum": 0, "maximum": 255 },
+        "logo": {
+          "type": "string",
+          "format": "uri",
+          "description": "Token logo image. Subject to the same domain allowlist as widget icons (src/icon/domain-allowlist.ts, enforced client-side AND by scripts/validate-fixtures.ts in CI) — not free-form."
+        },
         "website": { "type": "string", "format": "uri" },
         "description": { "type": "string", "maxLength": 2000 },
         "status": { "type": "string", "enum": ["active", "paused", "deprecated"] },

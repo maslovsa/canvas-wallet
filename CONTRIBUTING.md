@@ -21,6 +21,21 @@ schema, reviewed by a human before it ships.
    what ships.
 3. Open a pull request.
 
+### Token and network logos
+
+Add a `logo` field (a direct image URL) to a token to show its logo on the
+card — subject to the same domain allowlist as widget icons
+(`src/icon/domain-allowlist.ts`), enforced both client-side and by
+`scripts/validate-fixtures.ts` in CI. A token with no `logo` falls back to a
+lettered avatar rather than a blank space — don't invent a fake logo URL
+just to fill it in.
+
+Network branding (name → logo) is looked up from
+[`public/networks.json`](./public/networks.json), deliberately a separate
+file from the token registry since it's presentation metadata, not part of
+the schema. Add an entry there (with `synonyms` for alternate spellings) if
+you're adding a new network — the lookup never guesses at a match.
+
 This is a single shared file rather than one-file-per-token, so two PRs
 touching different tokens at the same time can conflict on merge — if that
 becomes a real problem as the registry grows, splitting into per-token files

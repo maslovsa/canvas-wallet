@@ -40,12 +40,16 @@ function log(ok: boolean, label: string, detail?: string): void {
   if (!ok) failed = true;
 }
 
+// Both widget icons ("icon") and the token-level "logo" field are subject
+// to the same domain allowlist — checked here, not just client-side.
+const IMAGE_URL_KEYS = new Set(["icon", "logo"]);
+
 function collectIconUrls(data: unknown): string[] {
   const urls: string[] = [];
   function walk(node: unknown): void {
     if (node && typeof node === "object") {
       for (const [key, value] of Object.entries(node as Record<string, unknown>)) {
-        if (key === "icon" && typeof value === "string" && value.startsWith("http")) {
+        if (IMAGE_URL_KEYS.has(key) && typeof value === "string" && value.startsWith("http")) {
           urls.push(value);
         }
         walk(value);
