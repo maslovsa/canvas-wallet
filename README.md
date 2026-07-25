@@ -1,5 +1,8 @@
 # Token UI Studio & Multi-Chain Registry
 
+Live: **https://maslovsa.github.io/canvas-wallet/** (once GitHub Pages is
+enabled — see [Deploying](#deploying) below).
+
 An open-source, schema-validated Server-Driven UI (SDUI) authoring tool for
 wallet token cards — an editor, a live mobile-wallet simulator, and a
 GitHub-PR-based publishing flow, on top of a standard token-list-shaped
@@ -15,12 +18,21 @@ how a token gets added and reviewed.
 ## Quick start
 
 ```bash
+git clone git@github.com:maslovsa/canvas-wallet.git
+cd canvas-wallet
 npm install
 npm run dev
 ```
 
 Open the printed local URL, pick a network and token, and edit the JSON on
 the right to see the live simulator and trust-score panel update.
+
+## Deploying
+
+GitHub Pages must be switched to Actions-based deploys once, per repo:
+**Settings → Pages → Source: "GitHub Actions"**. After that, every push to
+`main` that passes `validate-registry.yml` triggers `deploy.yml` and
+publishes to the URL above automatically — no manual deploy step.
 
 ## Project layout
 

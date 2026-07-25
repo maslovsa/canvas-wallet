@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://github.com/OWNER/REPO/registry.schema.json",
+  "$id": "https://github.com/maslovsa/canvas-wallet/raw/main/registry.schema.json",
   "title": "Token UI Studio Registry",
   "description": "Canonical schema for a multi-chain token registry with Server-Driven UI (SDUI) card customization. Any unknown widget.type or action.type MUST be ignored at render time, never rejected — but at authoring/CI time, unknown types fail schema validation (see widget/action oneOf below).",
   "type": "object",

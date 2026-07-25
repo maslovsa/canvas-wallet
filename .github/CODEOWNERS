@@ -8,4 +8,4 @@
 # self-approval gate in practice, not independent review. That's a real gap
 # in the security story until a second maintainer exists — see
 # CONTRIBUTING.md's "Review model" section.
-* @OWNER_GITHUB_HANDLE
+* @maslovsa

@@ -4,6 +4,14 @@
   "description": "Token UI Studio & Multi-Chain Registry — an open-source, schema-validated Server-Driven UI authoring tool for wallet token cards.",
   "private": true,
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/maslovsa/canvas-wallet.git"
+  },
+  "homepage": "https://maslovsa.github.io/canvas-wallet/",
+  "bugs": {
+    "url": "https://github.com/maslovsa/canvas-wallet/issues"
+  },
   "engines": {
     "node": ">=20"
   },
