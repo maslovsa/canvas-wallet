@@ -42,6 +42,36 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
+    outputs:
+      page_url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+
+  smoke-test:
+    # Automated post-deploy smoke check — CEO review Section 9 finding.
+    # Confirms the live site actually loads after each deploy, rather than
+    # silently trusting that "deploy-pages succeeded" means "the app works."
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check the live site returns 200 and serves the app shell
+        run: |
+          url="${{ needs.deploy.outputs.page_url }}"
+          for i in 1 2 3 4 5; do
+            status=$(curl -s -o response.html -w "%{http_code}" "$url" || echo "000")
+            if [ "$status" = "200" ]; then
+              break
+            fi
+            echo "Attempt $i: got HTTP $status, retrying in 10s..."
+            sleep 10
+          done
+          if [ "$status" != "200" ]; then
+            echo "::error::Live site at $url did not return 200 after 5 attempts (last: $status)"
+            exit 1
+          fi
+          if ! grep -q "Token UI Studio" response.html; then
+            echo "::error::Live site returned 200 but response body doesn't look like the app shell"
+            exit 1
+          fi
+          echo "Smoke test passed: $url is live and serving the app."
