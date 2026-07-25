@@ -1,0 +1,219 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/OWNER/REPO/registry.schema.json",
+  "title": "Token UI Studio Registry",
+  "description": "Canonical schema for a multi-chain token registry with Server-Driven UI (SDUI) card customization. Any unknown widget.type or action.type MUST be ignored at render time, never rejected — but at authoring/CI time, unknown types fail schema validation (see widget/action oneOf below).",
+  "type": "object",
+  "required": ["schemaVersion", "networks"],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "description": "Version of this schema the registry was authored against, semver-shaped (e.g. \"1.0.0\"). Intentionally NOT constrained to a fixed enum here — a future schema revision must remain syntactically valid so a client can read the field and make its own compatibility decision (see src/registry-client/schema-version-gate.ts). A client that doesn't recognize this version MUST refuse to render/edit rather than guess.",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "networks": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/network" }
+    }
+  },
+  "definitions": {
+    "network": {
+      "type": "object",
+      "required": ["name", "tokens"],
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "tokens": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/token" }
+        }
+      }
+    },
+    "token": {
+      "type": "object",
+      "required": ["name", "symbol", "type", "id", "decimals", "status"],
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "symbol": { "type": "string", "minLength": 1, "maxLength": 20 },
+        "type": { "type": "string", "minLength": 1 },
+        "id": { "type": "string", "minLength": 1, "description": "Contract/token address." },
+        "decimals": { "type": "integer", "minimum": 0, "maximum": 255 },
+        "website": { "type": "string", "format": "uri" },
+        "description": { "type": "string", "maxLength": 2000 },
+        "status": { "type": "string", "enum": ["active", "paused", "deprecated"] },
+        "tags": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "links": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "url"],
+            "additionalProperties": false,
+            "properties": {
+              "name": { "type": "string", "minLength": 1 },
+              "url": { "type": "string", "format": "uri" }
+            }
+          }
+        },
+        "explorer": { "type": "string", "format": "uri" },
+        "ui": { "$ref": "#/definitions/ui" },
+        "actions": {
+          "type": "object",
+          "additionalProperties": { "$ref": "#/definitions/action" }
+        },
+        "widgets": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/widget" }
+        }
+      }
+    },
+    "ui": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "theme": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "primaryColor": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+            "badgeText": { "type": "string", "maxLength": 40 }
+          }
+        },
+        "background": {
+          "type": "object",
+          "required": ["type", "colors"],
+          "additionalProperties": false,
+          "description": "v1 supports solid/gradient only. image_pattern is explicitly excluded (tracking/phishing vector) — see design doc.",
+          "properties": {
+            "type": { "type": "string", "enum": ["solid", "gradient"] },
+            "colors": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 8,
+              "items": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" }
+            },
+            "angle": { "type": "number", "minimum": 0, "maximum": 360 }
+          }
+        }
+      }
+    },
+    "action": {
+      "type": "object",
+      "required": ["type"],
+      "oneOf": [
+        { "$ref": "#/definitions/actionExternalUrl" },
+        { "$ref": "#/definitions/actionDeeplink" },
+        { "$ref": "#/definitions/actionWalletConnect" }
+      ]
+    },
+    "actionExternalUrl": {
+      "type": "object",
+      "required": ["type", "url"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "external_url" },
+        "url": {
+          "type": "string",
+          "minLength": 1,
+          "description": "May contain {symbol}, {id}, {user_address} — the ONLY allowed substitution variables. Client must URL-encode each substituted value."
+        },
+        "openIn": { "type": "string", "enum": ["in_app_browser", "external_browser"] }
+      }
+    },
+    "actionDeeplink": {
+      "type": "object",
+      "required": ["type", "url"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "deeplink" },
+        "url": { "type": "string", "minLength": 1 }
+      }
+    },
+    "actionWalletConnect": {
+      "type": "object",
+      "required": ["type", "dappUrl"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "wallet_connect" },
+        "dappUrl": { "type": "string", "format": "uri" }
+      }
+    },
+    "widget": {
+      "oneOf": [
+        { "$ref": "#/definitions/widgetBanner" },
+        { "$ref": "#/definitions/widgetActionGroup" },
+        { "$ref": "#/definitions/widgetKeyValue" },
+        { "$ref": "#/definitions/widgetNotice" }
+      ]
+    },
+    "widgetBanner": {
+      "type": "object",
+      "required": ["type", "title", "action"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "banner" },
+        "title": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "description": { "type": "string", "maxLength": 300 },
+        "icon": { "type": "string", "format": "uri" },
+        "action": { "type": "string", "minLength": 1, "description": "Key into the token's actions map." }
+      }
+    },
+    "widgetActionGroup": {
+      "type": "object",
+      "required": ["type", "items"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "action_group" },
+        "title": { "type": "string", "maxLength": 80 },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["label", "action"],
+            "additionalProperties": false,
+            "properties": {
+              "label": { "type": "string", "minLength": 1, "maxLength": 40 },
+              "icon": { "type": "string" },
+              "action": { "type": "string", "minLength": 1 }
+            }
+          }
+        }
+      }
+    },
+    "widgetKeyValue": {
+      "type": "object",
+      "required": ["type", "items"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "key_value" },
+        "title": { "type": "string", "maxLength": 80 },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["label", "value"],
+            "additionalProperties": false,
+            "properties": {
+              "label": { "type": "string", "minLength": 1, "maxLength": 40 },
+              "value": { "type": "string", "minLength": 1, "maxLength": 40 }
+            }
+          }
+        }
+      }
+    },
+    "widgetNotice": {
+      "type": "object",
+      "required": ["type", "message"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "notice" },
+        "message": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "severity": { "type": "string", "enum": ["info", "warning"] }
+      }
+    }
+  }
+}

@@ -1,0 +1,30 @@
+name: Validate registry
+
+# CI-enforced schema gate — the actual security control behind this project's
+# "PR-gated review" thesis (see docs/designs/token-ui-studio.md). Runs on
+# every PR touching the schema, fixtures, or registry data; never on pushes
+# to the default branch directly (see deploy.yml for the separate,
+# merge-only deploy workflow — CEO review Section 9 finding: deploy and
+# validate must never share a trigger).
+on:
+  pull_request:
+    paths:
+      - "registry.schema.json"
+      - "fixtures/**"
+      - "src/icon/domain-allowlist.ts"
+      - "scripts/validate-fixtures.ts"
+      - "**/*.json"
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+      - run: npm ci
+      - run: npm run validate:fixtures
+      - run: npx tsc -b
+      - run: npm test

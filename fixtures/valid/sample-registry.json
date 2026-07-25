@@ -1,0 +1,35 @@
+{
+  "schemaVersion": "1.0.0",
+  "networks": [
+    {
+      "name": "Ethereum",
+      "tokens": [
+        {
+          "name": "USDT Yield",
+          "symbol": "USDY",
+          "type": "ERC20",
+          "id": "0x0000000000000000000000000000000000dEaD",
+          "decimals": 6,
+          "website": "https://example.com/usdy",
+          "status": "active",
+          "tags": ["stablecoin", "yield"],
+          "ui": {
+            "theme": { "primaryColor": "#26A17B", "badgeText": "1:1 Backed" },
+            "background": { "type": "gradient", "colors": ["#0B0E11", "#134E3A"], "angle": 135 }
+          },
+          "actions": {
+            "mint_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/mint?token={symbol}",
+              "openIn": "in_app_browser"
+            }
+          },
+          "widgets": [
+            { "type": "banner", "title": "Mint & Redeem", "action": "mint_dapp" },
+            { "type": "key_value", "items": [{ "label": "Collateral Ratio", "value": "150%" }] }
+          ]
+        }
+      ]
+    }
+  ]
+}

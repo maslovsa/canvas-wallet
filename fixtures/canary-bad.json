@@ -1,0 +1,5 @@
+{
+  "_comment": "This fixture must ALWAYS fail schema validation. If it ever passes, the CI schema gate itself has silently broken (CEO review Section 8 finding) — do not fix this fixture, fix the validator.",
+  "schemaVersion": "not-a-real-version",
+  "networks": "this should be an array, not a string"
+}

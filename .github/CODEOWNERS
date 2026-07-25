@@ -1,0 +1,11 @@
+# Every change to the registry itself requires a review from a named owner
+# before merge — this is the actual "PR-gated review" security control the
+# whole project's threat model rests on (Outside Voice T2 from the CEO
+# review: CI alone only checks schema shape, it doesn't replace a human).
+#
+# Honest limitation, not glossed over: on a solo/early-stage repo the named
+# owner below may be the same person opening most PRs, which makes this a
+# self-approval gate in practice, not independent review. That's a real gap
+# in the security story until a second maintainer exists — see
+# CONTRIBUTING.md's "Review model" section.
+* @OWNER_GITHUB_HANDLE

@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "1.0.0",
+  "networks": [
+    {
+      "name": "Ethereum",
+      "tokens": [
+        {
+          "name": "Bad Token",
+          "symbol": "BAD",
+          "type": "ERC20",
+          "id": "0x1",
+          "decimals": 18,
+          "status": "active",
+          "ui": {
+            "background": { "type": "image_pattern", "colors": [], "patternUrl": "https://evil.example.com/track.png" }
+          }
+        }
+      ]
+    }
+  ]
+}

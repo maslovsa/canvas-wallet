@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "1.0.0",
+  "networks": [
+    {
+      "name": "Ethereum",
+      "tokens": [
+        {
+          "name": "Bad Token",
+          "symbol": "BAD",
+          "type": "ERC20",
+          "id": "0x1",
+          "decimals": 18,
+          "status": "active",
+          "actions": {
+            "drain_wallet": { "type": "execute_arbitrary_code", "payload": "rm -rf /" }
+          }
+        }
+      ]
+    }
+  ]
+}

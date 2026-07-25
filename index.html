@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Token UI Studio &amp; Multi-Chain Registry</title>
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
+<body>
+  <div id="app">
+    <div id="status-banner" class="status-banner"></div>
+    <div id="registry-source-banner" class="registry-source-banner"></div>
+
+    <div class="app-grid">
+      <div id="sidebar" class="sidebar"></div>
+
+      <div class="simulator-column">
+        <div class="simulator-toolbar">
+          <button id="chrome-style-toggle" class="toolbar-btn">Toggle iOS/Android</button>
+          <button id="chrome-theme-toggle" class="toolbar-btn">Toggle Light/Dark</button>
+        </div>
+        <div id="phone-frame" class="phone-frame"></div>
+        <div id="gallery" class="gallery"></div>
+        <div id="deploy-panel" class="deploy-panel"></div>
+      </div>
+
+      <div id="editor-container" class="editor-panel"></div>
+    </div>
+  </div>
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>

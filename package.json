@@ -1,0 +1,36 @@
+{
+  "name": "token-ui-studio",
+  "version": "0.1.0",
+  "description": "Token UI Studio & Multi-Chain Registry — an open-source, schema-validated Server-Driven UI authoring tool for wallet token cards.",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "postinstall": "npm run gen:schema-types",
+    "dev": "vite",
+    "build": "npm run gen:schema-types && tsc -b && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "gen:schema-types": "json2ts registry.schema.json -o src/generated/registry-schema.d.ts",
+    "validate:fixtures": "tsx scripts/validate-fixtures.ts"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.47.0",
+    "@types/punycode": "^2.1.4",
+    "ajv": "^8.17.1",
+    "happy-dom": "^20.11.1",
+    "json-schema-to-typescript": "^15.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0",
+    "vite": "^5.4.0",
+    "vitest": "^2.1.0"
+  },
+  "dependencies": {
+    "ajv-formats": "^3.0.1",
+    "punycode": "^2.3.1"
+  }
+}
