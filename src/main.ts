@@ -5,7 +5,7 @@ import { StaleFetchGuard } from "./registry-client/stale-fetch-guard.ts";
 import { checkGovernance, governanceWarning } from "./registry-client/governance-check.ts";
 import { loadManifest } from "./registry-client/manifest.ts";
 import { renderSidebar } from "./ui/sidebar.ts";
-import { renderPhoneFrame, type ChromeStyle, type ChromeTheme } from "./ui/phone-frame.ts";
+import { renderPhoneFrame, setPhoneNavScreen, type ChromeStyle, type ChromeTheme } from "./ui/phone-frame.ts";
 import { renderGalleryCards, type GalleryEntry } from "./ui/gallery.ts";
 import { Editor } from "./ui/editor.ts";
 import { buildDeployPlan } from "./deploy-flow/build-deploy-url.ts";
@@ -97,6 +97,7 @@ function handleUploadFile(file: File): void {
       el("status-banner").textContent = "";
       if (state.selectedToken) editor.loadToken(state.selectedToken);
       else editor.clear();
+      setPhoneNavScreen("list");
       setView("studio");
       renderAll();
     } catch (err) {
@@ -131,6 +132,10 @@ function renderAll(): void {
     chromeTheme: state.chromeTheme,
     networkName: state.selectedNetwork,
     networkInfo: findNetworkInfo(state.networks, state.selectedNetwork),
+    registryNetworks: state.registry.networks,
+    allNetworkInfo: state.networks,
+    onSelectNetwork: (network) => selectNetwork(network),
+    onSelectToken: (token) => selectToken(token, { confirmDiscard: true }),
   });
 
   renderRegistrySourceBanner();
@@ -258,6 +263,7 @@ function selectToken(token: Token, opts: { confirmDiscard: boolean }): void {
   state.selectedToken = token;
   state.isPreviewOnly = false;
   editor.loadToken(token);
+  setPhoneNavScreen("detail");
   renderAll();
 }
 
@@ -267,6 +273,7 @@ function selectNetwork(network: string): void {
   state.selectedToken = firstToken;
   if (firstToken) editor.loadToken(firstToken);
   else editor.clear();
+  setPhoneNavScreen("list");
   renderAll();
 }
 
@@ -289,6 +296,7 @@ async function loadSource(source: RegistrySource, listMeta: ListMeta | undefined
     statusEl.textContent = "";
     if (state.selectedToken) editor.loadToken(state.selectedToken);
     else editor.clear();
+    setPhoneNavScreen("list");
     renderAll();
 
     if (source.kind === "github") {
@@ -327,6 +335,10 @@ async function init(): Promise<void> {
         chromeTheme: state.chromeTheme,
         networkName: state.selectedNetwork,
         networkInfo: findNetworkInfo(state.networks, state.selectedNetwork),
+        registryNetworks: state.registry?.networks ?? [],
+        allNetworkInfo: state.networks,
+        onSelectNetwork: (network) => selectNetwork(network),
+        onSelectToken: (t) => selectToken(t, { confirmDiscard: true }),
       });
     },
   });
@@ -356,6 +368,7 @@ async function init(): Promise<void> {
       state.selectedToken = payload.token;
       state.isPreviewOnly = true;
       editor.loadToken(payload.token);
+      setPhoneNavScreen("detail");
       setView("studio");
       renderAll();
       return;

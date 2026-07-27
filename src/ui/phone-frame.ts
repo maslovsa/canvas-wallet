@@ -1,9 +1,11 @@
-import type { Token } from "../types.ts";
+import type { Network, Token } from "../types.ts";
 import { renderWidget } from "../widgets/widget-renderer.ts";
 import { resolveAction, demoAlertMessage } from "../widgets/action-executor.ts";
 import { createLogoBadge } from "./logo-badge.ts";
+import { formatAmount } from "../widgets/history.ts";
+import { generateBalance } from "./fake-balance.ts";
 import { loadIcon } from "../icon/icon-loader.ts";
-import type { NetworkInfo } from "../networks/network-registry.ts";
+import { findNetworkInfo, type NetworkInfo } from "../networks/network-registry.ts";
 
 export type ChromeStyle = "ios" | "android";
 export type ChromeTheme = "light" | "dark";
@@ -13,6 +15,121 @@ export interface PhoneFrameOptions {
   chromeTheme: ChromeTheme;
   networkName: string;
   networkInfo: NetworkInfo | undefined;
+  /** All networks (+ their tokens) in the currently open list — drives the in-phone wallet-home screen. */
+  registryNetworks: Network[];
+  /** Branding lookup for every network, not just the selected one (for the in-phone network filter's logos). */
+  allNetworkInfo: NetworkInfo[];
+  onSelectNetwork: (network: string) => void;
+  onSelectToken: (token: Token) => void;
+}
+
+// The phone simulates a real two-screen wallet flow: a "list" (network
+// filter + token balances) and a "detail" (the single-token card). Which
+// screen is showing is purely a chassis/UI concern, deliberately separate
+// from AppState.selectedToken in main.ts (which drives the Editor) — so it's
+// tracked here at module scope rather than threaded through render calls.
+// main.ts calls setPhoneNavScreen() explicitly at the points that should
+// change it (network switch -> "list", any explicit token selection ->
+// "detail"); a live edit in the Editor re-renders the current token's
+// content without changing which screen is showing. The in-phone back
+// button is the one transition that's purely local (doesn't touch app
+// state), so it mutates `screen` directly and re-renders itself.
+let screenMode: "list" | "detail" = "list";
+
+export function setPhoneNavScreen(mode: "list" | "detail"): void {
+  screenMode = mode;
+}
+
+export function renderPhoneFrame(container: HTMLElement, token: Token | undefined, options: PhoneFrameOptions): void {
+  container.innerHTML = "";
+  container.className = `phone-frame chrome-${options.chromeStyle} theme-${options.chromeTheme}`;
+
+  const screen = document.createElement("div");
+  screen.className = "phone-screen";
+  container.append(screen);
+  container.append(homeIndicator());
+
+  const notch = document.createElement("div");
+  notch.className = "phone-notch";
+  screen.append(notch);
+
+  if (screenMode === "detail" && token) {
+    renderDetailScreen(screen, token, options, () => {
+      screenMode = "list";
+      renderPhoneFrame(container, token, options);
+    });
+  } else {
+    renderListScreen(screen, options);
+  }
+}
+
+function renderListScreen(screen: HTMLElement, options: PhoneFrameOptions): void {
+  const header = document.createElement("div");
+  header.className = "phone-list-header";
+  header.textContent = "My Wallet";
+  screen.append(header);
+
+  const filter = document.createElement("div");
+  filter.className = "phone-network-filter";
+  for (const net of options.registryNetworks) {
+    const chip = document.createElement("button");
+    chip.className = "phone-network-chip" + (net.name === options.networkName ? " active" : "");
+    const info = findNetworkInfo(options.allNetworkInfo, net.name);
+    chip.append(createLogoBadge(info?.logo, net.name, "phone-network-chip-logo"));
+    const label = document.createElement("span");
+    label.textContent = net.name;
+    chip.append(label);
+    chip.addEventListener("click", () => options.onSelectNetwork(net.name));
+    filter.append(chip);
+  }
+  screen.append(filter);
+
+  const list = document.createElement("div");
+  list.className = "phone-token-list";
+  const tokens = options.registryNetworks.find((n) => n.name === options.networkName)?.tokens ?? [];
+  if (tokens.length === 0) {
+    const empty = document.createElement("div");
+    empty.className = "phone-empty-state";
+    empty.textContent = "No tokens on this network yet.";
+    list.append(empty);
+  }
+  for (const token of tokens) {
+    list.append(renderTokenListRow(token, options.onSelectToken));
+  }
+  screen.append(list);
+}
+
+function renderTokenListRow(token: Token, onSelect: (token: Token) => void): HTMLElement {
+  const row = document.createElement("div");
+  row.className = "phone-token-row";
+  row.append(createLogoBadge(token.logo, token.symbol, "phone-token-row-logo"));
+
+  const info = document.createElement("div");
+  info.className = "phone-token-row-info";
+  const name = document.createElement("div");
+  name.className = "phone-token-row-name";
+  name.textContent = token.symbol;
+  const sub = document.createElement("div");
+  sub.className = "phone-token-row-sub";
+  sub.textContent = token.name;
+  info.append(name, sub);
+  row.append(info);
+
+  const isStablecoin = token.tags?.includes("stablecoin") ?? false;
+  const balance = generateBalance(`${token.id}:${token.symbol}`, isStablecoin);
+  const balanceEl = document.createElement("div");
+  balanceEl.className = "phone-token-row-balance";
+  const amountEl = document.createElement("div");
+  amountEl.className = "phone-token-row-amount";
+  amountEl.textContent = `${formatAmount(balance.amount)} ${token.symbol}`;
+  const usdEl = document.createElement("div");
+  usdEl.className = "phone-token-row-usd";
+  usdEl.textContent = `$${balance.usd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  balanceEl.append(amountEl, usdEl);
+  row.append(balanceEl);
+
+  row.addEventListener("click", () => onSelect(token));
+  return row;
 }
 
 // Synchronous part only — for "image" this is just the overlay/fallback
@@ -43,41 +160,33 @@ function applyBackgroundImage(header: HTMLElement, token: Token): void {
   });
 }
 
-export function renderPhoneFrame(container: HTMLElement, token: Token | undefined, options: PhoneFrameOptions): void {
-  container.innerHTML = "";
-  container.className = `phone-frame chrome-${options.chromeStyle} theme-${options.chromeTheme}`;
-
-  const screen = document.createElement("div");
-  screen.className = "phone-screen";
-  container.append(screen);
-  container.append(homeIndicator());
-
-  if (!token) {
-    const empty = document.createElement("div");
-    empty.className = "phone-empty-state";
-    empty.textContent = "Select a token to preview its card.";
-    screen.append(empty);
-    return;
-  }
-
-  const notch = document.createElement("div");
-  notch.className = "phone-notch";
-  screen.append(notch);
-
+function renderDetailScreen(screen: HTMLElement, token: Token, options: PhoneFrameOptions, onBack: () => void): void {
   const header = document.createElement("div");
   header.className = "card-header";
   header.setAttribute("style", initialBackgroundStyle(token));
   applyBackgroundImage(header, token);
 
-  const tokenLogo = createLogoBadge(token.logo, token.symbol, "token-logo");
-  header.append(tokenLogo);
+  const topRow = document.createElement("div");
+  topRow.className = "card-header-top";
+  const backBtn = document.createElement("button");
+  backBtn.className = "card-back-btn";
+  backBtn.setAttribute("aria-label", "Back to wallet");
+  backBtn.textContent = "←";
+  backBtn.addEventListener("click", onBack);
+  topRow.append(backBtn);
 
   if (token.ui?.theme?.badgeText) {
     const badge = document.createElement("div");
     badge.className = "badge-chip";
     badge.textContent = token.ui.theme.badgeText;
-    header.append(badge);
+    topRow.append(badge);
   }
+  header.append(topRow);
+
+  const bottomRow = document.createElement("div");
+  bottomRow.className = "card-header-bottom";
+  const tokenLogo = createLogoBadge(token.logo, token.symbol, "token-logo");
+  bottomRow.append(tokenLogo);
 
   const infoStack = document.createElement("div");
   infoStack.className = "card-header-info";
@@ -102,7 +211,8 @@ export function renderPhoneFrame(container: HTMLElement, token: Token | undefine
     infoStack.append(issuerRow);
   }
 
-  header.append(infoStack);
+  bottomRow.append(infoStack);
+  header.append(bottomRow);
   screen.append(header);
 
   // Network row — makes it unambiguous which chain this card is on, even

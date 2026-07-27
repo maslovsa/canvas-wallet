@@ -256,17 +256,17 @@ body {
    .phone-screen is the clipped, scrollable display area inside it. */
 .phone-frame {
   position: relative;
-  width: 320px;
-  height: 664px;
+  width: 480px;
+  height: 996px;
   background: #1c1c1e;
-  border-radius: 48px;
-  padding: 12px;
+  border-radius: 66px;
+  padding: 18px;
   box-shadow:
     0 24px 60px rgba(0, 0, 0, 0.45),
     0 0 0 2px #050505;
 }
 .phone-frame.chrome-android {
-  border-radius: 30px;
+  border-radius: 42px;
   background: #202124;
 }
 
@@ -278,22 +278,22 @@ body {
   background: #050505;
 }
 .phone-frame::before {
-  left: -2px;
-  top: 130px;
-  width: 2px;
-  height: 56px;
-  border-radius: 2px 0 0 2px;
+  left: -3px;
+  top: 195px;
+  width: 3px;
+  height: 84px;
+  border-radius: 3px 0 0 3px;
 }
 .phone-frame::after {
-  right: -2px;
-  top: 170px;
-  width: 2px;
-  height: 90px;
-  border-radius: 0 2px 2px 0;
+  right: -3px;
+  top: 255px;
+  width: 3px;
+  height: 135px;
+  border-radius: 0 3px 3px 0;
 }
 .phone-frame.chrome-android::before,
 .phone-frame.chrome-android::after {
-  height: 70px;
+  height: 105px;
 }
 
 .phone-screen {
@@ -302,7 +302,7 @@ body {
   height: 100%;
   background: #fafafa;
   color: #111;
-  border-radius: 36px;
+  border-radius: 50px;
   overflow-y: auto;
   overflow-x: hidden;
 }
@@ -311,17 +311,17 @@ body {
   color: #eee;
 }
 .phone-frame.chrome-android .phone-screen {
-  border-radius: 20px;
+  border-radius: 28px;
 }
 
 .phone-home-indicator {
   position: absolute;
-  bottom: 6px;
+  bottom: 9px;
   left: 50%;
   transform: translateX(-50%);
-  width: 120px;
-  height: 4px;
-  border-radius: 2px;
+  width: 176px;
+  height: 6px;
+  border-radius: 3px;
   background: rgba(255, 255, 255, 0.35);
   pointer-events: none;
 }
@@ -336,53 +336,81 @@ body {
 .phone-notch {
   position: sticky;
   top: 0;
-  height: 22px;
+  height: 32px;
   background: #1c1c1e;
-  margin: 0 90px;
-  border-radius: 0 0 12px 12px;
+  margin: 0 140px;
+  border-radius: 0 0 16px 16px;
   z-index: 2;
 }
 .chrome-android .phone-notch {
-  margin: 8px auto 0;
+  margin: 10px auto 0;
   border-radius: 50%;
-  width: 10px;
-  height: 10px;
+  width: 12px;
+  height: 12px;
   background: #050505;
 }
 
 .card-header {
-  position: relative;
-  padding: 14px;
-  min-height: 118px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 16px;
+  min-height: 150px;
   margin-bottom: 10px; /* breathing room before the network row / widgets below */
 }
 
+.card-header-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.card-back-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0, 0, 0, 0.35);
+  color: #fff;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.card-back-btn:hover {
+  background: rgba(0, 0, 0, 0.5);
+}
+
 .badge-chip {
-  position: absolute;
-  top: 10px;
-  right: 10px;
   background: rgba(0, 0, 0, 0.35);
   color: #fff;
   border-radius: 12px;
   padding: 2px 8px;
   font-size: 10px;
+  white-space: nowrap;
+}
+
+.card-header-bottom {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .card-header-info {
-  position: absolute;
-  left: 54px;
-  right: 14px;
-  bottom: 12px;
   display: flex;
   flex-direction: column;
   gap: 4px;
+  min-width: 0;
 }
 
 .card-header-name {
   color: #fff;
   font-weight: 600;
-  font-size: 14px;
+  font-size: 16px;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .card-issuer-row {
@@ -390,13 +418,120 @@ body {
   align-items: center;
   gap: 5px;
   color: rgba(255, 255, 255, 0.85);
-  font-size: 11px;
+  font-size: 12px;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .card-issuer-flag {
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1;
+  flex-shrink: 0;
+}
+
+/* Phone "wallet home" screen — network filter + token balances, the
+   landing screen of the in-phone simulation before drilling into a
+   single token's card (see src/ui/phone-frame.ts). */
+.phone-list-header {
+  padding: 18px 16px 4px;
+  font-weight: 700;
+  font-size: 18px;
+}
+
+.phone-network-filter {
+  display: flex;
+  gap: 8px;
+  padding: 10px 16px;
+  overflow-x: auto;
+}
+
+.phone-network-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  background: transparent;
+  border: 1px solid rgba(127, 127, 127, 0.35);
+  color: inherit;
+  border-radius: 14px;
+  padding: 5px 12px;
+  font-size: 12px;
+  cursor: pointer;
+}
+.phone-network-chip.active {
+  border-color: var(--accent);
+  color: var(--accent);
+  font-weight: 600;
+}
+.phone-network-chip-logo {
+  width: 16px;
+  height: 16px;
+  font-size: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+.phone-network-chip-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.phone-token-list {
+  padding: 4px 8px 16px;
+}
+
+.phone-token-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 8px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+.phone-token-row:hover {
+  background: rgba(127, 127, 127, 0.08);
+}
+.phone-token-row-logo {
+  width: 38px;
+  height: 38px;
+  font-size: 15px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+.phone-token-row-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.phone-token-row-info {
+  flex: 1;
+  min-width: 0;
+}
+.phone-token-row-name {
+  font-weight: 600;
+  font-size: 14px;
+}
+.phone-token-row-sub {
+  font-size: 12px;
+  color: var(--text-dim);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.phone-token-row-balance {
+  text-align: right;
+}
+.phone-token-row-amount {
+  font-size: 13px;
+  font-weight: 600;
+}
+.phone-token-row-usd {
+  font-size: 12px;
+  color: var(--text-dim);
 }
 
 /* Shared logo-badge base — token logos, network logos, sidebar rows/tabs
@@ -430,12 +565,9 @@ body {
 }
 
 .token-logo {
-  position: absolute;
-  top: 10px;
-  left: 14px;
-  width: 32px;
-  height: 32px;
-  font-size: 14px;
+  width: 40px;
+  height: 40px;
+  font-size: 16px;
   border: 2px solid rgba(255, 255, 255, 0.6);
 }
 
