@@ -338,17 +338,26 @@ body {
   font-size: 13px;
 }
 
+/* A decorative overlay on the chassis (like .phone-home-indicator), not
+   inside the scrollable .phone-screen — positioned relative to
+   .phone-frame's own padding box, so it sits on top of whatever content is
+   underneath without reserving any scroll-content layout space. Offsets
+   below match .phone-frame's 18px padding, i.e. flush with where
+   .phone-screen visually begins. */
 .phone-notch {
-  position: sticky;
-  top: 0;
+  position: absolute;
+  top: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 164px;
   height: 32px;
   background: #1c1c1e;
-  margin: 0 140px;
   border-radius: 0 0 16px 16px;
-  z-index: 2;
+  z-index: 10;
+  pointer-events: none;
 }
 .chrome-android .phone-notch {
-  margin: 10px auto 0;
+  top: 28px;
   border-radius: 50%;
   width: 12px;
   height: 12px;
@@ -364,23 +373,22 @@ body {
   overflow: hidden;
 }
 
-/* The token's background photo lives on its own absolutely-positioned
-   layer (behind the nav bar / logo / name) so its opacity can be reduced
-   in light theme without fading the content stacked on top of it — see
-   applyBackgroundImage() in phone-frame.ts. */
-.card-header-bg-image {
+/* The header's visual (solid color / gradient / photo) lives on its own
+   absolutely-positioned layer, behind the nav bar / logo / name, so its
+   opacity can be reduced in light theme without fading the content
+   stacked on top of it — see applyHeaderBackground() in phone-frame.ts. */
+.card-header-bg {
   position: absolute;
   inset: 0;
   background-size: cover;
   background-position: center;
 }
 
-/* Apple-style translucent nav bar, pinned just below the notch (like
-   Apple Music / App Store detail screens where a blurred bar stays fixed
-   while the hero art and title scroll underneath it). It's a CHILD of
-   .card-header (not a sibling floated on top via negative margin) so the
-   header's own background is guaranteed to already fill the space behind
-   wherever the bar sticks — no separate box to pixel-match, no gap. */
+/* Pinned below the notch so the back button/badge stay reachable while
+   scrolling — a positioning strip only, no bar background/blur of its
+   own, so it never visually covers the header's art. It's a CHILD of
+   .card-header (not a sibling floated on top via negative margin) so it's
+   guaranteed to be correctly layered above the header's background. */
 .card-nav-bar {
   position: sticky;
   top: 32px;
@@ -391,13 +399,10 @@ body {
   justify-content: space-between;
   height: 44px;
   padding: 0 8px;
-  background: rgba(0, 0, 0, 0.28);
-  backdrop-filter: blur(12px) saturate(160%);
-  -webkit-backdrop-filter: blur(12px) saturate(160%);
 }
 
-/* Standard iOS nav-bar back control: chevron + label, tinted, no
-   background of its own — the bar behind it already supplies contrast. */
+/* Standard iOS nav-bar back control: chevron + label, tinted, no bar
+   behind it for contrast — a text-shadow keeps it legible over any art. */
 .card-back-btn {
   display: flex;
   align-items: center;
@@ -405,6 +410,7 @@ body {
   border: none;
   background: transparent;
   color: #fff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
   padding: 6px 8px 6px 4px;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
@@ -434,7 +440,7 @@ body {
 }
 
 .card-header-bottom {
-  position: relative; /* stacks above .card-header-bg-image regardless of z-index */
+  position: relative; /* stacks above .card-header-bg regardless of z-index */
   flex: 1;
   display: flex;
   align-items: center;
@@ -499,7 +505,11 @@ body {
    landing screen of the in-phone simulation before drilling into a
    single token's card (see src/ui/phone-frame.ts). */
 .phone-list-header {
-  padding: 20px 16px 8px;
+  /* 32px clears the floating notch overlay (see .phone-notch), which no
+     longer reserves layout space of its own now that it can sit on top of
+     a full-bleed detail-screen header — the list screen still needs the
+     same top clearance restored explicitly. */
+  padding: 52px 16px 8px;
 }
 .phone-list-title {
   font-weight: 800;

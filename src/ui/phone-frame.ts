@@ -52,10 +52,12 @@ export function renderPhoneFrame(container: HTMLElement, token: Token | undefine
   screen.className = "phone-screen";
   container.append(screen);
   container.append(homeIndicator());
-
-  const notch = document.createElement("div");
-  notch.className = "phone-notch";
-  screen.append(notch);
+  // A decorative overlay on the chassis itself (like .phone-home-indicator
+  // below), not inside the scrollable .phone-screen — a physical notch
+  // doesn't scroll or reserve layout space, it just sits on top of
+  // whatever content is under it, letting a full-bleed header background
+  // extend all the way to the true top of the screen.
+  container.append(notchElement());
 
   if (screenMode === "detail" && token) {
     renderDetailScreen(screen, token, options, () => {
@@ -147,58 +149,55 @@ function renderTokenListRow(token: Token, onSelect: (token: Token) => void): HTM
   return row;
 }
 
-// Synchronous part only — for "image" this is just the overlay/fallback
-// color shown before (or instead of, on failure) the async-loaded image.
-function initialBackgroundStyle(token: Token): string {
+// The header's visual (solid color / gradient / photo) always lives on its
+// own layer (.card-header-bg), separate from the header element itself, so
+// a real `opacity` reduction in light theme only fades that visual — not
+// the nav bar/logo/name stacked on top of it (fading .card-header directly
+// would fade those too). The header's own base color becomes white in
+// light theme so the reduced-opacity layer reveals white underneath,
+// lightening the visual instead of darkening it — applied uniformly to
+// every background type, not just photos, so a solid/gradient token card
+// adapts to light theme exactly the same way an image-backed one does.
+function applyHeaderBackground(header: HTMLElement, token: Token, chromeTheme: ChromeTheme): void {
   const bg = token.ui?.background;
-  if (!bg) return "";
-  if (bg.type === "solid") return `background-color: ${bg.colors[0] ?? "#111"};`;
-  if (bg.type === "gradient") {
-    const angle = bg.angle ?? 135;
-    return `background-image: linear-gradient(${angle}deg, ${bg.colors.join(", ")});`;
-  }
-  return `background-color: ${bg.overlayColor ?? "#111"};`;
-}
-
-// Reuses loadIcon()'s domain-allowlist + size-limited fetch — a background
-// image is just another allowlisted asset URL, same trust boundary as a
-// token logo or widget icon (see registry.schema.json's backgroundImage).
-//
-// The photo gets its own layer (.card-header-bg-image), separate from the
-// header element itself, so a real `opacity` reduction only fades the
-// photo — not the nav bar/logo/name sitting on top of it (applying opacity
-// to .card-header directly would fade those too). In light theme the
-// header's own base color is swapped to white so that reduced opacity
-// reveals white through the photo instead of the token's (usually dark)
-// overlayColor, which would otherwise darken rather than lighten it.
-function applyBackgroundImage(header: HTMLElement, token: Token, chromeTheme: ChromeTheme): void {
-  const bg = token.ui?.background;
-  if (!bg || bg.type !== "image") return;
   const bgLayer = document.createElement("div");
-  bgLayer.className = "card-header-bg-image";
+  bgLayer.className = "card-header-bg";
   header.prepend(bgLayer);
+
+  if (bg?.type === "solid") {
+    bgLayer.style.backgroundColor = bg.colors[0] ?? "#111";
+  } else if (bg?.type === "gradient") {
+    const angle = bg.angle ?? 135;
+    bgLayer.style.backgroundImage = `linear-gradient(${angle}deg, ${bg.colors.join(", ")})`;
+  } else if (bg?.type === "image") {
+    // Reuses loadIcon()'s domain-allowlist + size-limited fetch — a
+    // background image is just another allowlisted asset URL, same trust
+    // boundary as a token logo or widget icon (see registry.schema.json's
+    // backgroundImage).
+    bgLayer.style.backgroundColor = bg.overlayColor ?? "#111";
+    loadIcon(bg.url).then((src) => {
+      if (src) bgLayer.style.backgroundImage = `url(${CSS.escape(src)})`;
+    });
+  } else {
+    bgLayer.style.backgroundColor = "#111";
+  }
+
   if (chromeTheme === "light") {
     header.style.backgroundColor = "#fff";
-    bgLayer.style.opacity = "0.6"; // -40%, adapting the photo for a light background.
+    bgLayer.style.opacity = "0.6"; // -40%, adapting the visual for a light background.
   }
-  loadIcon(bg.url).then((src) => {
-    if (src) {
-      bgLayer.style.backgroundImage = `url(${CSS.escape(src)})`;
-    }
-  });
 }
 
 function renderDetailScreen(screen: HTMLElement, token: Token, options: PhoneFrameOptions, onBack: () => void): void {
   const header = document.createElement("div");
   header.className = "card-header";
-  header.setAttribute("style", initialBackgroundStyle(token));
-  applyBackgroundImage(header, token, options.chromeTheme);
+  applyHeaderBackground(header, token, options.chromeTheme);
 
-  // A pinned, translucent Apple-style nav bar — a CHILD of the header (not
-  // a sibling floated on top via negative margin) so the header's own
-  // background is always already there underneath wherever the bar
-  // sticks, the same layered effect as Apple Music/App Store detail
-  // screens where a blurred bar stays fixed while hero art scrolls by.
+  // A pinned nav bar (back button + badge) — a CHILD of the header (not a
+  // sibling floated on top via negative margin) so it stays correctly
+  // layered above the header's background regardless of scroll. No bar
+  // background of its own — it's just a positioning strip for the back
+  // button and badge, not a visible band over the art.
   const navBar = document.createElement("div");
   navBar.className = "card-nav-bar";
 
@@ -297,4 +296,10 @@ function homeIndicator(): HTMLElement {
   const indicator = document.createElement("div");
   indicator.className = "phone-home-indicator";
   return indicator;
+}
+
+function notchElement(): HTMLElement {
+  const notch = document.createElement("div");
+  notch.className = "phone-notch";
+  return notch;
 }
