@@ -47,6 +47,9 @@
               "type": "price_chart",
               "coingeckoId": "ethereum",
               "days": 1
+            },
+            {
+              "type": "history"
             }
           ]
         },
@@ -91,6 +94,9 @@
               "type": "price_chart",
               "coingeckoId": "weth",
               "days": 1
+            },
+            {
+              "type": "history"
             }
           ]
         },
@@ -159,6 +165,9 @@
               "type": "price_chart",
               "coingeckoId": "tether",
               "days": 1
+            },
+            {
+              "type": "history"
             }
           ]
         },
@@ -227,6 +236,9 @@
               "type": "price_chart",
               "coingeckoId": "usd-coin",
               "days": 1
+            },
+            {
+              "type": "history"
             }
           ]
         },
@@ -295,6 +307,9 @@
               "type": "price_chart",
               "coingeckoId": "dai",
               "days": 1
+            },
+            {
+              "type": "history"
             }
           ]
         },
@@ -363,6 +378,9 @@
               "type": "price_chart",
               "coingeckoId": "wrapped-bitcoin",
               "days": 1
+            },
+            {
+              "type": "history"
             }
           ]
         },
@@ -424,6 +442,9 @@
               "type": "price_chart",
               "coingeckoId": "chainlink",
               "days": 1
+            },
+            {
+              "type": "history"
             }
           ]
         },
@@ -486,6 +507,9 @@
               "type": "price_chart",
               "coingeckoId": "uniswap",
               "days": 1
+            },
+            {
+              "type": "history"
             }
           ]
         },
@@ -548,6 +572,9 @@
               "type": "price_chart",
               "coingeckoId": "aave",
               "days": 1
+            },
+            {
+              "type": "history"
             }
           ]
         },
@@ -610,6 +637,9 @@
               "type": "price_chart",
               "coingeckoId": "maker",
               "days": 1
+            },
+            {
+              "type": "history"
             }
           ]
         },
@@ -672,6 +702,9 @@
               "type": "price_chart",
               "coingeckoId": "compound-governance-token",
               "days": 1
+            },
+            {
+              "type": "history"
             }
           ]
         },
@@ -734,6 +767,9 @@
               "type": "price_chart",
               "coingeckoId": "sushi",
               "days": 1
+            },
+            {
+              "type": "history"
             }
           ]
         },
@@ -796,6 +832,9 @@
               "type": "price_chart",
               "coingeckoId": "curve-dao-token",
               "days": 1
+            },
+            {
+              "type": "history"
             }
           ]
         },
@@ -858,6 +897,9 @@
               "type": "price_chart",
               "coingeckoId": "havven",
               "days": 1
+            },
+            {
+              "type": "history"
             }
           ]
         },
@@ -905,6 +947,9 @@
               "type": "price_chart",
               "coingeckoId": "shiba-inu",
               "days": 1
+            },
+            {
+              "type": "history"
             }
           ],
           "actions": {
@@ -958,6 +1003,9 @@
               "type": "price_chart",
               "coingeckoId": "pepe",
               "days": 1
+            },
+            {
+              "type": "history"
             }
           ],
           "actions": {
@@ -1026,6 +1074,9 @@
               "type": "price_chart",
               "coingeckoId": "the-graph",
               "days": 1
+            },
+            {
+              "type": "history"
             }
           ]
         },
@@ -1088,6 +1139,9 @@
               "type": "price_chart",
               "coingeckoId": "ethereum-name-service",
               "days": 1
+            },
+            {
+              "type": "history"
             }
           ]
         },
@@ -1150,6 +1204,9 @@
               "type": "price_chart",
               "coingeckoId": "arbitrum",
               "days": 1
+            },
+            {
+              "type": "history"
             }
           ]
         },
@@ -1212,6 +1269,9 @@
               "type": "price_chart",
               "coingeckoId": "yearn-finance",
               "days": 1
+            },
+            {
+              "type": "history"
             }
           ]
         }
@@ -1263,6 +1323,9 @@
               "type": "price_chart",
               "coingeckoId": "binancecoin",
               "days": 1
+            },
+            {
+              "type": "history"
             }
           ]
         },
@@ -1309,6 +1372,9 @@
               "type": "price_chart",
               "coingeckoId": "wbnb",
               "days": 1
+            },
+            {
+              "type": "history"
             }
           ]
         },
@@ -1377,6 +1443,9 @@
               "type": "price_chart",
               "coingeckoId": "binance-bridged-usdt-bnb-smart-chain",
               "days": 1
+            },
+            {
+              "type": "history"
             }
           ]
         },
@@ -1445,6 +1514,9 @@
               "type": "price_chart",
               "coingeckoId": "binance-bridged-usdc-bnb-smart-chain",
               "days": 1
+            },
+            {
+              "type": "history"
             }
           ]
         },
@@ -1513,6 +1585,9 @@
               "type": "price_chart",
               "coingeckoId": "binance-peg-dai",
               "days": 1
+            },
+            {
+              "type": "history"
             }
           ]
         },
@@ -1581,6 +1656,9 @@
               "type": "price_chart",
               "coingeckoId": "binance-peg-busd",
               "days": 1
+            },
+            {
+              "type": "history"
             }
           ]
         },
@@ -1627,6 +1705,9 @@
               "type": "price_chart",
               "coingeckoId": "binance-peg-weth",
               "days": 1
+            },
+            {
+              "type": "history"
             }
           ]
         },
@@ -1688,6 +1769,9 @@
               "type": "price_chart",
               "coingeckoId": "chainlink",
               "days": 1
+            },
+            {
+              "type": "history"
             }
           ]
         },
@@ -1750,6 +1834,9 @@
               "type": "price_chart",
               "coingeckoId": "uniswap",
               "days": 1
+            },
+            {
+              "type": "history"
             }
           ]
         },
@@ -1812,6 +1899,9 @@
               "type": "price_chart",
               "coingeckoId": "aave",
               "days": 1
+            },
+            {
+              "type": "history"
             }
           ]
         },
@@ -1874,6 +1964,9 @@
               "type": "price_chart",
               "coingeckoId": "compound-governance-token",
               "days": 1
+            },
+            {
+              "type": "history"
             }
           ]
         },
@@ -1936,6 +2029,9 @@
               "type": "price_chart",
               "coingeckoId": "sushi",
               "days": 1
+            },
+            {
+              "type": "history"
             }
           ]
         },
@@ -1992,6 +2088,9 @@
                   "action": "protocol_dapp"
                 }
               ]
+            },
+            {
+              "type": "history"
             }
           ]
         },
@@ -2054,6 +2153,9 @@
               "type": "price_chart",
               "coingeckoId": "axie-infinity",
               "days": 1
+            },
+            {
+              "type": "history"
             }
           ]
         },
@@ -2101,6 +2203,9 @@
               "type": "price_chart",
               "coingeckoId": "floki",
               "days": 1
+            },
+            {
+              "type": "history"
             }
           ],
           "actions": {
@@ -2170,6 +2275,9 @@
               "type": "price_chart",
               "coingeckoId": "1inch",
               "days": 1
+            },
+            {
+              "type": "history"
             }
           ]
         },
@@ -2231,6 +2339,9 @@
               "type": "price_chart",
               "coingeckoId": "ankr",
               "days": 1
+            },
+            {
+              "type": "history"
             }
           ]
         }
@@ -2269,6 +2380,9 @@
               "type": "price_chart",
               "coingeckoId": "tron",
               "days": 1
+            },
+            {
+              "type": "history"
             }
           ]
         },
@@ -2337,6 +2451,9 @@
               "type": "price_chart",
               "coingeckoId": "tether",
               "days": 1
+            },
+            {
+              "type": "history"
             }
           ]
         },
@@ -2405,6 +2522,9 @@
               "type": "price_chart",
               "coingeckoId": "usd-coin",
               "days": 1
+            },
+            {
+              "type": "history"
             }
           ]
         },
@@ -2467,6 +2587,9 @@
                   "value": "Same-day"
                 }
               ]
+            },
+            {
+              "type": "history"
             }
           ]
         },
@@ -2519,6 +2642,9 @@
               "type": "price_chart",
               "coingeckoId": "apenft",
               "days": 1
+            },
+            {
+              "type": "history"
             }
           ]
         },
@@ -2575,6 +2701,9 @@
                   "action": "farm_dapp"
                 }
               ]
+            },
+            {
+              "type": "history"
             }
           ]
         },
@@ -2627,6 +2756,9 @@
               "type": "price_chart",
               "coingeckoId": "wink",
               "days": 1
+            },
+            {
+              "type": "history"
             }
           ]
         },
@@ -2680,6 +2812,9 @@
               "type": "price_chart",
               "coingeckoId": "bittorrent",
               "days": 1
+            },
+            {
+              "type": "history"
             }
           ]
         },
@@ -2736,6 +2871,9 @@
                   "action": "borrow_dapp"
                 }
               ]
+            },
+            {
+              "type": "history"
             }
           ]
         }

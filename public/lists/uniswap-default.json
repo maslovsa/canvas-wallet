@@ -69,6 +69,9 @@
               "type": "price_chart",
               "coingeckoId": "usd-coin",
               "days": 1
+            },
+            {
+              "type": "history"
             }
           ]
         },
@@ -137,6 +140,9 @@
               "type": "price_chart",
               "coingeckoId": "tether",
               "days": 1
+            },
+            {
+              "type": "history"
             }
           ]
         },
@@ -205,6 +211,9 @@
               "type": "price_chart",
               "coingeckoId": "dai",
               "days": 1
+            },
+            {
+              "type": "history"
             }
           ]
         },
@@ -271,6 +280,9 @@
               "type": "price_chart",
               "coingeckoId": "wrapped-bitcoin",
               "days": 1
+            },
+            {
+              "type": "history"
             }
           ],
           "actions": {
@@ -345,6 +357,9 @@
               "type": "price_chart",
               "coingeckoId": "uniswap",
               "days": 1
+            },
+            {
+              "type": "history"
             }
           ]
         },
@@ -406,6 +421,9 @@
               "type": "price_chart",
               "coingeckoId": "chainlink",
               "days": 1
+            },
+            {
+              "type": "history"
             }
           ]
         },
@@ -468,6 +486,9 @@
               "type": "price_chart",
               "coingeckoId": "aave",
               "days": 1
+            },
+            {
+              "type": "history"
             }
           ]
         }

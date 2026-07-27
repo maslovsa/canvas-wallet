@@ -213,8 +213,7 @@ body {
 .add-token-btn,
 .deploy-btn,
 .share-btn,
-.toolbar-btn,
-.preset-chip {
+.toolbar-btn {
   background: transparent;
   border: 1px solid var(--border);
   color: var(--text);
@@ -226,8 +225,7 @@ body {
 .add-token-btn:hover,
 .deploy-btn:hover,
 .share-btn:hover,
-.toolbar-btn:hover,
-.preset-chip:hover {
+.toolbar-btn:hover {
   border-color: var(--accent);
 }
 
@@ -244,6 +242,8 @@ body {
   flex-direction: column;
   align-items: center;
   gap: 12px;
+  overflow-y: auto;
+  padding-bottom: 8px;
 }
 
 .simulator-toolbar {
@@ -353,7 +353,8 @@ body {
 .card-header {
   position: relative;
   padding: 14px;
-  min-height: 90px;
+  min-height: 118px;
+  margin-bottom: 10px; /* breathing room before the network row / widgets below */
 }
 
 .badge-chip {
@@ -367,14 +368,35 @@ body {
   font-size: 10px;
 }
 
-.card-header-name {
+.card-header-info {
   position: absolute;
-  bottom: 10px;
   left: 54px;
+  right: 14px;
+  bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.card-header-name {
   color: #fff;
   font-weight: 600;
   font-size: 14px;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.card-issuer-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 11px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.card-issuer-flag {
+  font-size: 13px;
+  line-height: 1;
 }
 
 /* Shared logo-badge base — token logos, network logos, sidebar rows/tabs
@@ -572,11 +594,50 @@ body {
   font-style: italic;
 }
 
-.gallery {
+.widget-history {
+  background: rgba(127, 127, 127, 0.06);
+}
+.history-row {
   display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+}
+.history-row + .history-row {
+  border-top: 1px dashed var(--border);
+}
+.history-icon {
+  display: flex;
+  align-items: center;
   justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.history-icon-in {
+  background: rgba(47, 174, 91, 0.18);
+  color: #2fae5b;
+}
+.history-icon-out {
+  background: rgba(229, 72, 77, 0.18);
+  color: var(--danger);
+}
+.history-label {
+  flex: 1;
+  font-size: 12px;
+}
+.history-usd {
+  font-size: 12px;
+  font-weight: 600;
+}
+.history-usd-in {
+  color: #2fae5b;
+}
+.history-usd-out {
+  color: var(--danger);
 }
 
 .editor-panel {

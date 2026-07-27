@@ -65,6 +65,7 @@
           }
         },
         "explorer": { "type": "string", "format": "uri" },
+        "issuer": { "$ref": "#/definitions/issuer" },
         "ui": { "$ref": "#/definitions/ui" },
         "actions": {
           "type": "object",
@@ -73,6 +74,19 @@
         "widgets": {
           "type": "array",
           "items": { "$ref": "#/definitions/widget" }
+        }
+      }
+    },
+    "issuer": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Who issues/backs this token — mainly relevant for stablecoins. Optional and separate from `description` because the client renders it structurally (name + a country badge in the card header, see src/ui/phone-frame.ts).",
+      "properties": {
+        "name": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "country": {
+          "type": "string",
+          "pattern": "^[A-Z]{2}$",
+          "description": "ISO 3166-1 alpha-2 code of the issuer's jurisdiction (e.g. \"US\", \"CH\"). Omit entirely for a decentralized protocol/foundation with no single jurisdiction (e.g. Ethereum, Bitcoin) — the client shows a globe/worldwide icon when this is absent, and never guesses a country from the issuer name."
         }
       }
     },
@@ -192,7 +206,8 @@
         { "$ref": "#/definitions/widgetActionGroup" },
         { "$ref": "#/definitions/widgetKeyValue" },
         { "$ref": "#/definitions/widgetNotice" },
-        { "$ref": "#/definitions/widgetPriceChart" }
+        { "$ref": "#/definitions/widgetPriceChart" },
+        { "$ref": "#/definitions/widgetHistory" }
       ]
     },
     "widgetBanner": {
@@ -280,6 +295,16 @@
           "enum": [1, 7, 30, 90, 365],
           "description": "Range of price history to request, in days. Defaults to 1 (24h) if omitted."
         }
+      }
+    },
+    "widgetHistory": {
+      "type": "object",
+      "required": ["type"],
+      "additionalProperties": false,
+      "description": "Illustrative only: renders a small, client-generated set of fake recent-activity rows (received/sent, each capped at $100 equivalent). No wallet, backend, or real transaction data is ever involved — see src/widgets/history.ts.",
+      "properties": {
+        "type": { "const": "history" },
+        "title": { "type": "string", "maxLength": 80 }
       }
     }
   }

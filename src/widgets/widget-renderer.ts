@@ -1,6 +1,7 @@
 import type { Widget, Token } from "../types.ts";
 import { loadIcon } from "../icon/icon-loader.ts";
 import { fetchPriceHistory, generatePlaceholderSeries, buildSparkline } from "./price-chart.ts";
+import { generateHistory, formatAmount } from "./history.ts";
 
 // type -> render-function lookup table (CEO review Section 1 recommendation)
 // instead of if/else branching. Adding a 5th widget type means adding one
@@ -155,12 +156,51 @@ const renderPriceChart: WidgetRenderer<Extract<Widget, { type: "price_chart" }>>
   return el;
 };
 
+const renderHistory: WidgetRenderer<Extract<Widget, { type: "history" }>> = (widget, token) => {
+  const el = document.createElement("div");
+  el.className = "widget widget-history";
+
+  const title = document.createElement("div");
+  title.className = "widget-title";
+  title.textContent = widget.title ?? "Recent Activity";
+  el.append(title);
+
+  // Seeded by the token's own id — same token shows a stable feed across
+  // re-renders. Newest first, like every wallet app's activity list.
+  const isStablecoin = token.tags?.includes("stablecoin") ?? false;
+  const events = generateHistory(`${token.id}:${token.symbol}`, 5, isStablecoin);
+  for (const event of events) {
+    const row = document.createElement("div");
+    row.className = "history-row";
+
+    const icon = document.createElement("span");
+    icon.className = `history-icon history-icon-${event.direction}`;
+    icon.textContent = event.direction === "in" ? "↓" : "↑";
+    row.append(icon);
+
+    const label = document.createElement("span");
+    label.className = "history-label";
+    label.textContent = `${event.direction === "in" ? "Received" : "Sent"} ${formatAmount(event.amount)} ${token.symbol}`;
+    row.append(label);
+
+    const usd = document.createElement("span");
+    usd.className = `history-usd history-usd-${event.direction}`;
+    usd.textContent = `${event.direction === "in" ? "+" : "-"}$${event.usd.toFixed(2)}`;
+    row.append(usd);
+
+    el.append(row);
+  }
+
+  return el;
+};
+
 const RENDERERS: { [K in Widget["type"]]: WidgetRenderer<Extract<Widget, { type: K }>> } = {
   banner: renderBanner,
   action_group: renderActionGroup,
   key_value: renderKeyValue,
   notice: renderNotice,
   price_chart: renderPriceChart,
+  history: renderHistory,
 };
 
 /**

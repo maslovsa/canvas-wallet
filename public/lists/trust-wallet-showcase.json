@@ -47,6 +47,9 @@
               "type": "price_chart",
               "coingeckoId": "ethereum",
               "days": 1
+            },
+            {
+              "type": "history"
             }
           ]
         },
@@ -93,6 +96,9 @@
               "type": "price_chart",
               "coingeckoId": "weth",
               "days": 1
+            },
+            {
+              "type": "history"
             }
           ]
         },
@@ -153,6 +159,9 @@
                   "value": "150%"
                 }
               ]
+            },
+            {
+              "type": "history"
             }
           ]
         },
@@ -199,6 +208,9 @@
               "title": "Redeem",
               "description": "Redeem your bond at maturity",
               "action": "redeem_dapp"
+            },
+            {
+              "type": "history"
             }
           ]
         },
@@ -231,6 +243,9 @@
               "type": "notice",
               "message": "No intrinsic value. DYOR.",
               "severity": "warning"
+            },
+            {
+              "type": "history"
             }
           ]
         },
@@ -266,6 +281,9 @@
                   "value": "4.5%"
                 }
               ]
+            },
+            {
+              "type": "history"
             }
           ]
         }
@@ -333,6 +351,9 @@
               "type": "price_chart",
               "coingeckoId": "trust-wallet-token",
               "days": 1
+            },
+            {
+              "type": "history"
             }
           ]
         }
@@ -371,6 +392,9 @@
               "type": "price_chart",
               "coingeckoId": "tron",
               "days": 1
+            },
+            {
+              "type": "history"
             }
           ]
         }

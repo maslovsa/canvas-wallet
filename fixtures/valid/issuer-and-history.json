@@ -1,0 +1,30 @@
+{
+  "schemaVersion": "1.0.0",
+  "networks": [
+    {
+      "name": "Ethereum",
+      "tokens": [
+        {
+          "name": "USD Coin",
+          "symbol": "USDC",
+          "type": "ERC20",
+          "id": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+          "decimals": 6,
+          "status": "active",
+          "issuer": { "name": "Circle Internet Financial", "country": "US" },
+          "widgets": [{ "type": "history" }]
+        },
+        {
+          "name": "Ethereum",
+          "symbol": "ETH",
+          "type": "NATIVE",
+          "id": "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
+          "decimals": 18,
+          "status": "active",
+          "issuer": { "name": "Ethereum Foundation" },
+          "widgets": [{ "type": "history", "title": "Wallet Activity" }]
+        }
+      ]
+    }
+  ]
+}

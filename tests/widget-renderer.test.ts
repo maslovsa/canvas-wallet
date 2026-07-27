@@ -23,6 +23,7 @@ describe("renderWidget", () => {
       { type: "key_value", items: [{ label: "L", value: "V" }] },
       { type: "notice", message: "M" },
       { type: "price_chart", coingeckoId: "tron" },
+      { type: "history" },
     ];
     for (const widget of widgets) {
       const el = renderWidget(widget, token, () => {});
@@ -78,5 +79,14 @@ describe("renderWidget", () => {
     });
     expect(el?.querySelector(".price-chart-svg")).not.toBeNull();
     vi.unstubAllGlobals();
+  });
+
+  it("history renders one row per generated event, alternating received/sent styling", () => {
+    const el = renderWidget({ type: "history" }, token, () => {});
+    const rows = el?.querySelectorAll(".history-row");
+    expect(rows?.length).toBeGreaterThan(0);
+    for (const row of Array.from(rows ?? [])) {
+      expect(row.querySelector(".history-icon-in, .history-icon-out")).not.toBeNull();
+    }
   });
 });

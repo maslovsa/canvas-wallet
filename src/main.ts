@@ -8,7 +8,6 @@ import { renderSidebar } from "./ui/sidebar.ts";
 import { renderPhoneFrame, type ChromeStyle, type ChromeTheme } from "./ui/phone-frame.ts";
 import { renderGalleryCards, type GalleryEntry } from "./ui/gallery.ts";
 import { Editor } from "./ui/editor.ts";
-import { NAMED_PRESETS, STARTER_TEMPLATES } from "./presets/presets.ts";
 import { buildDeployPlan } from "./deploy-flow/build-deploy-url.ts";
 import { encodeSharePayload } from "./share-link/encode.ts";
 import { decodeShareFragment, ShareLinkDecodeError } from "./share-link/decode.ts";
@@ -93,10 +92,11 @@ function handleUploadFile(file: File): void {
       state.listMeta = { id: "uploaded", name: file.name, description: "Uploaded locally — not saved anywhere but your machine.", file: file.name };
       state.registry = registry;
       state.selectedNetwork = registry.networks[0]?.name ?? "";
-      state.selectedToken = undefined;
+      state.selectedToken = registry.networks[0]?.tokens[0];
       state.isPreviewOnly = false;
       el("status-banner").textContent = "";
-      editor.clear();
+      if (state.selectedToken) editor.loadToken(state.selectedToken);
+      else editor.clear();
       setView("studio");
       renderAll();
     } catch (err) {
@@ -134,7 +134,6 @@ function renderAll(): void {
   });
 
   renderRegistrySourceBanner();
-  renderTemplateChips();
   renderDeployPanel();
 }
 
@@ -162,31 +161,19 @@ function renderRegistrySourceBanner(): void {
   banner.textContent = `Viewing: ${state.source.owner}/${state.source.repo}`;
 }
 
-function renderTemplateChips(): void {
-  const gallery = el("template-chips");
-  gallery.innerHTML = "";
-  for (const template of [...NAMED_PRESETS, ...STARTER_TEMPLATES]) {
-    const chip = document.createElement("button");
-    chip.className = "preset-chip";
-    chip.textContent = template.symbol;
-    chip.addEventListener("click", () => selectToken(structuredClone(template), { confirmDiscard: true }));
-    gallery.append(chip);
-  }
-}
-
 function renderDeployPanel(): void {
   const panel = el("deploy-panel");
   panel.innerHTML = "";
 
   const deployBtn = document.createElement("button");
   deployBtn.className = "deploy-btn";
-  deployBtn.textContent = "Deploy / Propose Token Card via GitHub";
+  deployBtn.textContent = "\u{1F4BE} Deploy / Propose Token Card via GitHub";
   deployBtn.addEventListener("click", () => runDeployFlow(deployBtn));
   panel.append(deployBtn);
 
   const shareBtn = document.createElement("button");
   shareBtn.className = "share-btn";
-  shareBtn.textContent = "Copy share link";
+  shareBtn.textContent = "\u{1F517} Copy share link";
   shareBtn.addEventListener("click", () => runShareFlow(shareBtn));
   panel.append(shareBtn);
 }
@@ -276,8 +263,10 @@ function selectToken(token: Token, opts: { confirmDiscard: boolean }): void {
 
 function selectNetwork(network: string): void {
   state.selectedNetwork = network;
-  state.selectedToken = undefined;
-  editor.clear();
+  const firstToken = state.registry?.networks.find((n) => n.name === network)?.tokens[0];
+  state.selectedToken = firstToken;
+  if (firstToken) editor.loadToken(firstToken);
+  else editor.clear();
   renderAll();
 }
 
@@ -295,10 +284,11 @@ async function loadSource(source: RegistrySource, listMeta: ListMeta | undefined
     state.listMeta = listMeta;
     state.registry = registry;
     state.selectedNetwork = registry.networks[0]?.name ?? "";
-    state.selectedToken = undefined;
+    state.selectedToken = registry.networks[0]?.tokens[0];
     state.isPreviewOnly = false;
     statusEl.textContent = "";
-    editor.clear();
+    if (state.selectedToken) editor.loadToken(state.selectedToken);
+    else editor.clear();
     renderAll();
 
     if (source.kind === "github") {

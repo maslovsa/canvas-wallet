@@ -52,6 +52,25 @@ card — subject to the same domain allowlist as widget icons
 lettered avatar rather than a blank space — don't invent a fake logo URL
 just to fill it in.
 
+### Issuer / country badge
+
+A token can carry an optional `issuer: { name?, country? }` (see
+`registry.schema.json`) — `country` is an ISO 3166-1 alpha-2 code, shown as a
+flag next to the issuer name in the card header. Omit `country` entirely for
+a decentralized protocol/foundation with no single jurisdiction (e.g.
+Ethereum, Bitcoin) — the client shows a globe icon in that case and never
+guesses a country from the issuer name. None of the bundled lists populate
+`issuer` yet; it's a capability, not backfilled data.
+
+### The `history` widget is illustrative only
+
+`{ "type": "history" }` renders a small, client-generated "recent activity"
+feed (received/sent, each capped at $100 equivalent) — see
+`src/widgets/history.ts`. It is never real transaction data and involves no
+wallet or backend; the amounts are seeded from the token's own id so the
+same token shows a stable feed across re-renders instead of reshuffling on
+every keystroke.
+
 ### Verifying a token before adding it — decimals, checksum, logo
 
 Don't hand-copy `decimals` from another network's contract with the same

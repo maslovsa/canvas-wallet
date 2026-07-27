@@ -30,6 +30,7 @@ const nativeEth: Token = {
     theme: { primaryColor: "#627EEA", badgeText: "Native" },
     background: { type: "gradient", colors: ["#0B0E11", "#1C2440"], angle: 135 },
   },
+  widgets: [{ type: "history" }],
 };
 
 const wrappedEth: Token = {
@@ -48,6 +49,7 @@ const wrappedEth: Token = {
     theme: { primaryColor: "#627EEA", badgeText: "Wrapped 1:1" },
     background: { type: "gradient", colors: ["#0B0E11", "#1C2440"], angle: 135 },
   },
+  widgets: [{ type: "history" }],
 };
 
 const usdtYield: Token = {
@@ -85,6 +87,7 @@ const usdtYield: Token = {
       title: "Protocol Metrics",
       items: [{ label: "Collateral Ratio", value: "150%" }],
     },
+    { type: "history" },
   ],
 };
 
@@ -117,6 +120,7 @@ const twtGovernance: Token = {
       title: "Protocol Actions",
       items: [{ label: "Stake Yield (5% APY)", action: "stake_action" }],
     },
+    { type: "history" },
   ],
 };
 
@@ -154,6 +158,7 @@ const rwaBond: Token = {
       description: "Redeem your bond at maturity",
       action: "redeem_dapp",
     },
+    { type: "history" },
   ],
 };
 
@@ -169,7 +174,7 @@ const memeCoin: Token = {
     theme: { primaryColor: "#FF6B6B", badgeText: "Community" },
     background: { type: "gradient", colors: ["#2D0A0A", "#5C1A1A"], angle: 45 },
   },
-  widgets: [{ type: "notice", message: "No intrinsic value. DYOR.", severity: "warning" }],
+  widgets: [{ type: "notice", message: "No intrinsic value. DYOR.", severity: "warning" }, { type: "history" }],
 };
 
 const lpToken: Token = {
@@ -186,6 +191,7 @@ const lpToken: Token = {
   },
   widgets: [
     { type: "key_value", title: "Pool", items: [{ label: "APY", value: "4.5%" }] },
+    { type: "history" },
   ],
 };
 
@@ -209,7 +215,7 @@ const tronNative: Token = {
       overlayColor: "#1A0000",
     },
   },
-  widgets: [{ type: "price_chart", coingeckoId: "tron", days: 1 }],
+  widgets: [{ type: "price_chart", coingeckoId: "tron", days: 1 }, { type: "history" }],
 };
 
 /** The 3 named v1 presets shown by default. */

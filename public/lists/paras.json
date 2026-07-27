@@ -69,6 +69,9 @@
               "type": "price_chart",
               "coingeckoId": "tether",
               "days": 1
+            },
+            {
+              "type": "history"
             }
           ]
         },
@@ -137,6 +140,9 @@
               "type": "price_chart",
               "coingeckoId": "usd-coin",
               "days": 1
+            },
+            {
+              "type": "history"
             }
           ]
         },
@@ -205,6 +211,9 @@
               "type": "price_chart",
               "coingeckoId": "dai",
               "days": 1
+            },
+            {
+              "type": "history"
             }
           ]
         },
@@ -274,6 +283,9 @@
               "type": "price_chart",
               "coingeckoId": "ethena-usde",
               "days": 1
+            },
+            {
+              "type": "history"
             }
           ]
         },
@@ -342,6 +354,9 @@
               "type": "price_chart",
               "coingeckoId": "paypal-usd",
               "days": 1
+            },
+            {
+              "type": "history"
             }
           ]
         },
@@ -410,6 +425,9 @@
               "type": "price_chart",
               "coingeckoId": "true-usd",
               "days": 1
+            },
+            {
+              "type": "history"
             }
           ]
         },
@@ -478,6 +496,9 @@
               "type": "price_chart",
               "coingeckoId": "euro-coin",
               "days": 1
+            },
+            {
+              "type": "history"
             }
           ]
         },
@@ -546,6 +567,9 @@
               "type": "price_chart",
               "coingeckoId": "paxos-standard",
               "days": 1
+            },
+            {
+              "type": "history"
             }
           ]
         },
@@ -614,6 +638,9 @@
               "type": "price_chart",
               "coingeckoId": "frax",
               "days": 1
+            },
+            {
+              "type": "history"
             }
           ]
         },
@@ -681,6 +708,9 @@
               "type": "price_chart",
               "coingeckoId": "usd1-wlfi",
               "days": 1
+            },
+            {
+              "type": "history"
             }
           ]
         }
@@ -754,6 +784,9 @@
               "type": "price_chart",
               "coingeckoId": "binance-bridged-usdt-bnb-smart-chain",
               "days": 1
+            },
+            {
+              "type": "history"
             }
           ]
         },
@@ -822,6 +855,9 @@
               "type": "price_chart",
               "coingeckoId": "binance-bridged-usdc-bnb-smart-chain",
               "days": 1
+            },
+            {
+              "type": "history"
             }
           ]
         },
@@ -890,6 +926,9 @@
               "type": "price_chart",
               "coingeckoId": "first-digital-usd",
               "days": 1
+            },
+            {
+              "type": "history"
             }
           ]
         },
@@ -957,6 +996,9 @@
               "type": "price_chart",
               "coingeckoId": "usd1-wlfi",
               "days": 1
+            },
+            {
+              "type": "history"
             }
           ]
         }
@@ -1030,6 +1072,9 @@
               "type": "price_chart",
               "coingeckoId": "tether",
               "days": 1
+            },
+            {
+              "type": "history"
             }
           ]
         },
@@ -1098,6 +1143,9 @@
               "type": "price_chart",
               "coingeckoId": "usd-coin",
               "days": 1
+            },
+            {
+              "type": "history"
             }
           ]
         },
@@ -1166,6 +1214,9 @@
               "type": "price_chart",
               "coingeckoId": "true-usd",
               "days": 1
+            },
+            {
+              "type": "history"
             }
           ]
         },
@@ -1233,6 +1284,9 @@
               "type": "price_chart",
               "coingeckoId": "usd1-wlfi",
               "days": 1
+            },
+            {
+              "type": "history"
             }
           ]
         }
@@ -1306,6 +1360,9 @@
               "type": "price_chart",
               "coingeckoId": "tether",
               "days": 1
+            },
+            {
+              "type": "history"
             }
           ]
         },
@@ -1374,6 +1431,9 @@
               "type": "price_chart",
               "coingeckoId": "usd-coin",
               "days": 1
+            },
+            {
+              "type": "history"
             }
           ]
         },
@@ -1442,6 +1502,9 @@
               "type": "price_chart",
               "coingeckoId": "paypal-usd",
               "days": 1
+            },
+            {
+              "type": "history"
             }
           ]
         },
@@ -1509,6 +1572,9 @@
               "type": "price_chart",
               "coingeckoId": "usd1-wlfi",
               "days": 1
+            },
+            {
+              "type": "history"
             }
           ]
         }
