@@ -1,7 +1,7 @@
 import type { Widget, Token } from "../types.ts";
 import { loadIcon } from "../icon/icon-loader.ts";
 import { fetchPriceHistory, generatePlaceholderSeries, buildSparkline } from "./price-chart.ts";
-import { generateHistory, formatAmount } from "./history.ts";
+import { generateHistory, formatAmount, formatHistoryTimestamp } from "./history.ts";
 
 // type -> render-function lookup table (CEO review Section 1 recommendation)
 // instead of if/else branching. Adding a 5th widget type means adding one
@@ -178,10 +178,17 @@ const renderHistory: WidgetRenderer<Extract<Widget, { type: "history" }>> = (wid
     icon.textContent = event.direction === "in" ? "↓" : "↑";
     row.append(icon);
 
+    const details = document.createElement("span");
+    details.className = "history-details";
     const label = document.createElement("span");
     label.className = "history-label";
     label.textContent = `${event.direction === "in" ? "Received" : "Sent"} ${formatAmount(event.amount)} ${token.symbol}`;
-    row.append(label);
+    details.append(label);
+    const time = document.createElement("span");
+    time.className = "history-time";
+    time.textContent = formatHistoryTimestamp(event.timestamp);
+    details.append(time);
+    row.append(details);
 
     const usd = document.createElement("span");
     usd.className = `history-usd history-usd-${event.direction}`;

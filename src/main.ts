@@ -118,6 +118,19 @@ function handleUploadFile(file: File): void {
 // Studio (per-list view): sidebar + live simulator + editor.
 // ---------------------------------------------------------------------------
 
+/** Falls back sensibly for sources with no manifest entry (uploaded already sets one; github/share-link don't). */
+function listDisplayName(): string {
+  if (state.listMeta?.name) return state.listMeta.name;
+  if (state.source?.kind === "github") return `${state.source.owner}/${state.source.repo}`;
+  return "My Wallet";
+}
+
+function listDisplayDescription(): string {
+  if (state.listMeta?.description) return state.listMeta.description;
+  if (state.source?.kind === "github") return "Viewing an external GitHub-hosted registry.";
+  return "";
+}
+
 function renderAll(): void {
   if (!state.registry) return;
 
@@ -134,6 +147,8 @@ function renderAll(): void {
     networkInfo: findNetworkInfo(state.networks, state.selectedNetwork),
     registryNetworks: state.registry.networks,
     allNetworkInfo: state.networks,
+    listName: listDisplayName(),
+    listDescription: listDisplayDescription(),
     onSelectNetwork: (network) => selectNetwork(network),
     onSelectToken: (token) => selectToken(token, { confirmDiscard: true }),
   });
@@ -337,6 +352,8 @@ async function init(): Promise<void> {
         networkInfo: findNetworkInfo(state.networks, state.selectedNetwork),
         registryNetworks: state.registry?.networks ?? [],
         allNetworkInfo: state.networks,
+        listName: listDisplayName(),
+        listDescription: listDisplayDescription(),
         onSelectNetwork: (network) => selectNetwork(network),
         onSelectToken: (t) => selectToken(t, { confirmDiscard: true }),
       });

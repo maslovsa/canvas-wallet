@@ -20,6 +20,9 @@ export interface PhoneFrameOptions {
   registryNetworks: Network[];
   /** Branding lookup for every network, not just the selected one (for the in-phone network filter's logos). */
   allNetworkInfo: NetworkInfo[];
+  /** The current list's own name/description (state.listMeta in main.ts) — headlines the wallet-home screen. */
+  listName: string;
+  listDescription: string;
   onSelectNetwork: (network: string) => void;
   onSelectToken: (token: Token) => void;
 }
@@ -67,7 +70,18 @@ export function renderPhoneFrame(container: HTMLElement, token: Token | undefine
 function renderListScreen(screen: HTMLElement, options: PhoneFrameOptions): void {
   const header = document.createElement("div");
   header.className = "phone-list-header";
-  header.textContent = "My Wallet";
+
+  const title = document.createElement("div");
+  title.className = "phone-list-title";
+  title.textContent = options.listName;
+  header.append(title);
+
+  if (options.listDescription) {
+    const desc = document.createElement("div");
+    desc.className = "phone-list-desc";
+    desc.textContent = options.listDescription;
+    header.append(desc);
+  }
   screen.append(header);
 
   const filter = document.createElement("div");
@@ -197,44 +211,48 @@ function renderDetailScreen(screen: HTMLElement, token: Token, options: PhoneFra
   nameRow.textContent = `${token.name} (${token.symbol})`;
   infoStack.append(nameRow);
 
+  // Meta row: which chain this card is on (makes it unambiguous when two
+  // networks list a token with the same symbol) and the issuer, side by
+  // side in the header itself rather than as a separate row below it.
+  const metaRow = document.createElement("div");
+  metaRow.className = "card-header-meta";
+
+  const networkChip = document.createElement("span");
+  networkChip.className = "card-header-meta-item";
+  networkChip.append(createLogoBadge(options.networkInfo?.logo, options.networkName, "network-logo"));
+  const networkLabel = document.createElement("span");
+  networkLabel.textContent = options.networkInfo?.canonicalName ?? options.networkName;
+  networkChip.append(networkLabel);
+  metaRow.append(networkChip);
+
   if (token.issuer) {
-    const issuerRow = document.createElement("div");
-    issuerRow.className = "card-issuer-row";
+    const issuerChip = document.createElement("span");
+    issuerChip.className = "card-header-meta-item";
     const assetUrl = countryFlagAssetUrl(token.issuer.country);
     if (assetUrl) {
       const flagImg = document.createElement("img");
       flagImg.className = "card-issuer-flag card-issuer-flag-svg";
       flagImg.src = assetUrl;
       flagImg.alt = token.issuer.country ?? "";
-      issuerRow.append(flagImg);
+      issuerChip.append(flagImg);
     } else {
       const flag = document.createElement("span");
       flag.className = "card-issuer-flag";
       flag.textContent = countryFlagEmoji(token.issuer.country);
-      issuerRow.append(flag);
+      issuerChip.append(flag);
     }
     if (token.issuer.name) {
       const issuerName = document.createElement("span");
       issuerName.textContent = token.issuer.name;
-      issuerRow.append(issuerName);
+      issuerChip.append(issuerName);
     }
-    infoStack.append(issuerRow);
+    metaRow.append(issuerChip);
   }
 
+  infoStack.append(metaRow);
   bottomRow.append(infoStack);
   header.append(bottomRow);
   screen.append(header);
-
-  // Network row — makes it unambiguous which chain this card is on, even
-  // when two networks list a token with the same symbol.
-  const networkRow = document.createElement("div");
-  networkRow.className = "card-network-row";
-  const networkLogo = createLogoBadge(options.networkInfo?.logo, options.networkName, "network-logo");
-  networkRow.append(networkLogo);
-  const networkLabel = document.createElement("span");
-  networkLabel.textContent = `${options.networkInfo?.canonicalName ?? options.networkName} network`;
-  networkRow.append(networkLabel);
-  screen.append(networkRow);
 
   const body = document.createElement("div");
   body.className = "card-body";

@@ -9,10 +9,14 @@ export interface HistoryEvent {
   direction: "in" | "out";
   amount: number;
   usd: number;
+  /** Epoch ms, always within the last DAYS_SPAN days of `now`. */
+  timestamp: number;
 }
 
 const MAX_USD = 100;
 const MIN_USD = 1;
+const DAYS_SPAN = 6;
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
 /**
  * `isStablecoin` narrows the synthetic per-unit price to ~$1 so amount and
@@ -21,8 +25,13 @@ const MIN_USD = 1;
  * to "+$44.38" would look like a bug, not a placeholder. For everything else
  * there's no real price to stay consistent with, so a wide log-scale range
  * is just as illustrative as a narrow one.
+ *
+ * `now` is injectable (defaults to Date.now()) purely for deterministic
+ * tests — it's still the seeded PRNG that decides each event's actual
+ * offset, so the same token/seed produces the same *pattern* of dates
+ * relative to `now`, not a fixed calendar date that goes stale.
  */
-export function generateHistory(seed: string, count = 5, isStablecoin = false): HistoryEvent[] {
+export function generateHistory(seed: string, count = 5, isStablecoin = false, now = Date.now()): HistoryEvent[] {
   const rand = seededRandom(seed);
   const events: HistoryEvent[] = [];
   for (let i = 0; i < count; i++) {
@@ -30,13 +39,28 @@ export function generateHistory(seed: string, count = 5, isStablecoin = false): 
     const unitPrice = isStablecoin
       ? 0.97 + rand() * 0.06 // ~$0.97..$1.03, like a real pegged stablecoin
       : Math.pow(10, rand() * 6 - 3); // ~0.001 .. ~1000
+    const timestamp = now - Math.floor(rand() * DAYS_SPAN * MS_PER_DAY) - Math.floor(rand() * MS_PER_DAY);
     events.push({
       direction: rand() < 0.5 ? "in" : "out",
       amount: usd / unitPrice,
       usd,
+      timestamp,
     });
   }
-  return events;
+  // Newest first, like every wallet app's activity list — the direction/
+  // amount randomness doesn't imply any particular time order on its own.
+  return events.sort((a, b) => b.timestamp - a.timestamp);
+}
+
+const dateFormatter = new Intl.DateTimeFormat(undefined, {
+  month: "short",
+  day: "numeric",
+  hour: "2-digit",
+  minute: "2-digit",
+});
+
+export function formatHistoryTimestamp(timestamp: number): string {
+  return dateFormatter.format(new Date(timestamp));
 }
 
 export function formatAmount(amount: number): string {
