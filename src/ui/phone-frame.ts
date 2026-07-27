@@ -181,27 +181,39 @@ function applyBackgroundImage(header: HTMLElement, token: Token, chromeTheme: Ch
 }
 
 function renderDetailScreen(screen: HTMLElement, token: Token, options: PhoneFrameOptions, onBack: () => void): void {
-  const header = document.createElement("div");
-  header.className = "card-header";
-  header.setAttribute("style", initialBackgroundStyle(token));
-  applyBackgroundImage(header, token, options.chromeTheme);
+  // A pinned, translucent Apple-style nav bar — a sibling appended before
+  // the hero header (not nested inside it) so it stays fixed via sticky
+  // positioning while the header's background image and title scroll
+  // underneath it, the same layered effect as Apple Music/App Store
+  // detail screens over full-bleed art.
+  const navBar = document.createElement("div");
+  navBar.className = "card-nav-bar";
 
-  const topRow = document.createElement("div");
-  topRow.className = "card-header-top";
   const backBtn = document.createElement("button");
   backBtn.className = "card-back-btn";
   backBtn.setAttribute("aria-label", "Back to wallet");
-  backBtn.textContent = "←";
+  const chevron = document.createElement("span");
+  chevron.className = "card-back-chevron";
+  chevron.textContent = "‹";
+  const label = document.createElement("span");
+  label.className = "card-back-label";
+  label.textContent = "Back";
+  backBtn.append(chevron, label);
   backBtn.addEventListener("click", onBack);
-  topRow.append(backBtn);
+  navBar.append(backBtn);
 
   if (token.ui?.theme?.badgeText) {
     const badge = document.createElement("div");
     badge.className = "badge-chip";
     badge.textContent = token.ui.theme.badgeText;
-    topRow.append(badge);
+    navBar.append(badge);
   }
-  header.append(topRow);
+  screen.append(navBar);
+
+  const header = document.createElement("div");
+  header.className = "card-header";
+  header.setAttribute("style", initialBackgroundStyle(token));
+  applyBackgroundImage(header, token, options.chromeTheme);
 
   const bottomRow = document.createElement("div");
   bottomRow.className = "card-header-bottom";

@@ -356,7 +356,6 @@ body {
 }
 
 .card-header {
-  position: relative;
   display: flex;
   align-items: center; /* vertically centers .card-header-bottom across the full header height */
   padding: 16px;
@@ -364,38 +363,61 @@ body {
   margin-bottom: 10px; /* breathing room before the network row / widgets below */
 }
 
-.card-header-top {
-  position: absolute;
-  top: 16px;
-  left: 16px;
-  right: 16px;
+/* Apple-style translucent nav bar, pinned just below the notch (like
+   Apple Music / App Store detail screens where a blurred bar stays fixed
+   while the hero art and title scroll underneath it). A negative bottom
+   margin pulls .card-header up so the bar overlaps its top edge instead
+   of pushing it down — the sticky z-index stacking context then paints
+   the bar above the header's own background regardless of DOM order. */
+.card-nav-bar {
+  position: sticky;
+  top: 32px;
+  z-index: 5;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
+  height: 44px;
+  padding: 0 8px;
+  margin-bottom: -44px;
+  background: rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(12px) saturate(160%);
+  -webkit-backdrop-filter: blur(12px) saturate(160%);
 }
 
+/* Standard iOS nav-bar back control: chevron + label, tinted, no
+   background of its own — the bar behind it already supplies contrast. */
 .card-back-btn {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  gap: 2px;
   border: none;
-  background: rgba(0, 0, 0, 0.35);
+  background: transparent;
   color: #fff;
-  font-size: 16px;
-  line-height: 1;
+  padding: 6px 8px 6px 4px;
   cursor: pointer;
-  flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
 }
 .card-back-btn:hover {
-  background: rgba(0, 0, 0, 0.5);
+  opacity: 0.75;
+}
+.card-back-chevron {
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1;
+}
+.card-back-label {
+  font-size: 17px;
 }
 
 .badge-chip {
-  background: rgba(0, 0, 0, 0.35);
+  background: rgba(255, 255, 255, 0.22);
   color: #fff;
   border-radius: 12px;
-  padding: 2px 8px;
+  padding: 3px 10px;
   font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
   white-space: nowrap;
 }
 
@@ -465,15 +487,16 @@ body {
   padding: 20px 16px 8px;
 }
 .phone-list-title {
-  font-weight: 700;
-  font-size: 20px;
-  line-height: 1.25;
+  font-weight: 800;
+  font-size: 30px;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
 }
 .phone-list-desc {
-  margin-top: 4px;
-  font-size: 12px;
+  margin-top: 5px;
+  font-size: 13px;
   line-height: 1.4;
-  opacity: 0.7;
+  opacity: 0.6;
 }
 
 .phone-network-filter {
@@ -488,8 +511,8 @@ body {
   align-items: center;
   gap: 6px;
   flex-shrink: 0;
-  background: transparent;
-  border: 1px solid rgba(127, 127, 127, 0.35);
+  background: rgba(127, 127, 127, 0.12);
+  border: 1px solid transparent;
   color: inherit;
   border-radius: 14px;
   padding: 5px 12px;
@@ -497,8 +520,8 @@ body {
   cursor: pointer;
 }
 .phone-network-chip.active {
-  border-color: var(--accent);
-  color: var(--accent);
+  background: var(--accent);
+  color: #fff;
   font-weight: 600;
 }
 .phone-network-chip-logo {
@@ -526,6 +549,10 @@ body {
   padding: 10px 8px;
   border-radius: 10px;
   cursor: pointer;
+  border-bottom: 0.5px solid rgba(127, 127, 127, 0.14);
+}
+.phone-token-row:last-child {
+  border-bottom: none;
 }
 .phone-token-row:hover {
   background: rgba(127, 127, 127, 0.08);
@@ -667,13 +694,17 @@ body {
 }
 
 .widget-action-btn {
-  border: 1px solid var(--accent);
-  color: var(--accent);
-  background: transparent;
-  border-radius: 6px;
-  padding: 4px 10px;
+  border: none;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 14px;
+  padding: 6px 14px;
   font-size: 12px;
+  font-weight: 700;
   cursor: pointer;
+}
+.widget-action-btn:hover {
+  opacity: 0.85;
 }
 
 .action-group-row {
@@ -681,14 +712,24 @@ body {
   gap: 8px;
 }
 
+/* Apple "gray tinted capsule" action-button style (Wallet quick-actions,
+   App Store secondary buttons) — explicit `color: inherit` matters here:
+   a bare <button> ignores inherited text color in most browsers and falls
+   back to the UA default (black), which reads as broken against a dark
+   background/theme. */
 .action-group-btn {
   flex: 1;
-  border: 1px solid var(--border);
-  background: rgba(127, 127, 127, 0.08);
-  border-radius: 6px;
-  padding: 8px 4px;
-  font-size: 11px;
+  border: none;
+  background: rgba(127, 127, 127, 0.14);
+  color: inherit;
+  border-radius: 10px;
+  padding: 10px 6px;
+  font-size: 12px;
+  font-weight: 600;
   cursor: pointer;
+}
+.action-group-btn:hover {
+  background: rgba(127, 127, 127, 0.22);
 }
 
 .key-value-row {
