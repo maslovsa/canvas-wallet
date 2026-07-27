@@ -357,28 +357,27 @@ body {
 
 .card-header {
   display: flex;
-  align-items: center; /* vertically centers .card-header-bottom across the full header height */
-  padding: 16px;
+  flex-direction: column;
   min-height: 160px;
   margin-bottom: 10px; /* breathing room before the network row / widgets below */
 }
 
 /* Apple-style translucent nav bar, pinned just below the notch (like
    Apple Music / App Store detail screens where a blurred bar stays fixed
-   while the hero art and title scroll underneath it). A negative bottom
-   margin pulls .card-header up so the bar overlaps its top edge instead
-   of pushing it down — the sticky z-index stacking context then paints
-   the bar above the header's own background regardless of DOM order. */
+   while the hero art and title scroll underneath it). It's a CHILD of
+   .card-header (not a sibling floated on top via negative margin) so the
+   header's own background is guaranteed to already fill the space behind
+   wherever the bar sticks — no separate box to pixel-match, no gap. */
 .card-nav-bar {
   position: sticky;
   top: 32px;
   z-index: 5;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
   height: 44px;
   padding: 0 8px;
-  margin-bottom: -44px;
   background: rgba(0, 0, 0, 0.28);
   backdrop-filter: blur(12px) saturate(160%);
   -webkit-backdrop-filter: blur(12px) saturate(160%);
@@ -422,11 +421,13 @@ body {
 }
 
 .card-header-bottom {
+  flex: 1;
   display: flex;
   align-items: center;
   gap: 14px;
   width: 100%;
   min-width: 0;
+  padding: 0 16px 16px;
 }
 
 .card-header-info {

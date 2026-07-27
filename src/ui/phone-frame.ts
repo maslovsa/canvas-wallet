@@ -181,11 +181,16 @@ function applyBackgroundImage(header: HTMLElement, token: Token, chromeTheme: Ch
 }
 
 function renderDetailScreen(screen: HTMLElement, token: Token, options: PhoneFrameOptions, onBack: () => void): void {
-  // A pinned, translucent Apple-style nav bar — a sibling appended before
-  // the hero header (not nested inside it) so it stays fixed via sticky
-  // positioning while the header's background image and title scroll
-  // underneath it, the same layered effect as Apple Music/App Store
-  // detail screens over full-bleed art.
+  const header = document.createElement("div");
+  header.className = "card-header";
+  header.setAttribute("style", initialBackgroundStyle(token));
+  applyBackgroundImage(header, token, options.chromeTheme);
+
+  // A pinned, translucent Apple-style nav bar — a CHILD of the header (not
+  // a sibling floated on top via negative margin) so the header's own
+  // background is always already there underneath wherever the bar
+  // sticks, the same layered effect as Apple Music/App Store detail
+  // screens where a blurred bar stays fixed while hero art scrolls by.
   const navBar = document.createElement("div");
   navBar.className = "card-nav-bar";
 
@@ -208,12 +213,7 @@ function renderDetailScreen(screen: HTMLElement, token: Token, options: PhoneFra
     badge.textContent = token.ui.theme.badgeText;
     navBar.append(badge);
   }
-  screen.append(navBar);
-
-  const header = document.createElement("div");
-  header.className = "card-header";
-  header.setAttribute("style", initialBackgroundStyle(token));
-  applyBackgroundImage(header, token, options.chromeTheme);
+  header.append(navBar);
 
   const bottomRow = document.createElement("div");
   bottomRow.className = "card-header-bottom";
