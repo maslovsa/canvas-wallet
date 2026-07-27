@@ -114,6 +114,10 @@
             "stablecoin"
           ],
           "explorer": "https://etherscan.io/token/0xdAC17F958D2ee523a2206206994597C13D831ec7",
+          "issuer": {
+            "name": "Tether Holdings Limited",
+            "country": "VG"
+          },
           "ui": {
             "theme": {
               "primaryColor": "#26A17B",
@@ -185,6 +189,10 @@
             "stablecoin"
           ],
           "explorer": "https://etherscan.io/token/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+          "issuer": {
+            "name": "Circle Internet Financial",
+            "country": "US"
+          },
           "ui": {
             "theme": {
               "primaryColor": "#2775CA",
@@ -256,6 +264,9 @@
             "stablecoin"
           ],
           "explorer": "https://etherscan.io/token/0x6B175474E89094C44Da98b954EedeAC495271d0F",
+          "issuer": {
+            "name": "Sky (MakerDAO)"
+          },
           "ui": {
             "theme": {
               "primaryColor": "#F5AC37",
@@ -1392,6 +1403,10 @@
             "stablecoin"
           ],
           "explorer": "https://bscscan.com/token/0x55d398326f99059fF775485246999027B3197955",
+          "issuer": {
+            "name": "Tether Holdings Limited",
+            "country": "VG"
+          },
           "ui": {
             "theme": {
               "primaryColor": "#26A17B",
@@ -1463,6 +1478,10 @@
             "stablecoin"
           ],
           "explorer": "https://bscscan.com/token/0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d",
+          "issuer": {
+            "name": "Circle Internet Financial",
+            "country": "US"
+          },
           "ui": {
             "theme": {
               "primaryColor": "#2775CA",
@@ -1534,6 +1553,9 @@
             "stablecoin"
           ],
           "explorer": "https://bscscan.com/token/0x1AF3F329e8BE154074D8769D1FFa4eE058B1DBc3",
+          "issuer": {
+            "name": "Sky (MakerDAO)"
+          },
           "ui": {
             "theme": {
               "primaryColor": "#F5AC37",
@@ -1605,6 +1627,10 @@
             "stablecoin"
           ],
           "explorer": "https://bscscan.com/token/0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56",
+          "issuer": {
+            "name": "Paxos Trust Company",
+            "country": "US"
+          },
           "ui": {
             "theme": {
               "primaryColor": "#F0B90B",
@@ -2400,6 +2426,10 @@
             "stablecoin"
           ],
           "explorer": "https://tronscan.org/#/token20/TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t",
+          "issuer": {
+            "name": "Tether Holdings Limited",
+            "country": "VG"
+          },
           "ui": {
             "theme": {
               "primaryColor": "#26A17B",
@@ -2471,6 +2501,10 @@
             "stablecoin"
           ],
           "explorer": "https://tronscan.org/#/token20/TEkxiTehnzSmSe2XqrBj4w32RUN966rdz8",
+          "issuer": {
+            "name": "Circle Internet Financial",
+            "country": "US"
+          },
           "ui": {
             "theme": {
               "primaryColor": "#2775CA",

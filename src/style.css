@@ -431,6 +431,14 @@ body {
   flex-shrink: 0;
 }
 
+.card-issuer-flag-svg {
+  width: 18px;
+  height: 13px;
+  border-radius: 2px;
+  object-fit: cover;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.3);
+}
+
 /* Phone "wallet home" screen — network filter + token balances, the
    landing screen of the in-phone simulation before drilling into a
    single token's card (see src/ui/phone-frame.ts). */

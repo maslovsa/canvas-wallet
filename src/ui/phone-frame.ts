@@ -6,6 +6,7 @@ import { formatAmount } from "../widgets/history.ts";
 import { generateBalance } from "./fake-balance.ts";
 import { loadIcon } from "../icon/icon-loader.ts";
 import { findNetworkInfo, type NetworkInfo } from "../networks/network-registry.ts";
+import { countryFlagAssetUrl, countryFlagEmoji } from "../country/country-flag.ts";
 
 export type ChromeStyle = "ios" | "android";
 export type ChromeTheme = "light" | "dark";
@@ -199,10 +200,19 @@ function renderDetailScreen(screen: HTMLElement, token: Token, options: PhoneFra
   if (token.issuer) {
     const issuerRow = document.createElement("div");
     issuerRow.className = "card-issuer-row";
-    const flag = document.createElement("span");
-    flag.className = "card-issuer-flag";
-    flag.textContent = countryFlagOrGlobe(token.issuer.country);
-    issuerRow.append(flag);
+    const assetUrl = countryFlagAssetUrl(token.issuer.country);
+    if (assetUrl) {
+      const flagImg = document.createElement("img");
+      flagImg.className = "card-issuer-flag card-issuer-flag-svg";
+      flagImg.src = assetUrl;
+      flagImg.alt = token.issuer.country ?? "";
+      issuerRow.append(flagImg);
+    } else {
+      const flag = document.createElement("span");
+      flag.className = "card-issuer-flag";
+      flag.textContent = countryFlagEmoji(token.issuer.country);
+      issuerRow.append(flag);
+    }
     if (token.issuer.name) {
       const issuerName = document.createElement("span");
       issuerName.textContent = token.issuer.name;
@@ -238,17 +248,6 @@ function renderDetailScreen(screen: HTMLElement, token: Token, options: PhoneFra
     if (el) body.append(el);
   }
   screen.append(body);
-}
-
-const GLOBE = "\u{1F310}"; // shown when the issuer has no single jurisdiction — never guessed.
-
-// A 2-letter ISO 3166-1 country code maps directly to its flag emoji via the
-// Unicode regional-indicator-symbol trick (each letter -> U+1F1E6..U+1F1FF).
-function countryFlagOrGlobe(country: string | undefined): string {
-  if (!country || country.length !== 2) return GLOBE;
-  const codePoints = [...country.toUpperCase()].map((c) => 0x1f1e6 + (c.charCodeAt(0) - 65));
-  if (codePoints.some((cp) => cp < 0x1f1e6 || cp > 0x1f1ff)) return GLOBE;
-  return String.fromCodePoint(...codePoints);
 }
 
 function homeIndicator(): HTMLElement {
