@@ -65,7 +65,10 @@ export function countryFlagAssetUrl(country: string | undefined): string | null 
   if (!country) return null;
   const cc = country.toUpperCase();
   if (!VENDORED_FLAG_CODES.has(cc)) return null;
-  return `/flags/${cc.toLowerCase()}.svg`;
+  // Must respect Vite's base path (e.g. "/canvas-wallet/" on GitHub Pages) —
+  // a hardcoded root-relative "/flags/..." 404s on any subpath deployment,
+  // same reasoning as network-registry.ts's networks.json fetch.
+  return `${import.meta.env.BASE_URL}flags/${cc.toLowerCase()}.svg`;
 }
 
 /**
