@@ -399,6 +399,13 @@ body {
   justify-content: space-between;
   height: 44px;
   padding: 0 8px;
+  /* The header now starts at the true top of the screen (behind the
+     notch), but the nav bar itself must clear the notch — margin-top
+     matches its own sticky `top` offset so its reserved (static) layout
+     position already sits exactly where it pins to. Without this, the
+     bar visually renders 32px lower than the space it reserves even at
+     scrollTop 0, overlapping the content that follows it. */
+  margin-top: 32px;
 }
 
 /* Standard iOS nav-bar back control: chevron + label, tinted, no bar
@@ -447,7 +454,12 @@ body {
   gap: 14px;
   width: 100%;
   min-width: 0;
-  padding: 0 16px 16px;
+  /* Deliberately symmetric (no bottom-only padding) — this box is
+     .card-header's flex:1 remainder after the nav bar, and align-items:
+     center already centers the icon+label content within it exactly
+     between the nav bar and the header's bottom edge. An asymmetric
+     bottom padding here previously biased the content upward. */
+  padding: 0 16px;
 }
 
 .card-header-info {
