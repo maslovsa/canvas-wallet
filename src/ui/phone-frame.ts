@@ -163,12 +163,17 @@ function initialBackgroundStyle(token: Token): string {
 // Reuses loadIcon()'s domain-allowlist + size-limited fetch — a background
 // image is just another allowlisted asset URL, same trust boundary as a
 // token logo or widget icon (see registry.schema.json's backgroundImage).
-function applyBackgroundImage(header: HTMLElement, token: Token): void {
+function applyBackgroundImage(header: HTMLElement, token: Token, chromeTheme: ChromeTheme): void {
   const bg = token.ui?.background;
   if (!bg || bg.type !== "image") return;
   loadIcon(bg.url).then((src) => {
     if (src) {
-      header.style.backgroundImage = `url(${CSS.escape(src)})`;
+      // Light theme washes out just the token's own background picture (a
+      // 50%-white overlay stacked on the same background-image layer) —
+      // not the phone chassis around it, and not the card's text/logo,
+      // which live outside this element's background layer entirely.
+      const wash = chromeTheme === "light" ? "linear-gradient(rgba(255,255,255,0.5), rgba(255,255,255,0.5)), " : "";
+      header.style.backgroundImage = `${wash}url(${CSS.escape(src)})`;
       header.style.backgroundSize = "cover";
       header.style.backgroundPosition = "center";
     }
@@ -179,7 +184,7 @@ function renderDetailScreen(screen: HTMLElement, token: Token, options: PhoneFra
   const header = document.createElement("div");
   header.className = "card-header";
   header.setAttribute("style", initialBackgroundStyle(token));
-  applyBackgroundImage(header, token);
+  applyBackgroundImage(header, token, options.chromeTheme);
 
   const topRow = document.createElement("div");
   topRow.className = "card-header-top";

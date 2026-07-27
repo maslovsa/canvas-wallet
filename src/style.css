@@ -300,17 +300,14 @@ body {
   position: relative;
   width: 100%;
   height: 100%;
-  /* Light theme = the same canonical background as dark, laid over white at
-     50% — a washed variant of one background rather than an unrelated flat
-     color (per explicit design decision, not just a lighter default). */
-  background: #8b8c8e;
+  background: #fafafa;
   color: #111;
   border-radius: 50px;
   overflow-y: auto;
   overflow-x: hidden;
   /* A dimmed-text color scoped to the phone chassis — the app-wide
-     --text-dim is tuned for the app's own dark chrome and reads as
-     near-invisible against this screen's washed-gray light background. */
+     --text-dim is tuned for the app's own dark chrome, so this stays
+     tunable per phone theme independently of it. */
   --phone-dim: rgba(0, 0, 0, 0.55);
 }
 .phone-frame.theme-dark .phone-screen {
@@ -359,15 +356,19 @@ body {
 }
 
 .card-header {
+  position: relative;
   display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+  align-items: center; /* vertically centers .card-header-bottom across the full header height */
   padding: 16px;
-  min-height: 150px;
+  min-height: 160px;
   margin-bottom: 10px; /* breathing room before the network row / widgets below */
 }
 
 .card-header-top {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  right: 16px;
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -401,7 +402,9 @@ body {
 .card-header-bottom {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
+  width: 100%;
+  min-width: 0;
 }
 
 .card-header-info {
@@ -414,7 +417,7 @@ body {
 .card-header-name {
   color: #fff;
   font-weight: 600;
-  font-size: 16px;
+  font-size: 19px;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -427,7 +430,7 @@ body {
   flex-wrap: wrap;
   gap: 10px;
   color: rgba(255, 255, 255, 0.85);
-  font-size: 12px;
+  font-size: 13px;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
@@ -442,14 +445,14 @@ body {
 }
 
 .card-issuer-flag {
-  font-size: 14px;
+  font-size: 15px;
   line-height: 1;
   flex-shrink: 0;
 }
 
 .card-issuer-flag-svg {
-  width: 18px;
-  height: 13px;
+  width: 20px;
+  height: 15px;
   border-radius: 2px;
   object-fit: cover;
   box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.3);
@@ -598,16 +601,16 @@ body {
 }
 
 .token-logo {
-  width: 40px;
-  height: 40px;
-  font-size: 16px;
+  width: 50px;
+  height: 50px;
+  font-size: 19px;
   border: 2px solid rgba(255, 255, 255, 0.6);
 }
 
 .network-logo {
-  width: 16px;
-  height: 16px;
-  font-size: 9px;
+  width: 18px;
+  height: 18px;
+  font-size: 10px;
   flex-shrink: 0;
 }
 
