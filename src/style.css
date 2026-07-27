@@ -356,10 +356,23 @@ body {
 }
 
 .card-header {
+  position: relative;
   display: flex;
   flex-direction: column;
   min-height: 160px;
   margin-bottom: 10px; /* breathing room before the network row / widgets below */
+  overflow: hidden;
+}
+
+/* The token's background photo lives on its own absolutely-positioned
+   layer (behind the nav bar / logo / name) so its opacity can be reduced
+   in light theme without fading the content stacked on top of it — see
+   applyBackgroundImage() in phone-frame.ts. */
+.card-header-bg-image {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
 }
 
 /* Apple-style translucent nav bar, pinned just below the notch (like
@@ -421,6 +434,7 @@ body {
 }
 
 .card-header-bottom {
+  position: relative; /* stacks above .card-header-bg-image regardless of z-index */
   flex: 1;
   display: flex;
   align-items: center;

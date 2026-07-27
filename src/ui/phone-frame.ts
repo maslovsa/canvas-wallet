@@ -163,19 +163,27 @@ function initialBackgroundStyle(token: Token): string {
 // Reuses loadIcon()'s domain-allowlist + size-limited fetch — a background
 // image is just another allowlisted asset URL, same trust boundary as a
 // token logo or widget icon (see registry.schema.json's backgroundImage).
+//
+// The photo gets its own layer (.card-header-bg-image), separate from the
+// header element itself, so a real `opacity` reduction only fades the
+// photo — not the nav bar/logo/name sitting on top of it (applying opacity
+// to .card-header directly would fade those too). In light theme the
+// header's own base color is swapped to white so that reduced opacity
+// reveals white through the photo instead of the token's (usually dark)
+// overlayColor, which would otherwise darken rather than lighten it.
 function applyBackgroundImage(header: HTMLElement, token: Token, chromeTheme: ChromeTheme): void {
   const bg = token.ui?.background;
   if (!bg || bg.type !== "image") return;
+  const bgLayer = document.createElement("div");
+  bgLayer.className = "card-header-bg-image";
+  header.prepend(bgLayer);
+  if (chromeTheme === "light") {
+    header.style.backgroundColor = "#fff";
+    bgLayer.style.opacity = "0.6"; // -40%, adapting the photo for a light background.
+  }
   loadIcon(bg.url).then((src) => {
     if (src) {
-      // Light theme washes out just the token's own background picture (a
-      // 50%-white overlay stacked on the same background-image layer) —
-      // not the phone chassis around it, and not the card's text/logo,
-      // which live outside this element's background layer entirely.
-      const wash = chromeTheme === "light" ? "linear-gradient(rgba(255,255,255,0.5), rgba(255,255,255,0.5)), " : "";
-      header.style.backgroundImage = `${wash}url(${CSS.escape(src)})`;
-      header.style.backgroundSize = "cover";
-      header.style.backgroundPosition = "center";
+      bgLayer.style.backgroundImage = `url(${CSS.escape(src)})`;
     }
   });
 }
