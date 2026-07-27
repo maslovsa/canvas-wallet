@@ -1,0 +1,2745 @@
+{
+  "schemaVersion": "1.0.0",
+  "networks": [
+    {
+      "name": "Ethereum",
+      "tokens": [
+        {
+          "name": "Ethereum",
+          "symbol": "ETH",
+          "type": "NATIVE",
+          "id": "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
+          "decimals": 18,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/info/logo.png",
+          "website": "https://ethereum.org",
+          "description": "The native asset of the Ethereum network.",
+          "status": "active",
+          "tags": [
+            "native"
+          ],
+          "explorer": "https://etherscan.io",
+          "ui": {
+            "theme": {
+              "primaryColor": "#627EEA",
+              "badgeText": "Native"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#0B0E11",
+                "#1C2440"
+              ],
+              "angle": 135
+            }
+          },
+          "widgets": [
+            {
+              "type": "key_value",
+              "title": "Network",
+              "items": [
+                {
+                  "label": "Consensus",
+                  "value": "Proof of Stake"
+                }
+              ]
+            },
+            {
+              "type": "price_chart",
+              "coingeckoId": "ethereum",
+              "days": 1
+            }
+          ]
+        },
+        {
+          "name": "Wrapped Ether",
+          "symbol": "WETH",
+          "type": "ERC20",
+          "id": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+          "decimals": 18,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2/logo.png",
+          "website": "https://weth.io",
+          "description": "ERC-20 wrapper for native ETH — 1 WETH is always redeemable for 1 ETH.",
+          "status": "active",
+          "tags": [
+            "wrapped"
+          ],
+          "explorer": "https://etherscan.io/token/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+          "ui": {
+            "theme": {
+              "primaryColor": "#627EEA",
+              "badgeText": "Wrapped 1:1"
+            },
+            "background": {
+              "type": "solid",
+              "colors": [
+                "#0B0E1E"
+              ]
+            }
+          },
+          "widgets": [
+            {
+              "type": "key_value",
+              "title": "Wrapping",
+              "items": [
+                {
+                  "label": "Backing",
+                  "value": "1:1 ETH"
+                }
+              ]
+            },
+            {
+              "type": "price_chart",
+              "coingeckoId": "weth",
+              "days": 1
+            }
+          ]
+        },
+        {
+          "name": "Tether USD",
+          "symbol": "USDT",
+          "type": "ERC20",
+          "id": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+          "decimals": 6,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xdAC17F958D2ee523a2206206994597C13D831ec7/logo.png",
+          "website": "https://tether.to",
+          "description": "The largest stablecoin by market cap, pegged 1:1 to the US dollar.",
+          "status": "active",
+          "tags": [
+            "stablecoin"
+          ],
+          "explorer": "https://etherscan.io/token/0xdAC17F958D2ee523a2206206994597C13D831ec7",
+          "ui": {
+            "theme": {
+              "primaryColor": "#26A17B",
+              "badgeText": "Stablecoin"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#04100C",
+                "#0B3025"
+              ],
+              "angle": 135
+            }
+          },
+          "actions": {
+            "mint_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/mint?token=USDT",
+              "openIn": "in_app_browser"
+            },
+            "redeem_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/redeem?token=USDT",
+              "openIn": "in_app_browser"
+            }
+          },
+          "widgets": [
+            {
+              "type": "banner",
+              "title": "Mint & Redeem",
+              "description": "Mint or redeem USDT 1:1 via the issuer's app",
+              "action": "mint_dapp"
+            },
+            {
+              "type": "key_value",
+              "title": "Reserve Info",
+              "items": [
+                {
+                  "label": "Peg",
+                  "value": "1 USDT = 1 USD"
+                },
+                {
+                  "label": "Redemption",
+                  "value": "Same-day"
+                }
+              ]
+            },
+            {
+              "type": "price_chart",
+              "coingeckoId": "tether",
+              "days": 1
+            }
+          ]
+        },
+        {
+          "name": "USD Coin",
+          "symbol": "USDC",
+          "type": "ERC20",
+          "id": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+          "decimals": 6,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48/logo.png",
+          "website": "https://www.circle.com/usdc",
+          "description": "Fully-reserved US dollar stablecoin issued by Circle.",
+          "status": "active",
+          "tags": [
+            "stablecoin"
+          ],
+          "explorer": "https://etherscan.io/token/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+          "ui": {
+            "theme": {
+              "primaryColor": "#2775CA",
+              "badgeText": "Stablecoin"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#040C14",
+                "#0C233D"
+              ],
+              "angle": 135
+            }
+          },
+          "actions": {
+            "mint_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/mint?token=USDC",
+              "openIn": "in_app_browser"
+            },
+            "redeem_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/redeem?token=USDC",
+              "openIn": "in_app_browser"
+            }
+          },
+          "widgets": [
+            {
+              "type": "banner",
+              "title": "Mint & Redeem",
+              "description": "Mint or redeem USDC 1:1 via the issuer's app",
+              "action": "mint_dapp"
+            },
+            {
+              "type": "key_value",
+              "title": "Reserve Info",
+              "items": [
+                {
+                  "label": "Peg",
+                  "value": "1 USDC = 1 USD"
+                },
+                {
+                  "label": "Redemption",
+                  "value": "Same-day"
+                }
+              ]
+            },
+            {
+              "type": "price_chart",
+              "coingeckoId": "usd-coin",
+              "days": 1
+            }
+          ]
+        },
+        {
+          "name": "Dai Stablecoin",
+          "symbol": "DAI",
+          "type": "ERC20",
+          "id": "0x6B175474E89094C44Da98b954EedeAC495271d0F",
+          "decimals": 18,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x6B175474E89094C44Da98b954EedeAC495271d0F/logo.png",
+          "website": "https://makerdao.com",
+          "description": "Decentralized, crypto-collateralized stablecoin from MakerDAO.",
+          "status": "active",
+          "tags": [
+            "stablecoin"
+          ],
+          "explorer": "https://etherscan.io/token/0x6B175474E89094C44Da98b954EedeAC495271d0F",
+          "ui": {
+            "theme": {
+              "primaryColor": "#F5AC37",
+              "badgeText": "Stablecoin"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#181105",
+                "#4A3411"
+              ],
+              "angle": 135
+            }
+          },
+          "actions": {
+            "mint_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/mint?token=DAI",
+              "openIn": "in_app_browser"
+            },
+            "redeem_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/redeem?token=DAI",
+              "openIn": "in_app_browser"
+            }
+          },
+          "widgets": [
+            {
+              "type": "banner",
+              "title": "Mint & Redeem",
+              "description": "Mint or redeem DAI 1:1 via the issuer's app",
+              "action": "mint_dapp"
+            },
+            {
+              "type": "key_value",
+              "title": "Reserve Info",
+              "items": [
+                {
+                  "label": "Peg",
+                  "value": "1 DAI = 1 USD"
+                },
+                {
+                  "label": "Redemption",
+                  "value": "Same-day"
+                }
+              ]
+            },
+            {
+              "type": "price_chart",
+              "coingeckoId": "dai",
+              "days": 1
+            }
+          ]
+        },
+        {
+          "name": "Wrapped BTC",
+          "symbol": "WBTC",
+          "type": "ERC20",
+          "id": "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
+          "decimals": 8,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599/logo.png",
+          "website": "https://wbtc.network",
+          "description": "ERC-20 representation of Bitcoin, 1:1 custodial-backed.",
+          "status": "active",
+          "tags": [
+            "wrapped"
+          ],
+          "explorer": "https://etherscan.io/token/0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
+          "ui": {
+            "theme": {
+              "primaryColor": "#F09242",
+              "badgeText": "Wrapped 1:1"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#180F07",
+                "#482C14"
+              ],
+              "angle": 135
+            }
+          },
+          "actions": {
+            "mint_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/mint?token=WBTC",
+              "openIn": "in_app_browser"
+            },
+            "redeem_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/redeem?token=WBTC",
+              "openIn": "in_app_browser"
+            }
+          },
+          "widgets": [
+            {
+              "type": "banner",
+              "title": "Mint & Redeem",
+              "description": "Mint or redeem WBTC 1:1 via the issuer's app",
+              "action": "mint_dapp"
+            },
+            {
+              "type": "key_value",
+              "title": "Reserve Info",
+              "items": [
+                {
+                  "label": "Peg",
+                  "value": "1 WBTC = 1 BTC"
+                },
+                {
+                  "label": "Redemption",
+                  "value": "Same-day"
+                }
+              ]
+            },
+            {
+              "type": "price_chart",
+              "coingeckoId": "wrapped-bitcoin",
+              "days": 1
+            }
+          ]
+        },
+        {
+          "name": "ChainLink Token",
+          "symbol": "LINK",
+          "type": "ERC20",
+          "id": "0x514910771AF9Ca656af840dff83E8264EcF986CA",
+          "decimals": 18,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x514910771AF9Ca656af840dff83E8264EcF986CA/logo.png",
+          "website": "https://chain.link",
+          "description": "Native token of the Chainlink decentralized oracle network.",
+          "status": "active",
+          "tags": [
+            "oracle"
+          ],
+          "explorer": "https://etherscan.io/token/0x514910771AF9Ca656af840dff83E8264EcF986CA",
+          "ui": {
+            "theme": {
+              "primaryColor": "#2A5ADA",
+              "badgeText": "Oracle"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#040916",
+                "#0D1B41"
+              ],
+              "angle": 135
+            }
+          },
+          "actions": {
+            "swap_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/swap?output=LINK",
+              "openIn": "in_app_browser"
+            },
+            "protocol_dapp": {
+              "type": "wallet_connect",
+              "dappUrl": "https://stake.example.com/link"
+            }
+          },
+          "widgets": [
+            {
+              "type": "action_group",
+              "title": "Protocol Actions",
+              "items": [
+                {
+                  "label": "Swap for LINK",
+                  "action": "swap_dapp"
+                },
+                {
+                  "label": "Stake LINK",
+                  "action": "protocol_dapp"
+                }
+              ]
+            },
+            {
+              "type": "price_chart",
+              "coingeckoId": "chainlink",
+              "days": 1
+            }
+          ]
+        },
+        {
+          "name": "Uniswap",
+          "symbol": "UNI",
+          "type": "ERC20",
+          "id": "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
+          "decimals": 18,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984/logo.png",
+          "website": "https://uniswap.org",
+          "description": "Governance token of the Uniswap Protocol.",
+          "status": "active",
+          "tags": [
+            "governance",
+            "dex"
+          ],
+          "explorer": "https://etherscan.io/token/0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
+          "ui": {
+            "theme": {
+              "primaryColor": "#FF007A",
+              "badgeText": "Governance"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#19000C",
+                "#4D0025"
+              ],
+              "angle": 135
+            }
+          },
+          "actions": {
+            "swap_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/swap?output=UNI",
+              "openIn": "in_app_browser"
+            },
+            "protocol_dapp": {
+              "type": "wallet_connect",
+              "dappUrl": "https://stake.example.com/uni"
+            }
+          },
+          "widgets": [
+            {
+              "type": "action_group",
+              "title": "Protocol Actions",
+              "items": [
+                {
+                  "label": "Swap for UNI",
+                  "action": "swap_dapp"
+                },
+                {
+                  "label": "Vote on Proposals",
+                  "action": "protocol_dapp"
+                }
+              ]
+            },
+            {
+              "type": "price_chart",
+              "coingeckoId": "uniswap",
+              "days": 1
+            }
+          ]
+        },
+        {
+          "name": "Aave",
+          "symbol": "AAVE",
+          "type": "ERC20",
+          "id": "0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9",
+          "decimals": 18,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9/logo.png",
+          "website": "https://aave.com",
+          "description": "Governance token of the Aave lending protocol.",
+          "status": "active",
+          "tags": [
+            "governance",
+            "lending"
+          ],
+          "explorer": "https://etherscan.io/token/0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9",
+          "ui": {
+            "theme": {
+              "primaryColor": "#B6509E",
+              "badgeText": "Governance"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#120810",
+                "#37182F"
+              ],
+              "angle": 135
+            }
+          },
+          "actions": {
+            "swap_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/swap?output=AAVE",
+              "openIn": "in_app_browser"
+            },
+            "protocol_dapp": {
+              "type": "wallet_connect",
+              "dappUrl": "https://stake.example.com/aave"
+            }
+          },
+          "widgets": [
+            {
+              "type": "action_group",
+              "title": "Protocol Actions",
+              "items": [
+                {
+                  "label": "Swap for AAVE",
+                  "action": "swap_dapp"
+                },
+                {
+                  "label": "Supply & Earn",
+                  "action": "protocol_dapp"
+                }
+              ]
+            },
+            {
+              "type": "price_chart",
+              "coingeckoId": "aave",
+              "days": 1
+            }
+          ]
+        },
+        {
+          "name": "Maker",
+          "symbol": "MKR",
+          "type": "ERC20",
+          "id": "0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2",
+          "decimals": 18,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2/logo.png",
+          "website": "https://makerdao.com",
+          "description": "Governance token of MakerDAO, the protocol behind DAI.",
+          "status": "active",
+          "tags": [
+            "governance",
+            "lending"
+          ],
+          "explorer": "https://etherscan.io/token/0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2",
+          "ui": {
+            "theme": {
+              "primaryColor": "#1AAB9B",
+              "badgeText": "Governance"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#03110F",
+                "#08332F"
+              ],
+              "angle": 135
+            }
+          },
+          "actions": {
+            "swap_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/swap?output=MKR",
+              "openIn": "in_app_browser"
+            },
+            "protocol_dapp": {
+              "type": "wallet_connect",
+              "dappUrl": "https://stake.example.com/mkr"
+            }
+          },
+          "widgets": [
+            {
+              "type": "action_group",
+              "title": "Protocol Actions",
+              "items": [
+                {
+                  "label": "Swap for MKR",
+                  "action": "swap_dapp"
+                },
+                {
+                  "label": "Vote on Proposals",
+                  "action": "protocol_dapp"
+                }
+              ]
+            },
+            {
+              "type": "price_chart",
+              "coingeckoId": "maker",
+              "days": 1
+            }
+          ]
+        },
+        {
+          "name": "Compound",
+          "symbol": "COMP",
+          "type": "ERC20",
+          "id": "0xc00e94Cb662C3520282E6f5717214004A7f26888",
+          "decimals": 18,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xc00e94Cb662C3520282E6f5717214004A7f26888/logo.png",
+          "website": "https://compound.finance",
+          "description": "Governance token of the Compound lending protocol.",
+          "status": "active",
+          "tags": [
+            "governance",
+            "lending"
+          ],
+          "explorer": "https://etherscan.io/token/0xc00e94Cb662C3520282E6f5717214004A7f26888",
+          "ui": {
+            "theme": {
+              "primaryColor": "#00D395",
+              "badgeText": "Governance"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#00150F",
+                "#003F2D"
+              ],
+              "angle": 135
+            }
+          },
+          "actions": {
+            "swap_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/swap?output=COMP",
+              "openIn": "in_app_browser"
+            },
+            "protocol_dapp": {
+              "type": "wallet_connect",
+              "dappUrl": "https://stake.example.com/comp"
+            }
+          },
+          "widgets": [
+            {
+              "type": "action_group",
+              "title": "Protocol Actions",
+              "items": [
+                {
+                  "label": "Swap for COMP",
+                  "action": "swap_dapp"
+                },
+                {
+                  "label": "Supply & Earn",
+                  "action": "protocol_dapp"
+                }
+              ]
+            },
+            {
+              "type": "price_chart",
+              "coingeckoId": "compound-governance-token",
+              "days": 1
+            }
+          ]
+        },
+        {
+          "name": "SushiToken",
+          "symbol": "SUSHI",
+          "type": "ERC20",
+          "id": "0x6B3595068778DD592e39A122f4f5a5cF09C90fE2",
+          "decimals": 18,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x6B3595068778DD592e39A122f4f5a5cF09C90fE2/logo.png",
+          "website": "https://sushi.com",
+          "description": "Governance token of the SushiSwap DEX.",
+          "status": "active",
+          "tags": [
+            "governance",
+            "dex"
+          ],
+          "explorer": "https://etherscan.io/token/0x6B3595068778DD592e39A122f4f5a5cF09C90fE2",
+          "ui": {
+            "theme": {
+              "primaryColor": "#FA52A0",
+              "badgeText": "Governance"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#190810",
+                "#4B1930"
+              ],
+              "angle": 135
+            }
+          },
+          "actions": {
+            "swap_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/swap?output=SUSHI",
+              "openIn": "in_app_browser"
+            },
+            "protocol_dapp": {
+              "type": "wallet_connect",
+              "dappUrl": "https://stake.example.com/sushi"
+            }
+          },
+          "widgets": [
+            {
+              "type": "action_group",
+              "title": "Protocol Actions",
+              "items": [
+                {
+                  "label": "Swap for SUSHI",
+                  "action": "swap_dapp"
+                },
+                {
+                  "label": "Stake (xSUSHI)",
+                  "action": "protocol_dapp"
+                }
+              ]
+            },
+            {
+              "type": "price_chart",
+              "coingeckoId": "sushi",
+              "days": 1
+            }
+          ]
+        },
+        {
+          "name": "Curve DAO Token",
+          "symbol": "CRV",
+          "type": "ERC20",
+          "id": "0xD533a949740bb3306d119CC777fa900bA034cd52",
+          "decimals": 18,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xD533a949740bb3306d119CC777fa900bA034cd52/logo.png",
+          "website": "https://curve.fi",
+          "description": "Governance token of the Curve Finance stablecoin/DEX protocol.",
+          "status": "active",
+          "tags": [
+            "governance",
+            "dex"
+          ],
+          "explorer": "https://etherscan.io/token/0xD533a949740bb3306d119CC777fa900bA034cd52",
+          "ui": {
+            "theme": {
+              "primaryColor": "#FFD200",
+              "badgeText": "Governance"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#191500",
+                "#4D3F00"
+              ],
+              "angle": 135
+            }
+          },
+          "actions": {
+            "swap_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/swap?output=CRV",
+              "openIn": "in_app_browser"
+            },
+            "protocol_dapp": {
+              "type": "wallet_connect",
+              "dappUrl": "https://stake.example.com/crv"
+            }
+          },
+          "widgets": [
+            {
+              "type": "action_group",
+              "title": "Protocol Actions",
+              "items": [
+                {
+                  "label": "Swap for CRV",
+                  "action": "swap_dapp"
+                },
+                {
+                  "label": "Lock & Boost (veCRV)",
+                  "action": "protocol_dapp"
+                }
+              ]
+            },
+            {
+              "type": "price_chart",
+              "coingeckoId": "curve-dao-token",
+              "days": 1
+            }
+          ]
+        },
+        {
+          "name": "Synthetix Network Token",
+          "symbol": "SNX",
+          "type": "ERC20",
+          "id": "0xC011a73ee8576Fb46F5E1c5751cA3B9Fe0af2a6F",
+          "decimals": 18,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xC011a73ee8576Fb46F5E1c5751cA3B9Fe0af2a6F/logo.png",
+          "website": "https://synthetix.io",
+          "description": "Governance/collateral token of the Synthetix derivatives protocol.",
+          "status": "active",
+          "tags": [
+            "governance",
+            "derivatives"
+          ],
+          "explorer": "https://etherscan.io/token/0xC011a73ee8576Fb46F5E1c5751cA3B9Fe0af2a6F",
+          "ui": {
+            "theme": {
+              "primaryColor": "#00D1FF",
+              "badgeText": "Governance"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#001519",
+                "#003F4D"
+              ],
+              "angle": 135
+            }
+          },
+          "actions": {
+            "swap_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/swap?output=SNX",
+              "openIn": "in_app_browser"
+            },
+            "protocol_dapp": {
+              "type": "wallet_connect",
+              "dappUrl": "https://stake.example.com/snx"
+            }
+          },
+          "widgets": [
+            {
+              "type": "action_group",
+              "title": "Protocol Actions",
+              "items": [
+                {
+                  "label": "Swap for SNX",
+                  "action": "swap_dapp"
+                },
+                {
+                  "label": "Stake & Mint sUSD",
+                  "action": "protocol_dapp"
+                }
+              ]
+            },
+            {
+              "type": "price_chart",
+              "coingeckoId": "havven",
+              "days": 1
+            }
+          ]
+        },
+        {
+          "name": "SHIBA INU",
+          "symbol": "SHIB",
+          "type": "ERC20",
+          "id": "0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE",
+          "decimals": 18,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE/logo.png",
+          "website": "https://shibatoken.com",
+          "description": "Community-driven meme token, one of the largest by market cap.",
+          "status": "active",
+          "tags": [
+            "meme"
+          ],
+          "explorer": "https://etherscan.io/token/0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE",
+          "ui": {
+            "theme": {
+              "primaryColor": "#FFA409",
+              "badgeText": "Community"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#191001",
+                "#4D3103"
+              ],
+              "angle": 135
+            }
+          },
+          "widgets": [
+            {
+              "type": "notice",
+              "message": "No intrinsic value. DYOR.",
+              "severity": "warning"
+            },
+            {
+              "type": "banner",
+              "title": "Buy SHIB",
+              "description": "Community meme token — trade at your own risk",
+              "action": "buy_dapp"
+            },
+            {
+              "type": "price_chart",
+              "coingeckoId": "shiba-inu",
+              "days": 1
+            }
+          ],
+          "actions": {
+            "buy_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/swap?output=SHIB",
+              "openIn": "external_browser"
+            }
+          }
+        },
+        {
+          "name": "Pepe",
+          "symbol": "PEPE",
+          "type": "ERC20",
+          "id": "0x6982508145454Ce325dDbE47a25d4ec3d2311933",
+          "decimals": 18,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x6982508145454Ce325dDbE47a25d4ec3d2311933/logo.png",
+          "description": "Community-driven meme token inspired by the Pepe the Frog character.",
+          "status": "active",
+          "tags": [
+            "meme"
+          ],
+          "explorer": "https://etherscan.io/token/0x6982508145454Ce325dDbE47a25d4ec3d2311933",
+          "ui": {
+            "theme": {
+              "primaryColor": "#4CAF50",
+              "badgeText": "Community"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#081108",
+                "#173518"
+              ],
+              "angle": 135
+            }
+          },
+          "widgets": [
+            {
+              "type": "notice",
+              "message": "No intrinsic value. DYOR.",
+              "severity": "warning"
+            },
+            {
+              "type": "banner",
+              "title": "Buy PEPE",
+              "description": "Community meme token — trade at your own risk",
+              "action": "buy_dapp"
+            },
+            {
+              "type": "price_chart",
+              "coingeckoId": "pepe",
+              "days": 1
+            }
+          ],
+          "actions": {
+            "buy_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/swap?output=PEPE",
+              "openIn": "external_browser"
+            }
+          }
+        },
+        {
+          "name": "The Graph",
+          "symbol": "GRT",
+          "type": "ERC20",
+          "id": "0xc944E90C64B2c07662A292be6244BDf05Cda44a7",
+          "decimals": 18,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xc944E90C64B2c07662A292be6244BDf05Cda44a7/logo.png",
+          "website": "https://thegraph.com",
+          "description": "Indexing protocol token for querying blockchain data (subgraphs).",
+          "status": "active",
+          "tags": [
+            "infrastructure"
+          ],
+          "explorer": "https://etherscan.io/token/0xc944E90C64B2c07662A292be6244BDf05Cda44a7",
+          "ui": {
+            "theme": {
+              "primaryColor": "#6747ED",
+              "badgeText": "Infrastructure"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#0A0718",
+                "#1F1547"
+              ],
+              "angle": 135
+            }
+          },
+          "actions": {
+            "swap_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/swap?output=GRT",
+              "openIn": "in_app_browser"
+            },
+            "protocol_dapp": {
+              "type": "wallet_connect",
+              "dappUrl": "https://stake.example.com/grt"
+            }
+          },
+          "widgets": [
+            {
+              "type": "action_group",
+              "title": "Protocol Actions",
+              "items": [
+                {
+                  "label": "Swap for GRT",
+                  "action": "swap_dapp"
+                },
+                {
+                  "label": "Delegate to Indexers",
+                  "action": "protocol_dapp"
+                }
+              ]
+            },
+            {
+              "type": "price_chart",
+              "coingeckoId": "the-graph",
+              "days": 1
+            }
+          ]
+        },
+        {
+          "name": "Ethereum Name Service",
+          "symbol": "ENS",
+          "type": "ERC20",
+          "id": "0xC18360217D8F7Ab5e7c516566761Ea12Ce7F9D72",
+          "decimals": 18,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xC18360217D8F7Ab5e7c516566761Ea12Ce7F9D72/logo.png",
+          "website": "https://ens.domains",
+          "description": "Governance token of the Ethereum Name Service (.eth domains).",
+          "status": "active",
+          "tags": [
+            "governance",
+            "infrastructure"
+          ],
+          "explorer": "https://etherscan.io/token/0xC18360217D8F7Ab5e7c516566761Ea12Ce7F9D72",
+          "ui": {
+            "theme": {
+              "primaryColor": "#5284FF",
+              "badgeText": "Governance"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#080D19",
+                "#19284D"
+              ],
+              "angle": 135
+            }
+          },
+          "actions": {
+            "swap_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/swap?output=ENS",
+              "openIn": "in_app_browser"
+            },
+            "protocol_dapp": {
+              "type": "wallet_connect",
+              "dappUrl": "https://stake.example.com/ens"
+            }
+          },
+          "widgets": [
+            {
+              "type": "action_group",
+              "title": "Protocol Actions",
+              "items": [
+                {
+                  "label": "Swap for ENS",
+                  "action": "swap_dapp"
+                },
+                {
+                  "label": "Manage .eth Domains",
+                  "action": "protocol_dapp"
+                }
+              ]
+            },
+            {
+              "type": "price_chart",
+              "coingeckoId": "ethereum-name-service",
+              "days": 1
+            }
+          ]
+        },
+        {
+          "name": "Arbitrum",
+          "symbol": "ARB",
+          "type": "ERC20",
+          "id": "0xB50721BCf8d664c30412Cfbc6cf7a15145234ad1",
+          "decimals": 18,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xB50721BCf8d664c30412Cfbc6cf7a15145234ad1/logo.png",
+          "website": "https://arbitrum.io",
+          "description": "Governance token of the Arbitrum Ethereum layer-2 rollup.",
+          "status": "active",
+          "tags": [
+            "governance",
+            "layer2"
+          ],
+          "explorer": "https://etherscan.io/token/0xB50721BCf8d664c30412Cfbc6cf7a15145234ad1",
+          "ui": {
+            "theme": {
+              "primaryColor": "#28A0F0",
+              "badgeText": "Layer 2"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#041018",
+                "#0C3048"
+              ],
+              "angle": 135
+            }
+          },
+          "actions": {
+            "swap_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/swap?output=ARB",
+              "openIn": "in_app_browser"
+            },
+            "protocol_dapp": {
+              "type": "wallet_connect",
+              "dappUrl": "https://stake.example.com/arb"
+            }
+          },
+          "widgets": [
+            {
+              "type": "action_group",
+              "title": "Protocol Actions",
+              "items": [
+                {
+                  "label": "Swap for ARB",
+                  "action": "swap_dapp"
+                },
+                {
+                  "label": "Bridge to Arbitrum",
+                  "action": "protocol_dapp"
+                }
+              ]
+            },
+            {
+              "type": "price_chart",
+              "coingeckoId": "arbitrum",
+              "days": 1
+            }
+          ]
+        },
+        {
+          "name": "yearn.finance",
+          "symbol": "YFI",
+          "type": "ERC20",
+          "id": "0x0bc529c00C6401aEF6D220BE8C6Ea1667F6Ad93e",
+          "decimals": 18,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x0bc529c00C6401aEF6D220BE8C6Ea1667F6Ad93e/logo.png",
+          "website": "https://yearn.fi",
+          "description": "Governance token of the yearn.finance yield-aggregator protocol.",
+          "status": "active",
+          "tags": [
+            "governance",
+            "yield"
+          ],
+          "explorer": "https://etherscan.io/token/0x0bc529c00C6401aEF6D220BE8C6Ea1667F6Ad93e",
+          "ui": {
+            "theme": {
+              "primaryColor": "#0074D9",
+              "badgeText": "Governance"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#000C16",
+                "#002341"
+              ],
+              "angle": 135
+            }
+          },
+          "actions": {
+            "swap_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/swap?output=YFI",
+              "openIn": "in_app_browser"
+            },
+            "protocol_dapp": {
+              "type": "wallet_connect",
+              "dappUrl": "https://stake.example.com/yfi"
+            }
+          },
+          "widgets": [
+            {
+              "type": "action_group",
+              "title": "Protocol Actions",
+              "items": [
+                {
+                  "label": "Swap for YFI",
+                  "action": "swap_dapp"
+                },
+                {
+                  "label": "Deposit into Vaults",
+                  "action": "protocol_dapp"
+                }
+              ]
+            },
+            {
+              "type": "price_chart",
+              "coingeckoId": "yearn-finance",
+              "days": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "BSC",
+      "tokens": [
+        {
+          "name": "BNB",
+          "symbol": "BNB",
+          "type": "NATIVE",
+          "id": "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
+          "decimals": 18,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/smartchain/info/logo.png",
+          "website": "https://www.bnbchain.org",
+          "description": "The native asset of BNB Smart Chain.",
+          "status": "active",
+          "tags": [
+            "native"
+          ],
+          "explorer": "https://bscscan.com",
+          "ui": {
+            "theme": {
+              "primaryColor": "#F3BA2F",
+              "badgeText": "Native"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#1A1500",
+                "#332900"
+              ],
+              "angle": 135
+            }
+          },
+          "widgets": [
+            {
+              "type": "key_value",
+              "title": "Network",
+              "items": [
+                {
+                  "label": "Consensus",
+                  "value": "Proof of Staked Authority"
+                }
+              ]
+            },
+            {
+              "type": "price_chart",
+              "coingeckoId": "binancecoin",
+              "days": 1
+            }
+          ]
+        },
+        {
+          "name": "Wrapped BNB",
+          "symbol": "WBNB",
+          "type": "BEP20",
+          "id": "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
+          "decimals": 18,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/smartchain/assets/0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c/logo.png",
+          "website": "https://www.bnbchain.org",
+          "description": "BEP-20 wrapper for native BNB — 1 WBNB is always redeemable for 1 BNB.",
+          "status": "active",
+          "tags": [
+            "wrapped"
+          ],
+          "explorer": "https://bscscan.com/token/0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
+          "ui": {
+            "theme": {
+              "primaryColor": "#F3BA2F",
+              "badgeText": "Wrapped 1:1"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#181305",
+                "#49380E"
+              ],
+              "angle": 135
+            }
+          },
+          "widgets": [
+            {
+              "type": "key_value",
+              "title": "Wrapping",
+              "items": [
+                {
+                  "label": "Backing",
+                  "value": "1:1 BNB"
+                }
+              ]
+            },
+            {
+              "type": "price_chart",
+              "coingeckoId": "wbnb",
+              "days": 1
+            }
+          ]
+        },
+        {
+          "name": "Tether USD (BSC)",
+          "symbol": "USDT",
+          "type": "BEP20",
+          "id": "0x55d398326f99059fF775485246999027B3197955",
+          "decimals": 18,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/smartchain/assets/0x55d398326f99059fF775485246999027B3197955/logo.png",
+          "website": "https://tether.to",
+          "description": "Binance-Peg USDT. NOTE: on BSC this contract reports 18 decimals on-chain (Ethereum USDT is 6) — verified live via eth_call, do not reuse the Ethereum decimals value for this chain.",
+          "status": "active",
+          "tags": [
+            "stablecoin"
+          ],
+          "explorer": "https://bscscan.com/token/0x55d398326f99059fF775485246999027B3197955",
+          "ui": {
+            "theme": {
+              "primaryColor": "#26A17B",
+              "badgeText": "Stablecoin"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#04100C",
+                "#0B3025"
+              ],
+              "angle": 135
+            }
+          },
+          "actions": {
+            "mint_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/mint?token=USDT",
+              "openIn": "in_app_browser"
+            },
+            "redeem_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/redeem?token=USDT",
+              "openIn": "in_app_browser"
+            }
+          },
+          "widgets": [
+            {
+              "type": "banner",
+              "title": "Mint & Redeem",
+              "description": "Mint or redeem USDT 1:1 via the issuer's app",
+              "action": "mint_dapp"
+            },
+            {
+              "type": "key_value",
+              "title": "Reserve Info",
+              "items": [
+                {
+                  "label": "Peg",
+                  "value": "1 USDT = 1 USD"
+                },
+                {
+                  "label": "Redemption",
+                  "value": "Same-day"
+                }
+              ]
+            },
+            {
+              "type": "price_chart",
+              "coingeckoId": "binance-bridged-usdt-bnb-smart-chain",
+              "days": 1
+            }
+          ]
+        },
+        {
+          "name": "USD Coin (BSC)",
+          "symbol": "USDC",
+          "type": "BEP20",
+          "id": "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d",
+          "decimals": 18,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/smartchain/assets/0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d/logo.png",
+          "website": "https://www.circle.com/usdc",
+          "description": "Binance-Peg USDC. NOTE: on BSC this contract reports 18 decimals on-chain (Ethereum USDC is 6) — verified live via eth_call.",
+          "status": "active",
+          "tags": [
+            "stablecoin"
+          ],
+          "explorer": "https://bscscan.com/token/0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d",
+          "ui": {
+            "theme": {
+              "primaryColor": "#2775CA",
+              "badgeText": "Stablecoin"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#040C14",
+                "#0C233D"
+              ],
+              "angle": 135
+            }
+          },
+          "actions": {
+            "mint_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/mint?token=USDC",
+              "openIn": "in_app_browser"
+            },
+            "redeem_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/redeem?token=USDC",
+              "openIn": "in_app_browser"
+            }
+          },
+          "widgets": [
+            {
+              "type": "banner",
+              "title": "Mint & Redeem",
+              "description": "Mint or redeem USDC 1:1 via the issuer's app",
+              "action": "mint_dapp"
+            },
+            {
+              "type": "key_value",
+              "title": "Reserve Info",
+              "items": [
+                {
+                  "label": "Peg",
+                  "value": "1 USDC = 1 USD"
+                },
+                {
+                  "label": "Redemption",
+                  "value": "Same-day"
+                }
+              ]
+            },
+            {
+              "type": "price_chart",
+              "coingeckoId": "binance-bridged-usdc-bnb-smart-chain",
+              "days": 1
+            }
+          ]
+        },
+        {
+          "name": "Dai Stablecoin (BSC)",
+          "symbol": "DAI",
+          "type": "BEP20",
+          "id": "0x1AF3F329e8BE154074D8769D1FFa4eE058B1DBc3",
+          "decimals": 18,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/smartchain/assets/0x1AF3F329e8BE154074D8769D1FFa4eE058B1DBc3/logo.png",
+          "website": "https://makerdao.com",
+          "description": "Binance-Peg DAI stablecoin.",
+          "status": "active",
+          "tags": [
+            "stablecoin"
+          ],
+          "explorer": "https://bscscan.com/token/0x1AF3F329e8BE154074D8769D1FFa4eE058B1DBc3",
+          "ui": {
+            "theme": {
+              "primaryColor": "#F5AC37",
+              "badgeText": "Stablecoin"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#181105",
+                "#4A3411"
+              ],
+              "angle": 135
+            }
+          },
+          "actions": {
+            "mint_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/mint?token=DAI",
+              "openIn": "in_app_browser"
+            },
+            "redeem_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/redeem?token=DAI",
+              "openIn": "in_app_browser"
+            }
+          },
+          "widgets": [
+            {
+              "type": "banner",
+              "title": "Mint & Redeem",
+              "description": "Mint or redeem DAI 1:1 via the issuer's app",
+              "action": "mint_dapp"
+            },
+            {
+              "type": "key_value",
+              "title": "Reserve Info",
+              "items": [
+                {
+                  "label": "Peg",
+                  "value": "1 DAI = 1 USD"
+                },
+                {
+                  "label": "Redemption",
+                  "value": "Same-day"
+                }
+              ]
+            },
+            {
+              "type": "price_chart",
+              "coingeckoId": "binance-peg-dai",
+              "days": 1
+            }
+          ]
+        },
+        {
+          "name": "Binance USD",
+          "symbol": "BUSD",
+          "type": "BEP20",
+          "id": "0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56",
+          "decimals": 18,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/smartchain/assets/0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56/logo.png",
+          "website": "https://www.bnbchain.org",
+          "description": "Binance's own USD-pegged stablecoin (Paxos-issued, no longer minted but still in circulation).",
+          "status": "active",
+          "tags": [
+            "stablecoin"
+          ],
+          "explorer": "https://bscscan.com/token/0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56",
+          "ui": {
+            "theme": {
+              "primaryColor": "#F0B90B",
+              "badgeText": "Stablecoin"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#181201",
+                "#483803"
+              ],
+              "angle": 135
+            }
+          },
+          "actions": {
+            "mint_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/mint?token=BUSD",
+              "openIn": "in_app_browser"
+            },
+            "redeem_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/redeem?token=BUSD",
+              "openIn": "in_app_browser"
+            }
+          },
+          "widgets": [
+            {
+              "type": "banner",
+              "title": "Mint & Redeem",
+              "description": "Mint or redeem BUSD 1:1 via the issuer's app",
+              "action": "mint_dapp"
+            },
+            {
+              "type": "key_value",
+              "title": "Reserve Info",
+              "items": [
+                {
+                  "label": "Peg",
+                  "value": "1 BUSD = 1 USD"
+                },
+                {
+                  "label": "Redemption",
+                  "value": "Same-day"
+                }
+              ]
+            },
+            {
+              "type": "price_chart",
+              "coingeckoId": "binance-peg-busd",
+              "days": 1
+            }
+          ]
+        },
+        {
+          "name": "Wrapped Ether (BSC)",
+          "symbol": "WETH",
+          "type": "BEP20",
+          "id": "0x2170Ed0880ac9A755fd29B2688956BD959F933F8",
+          "decimals": 18,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/smartchain/assets/0x2170Ed0880ac9A755fd29B2688956BD959F933F8/logo.png",
+          "website": "https://ethereum.org",
+          "description": "Binance-Peg WETH — bridged representation of Ethereum's ETH on BSC.",
+          "status": "active",
+          "tags": [
+            "wrapped"
+          ],
+          "explorer": "https://bscscan.com/token/0x2170Ed0880ac9A755fd29B2688956BD959F933F8",
+          "ui": {
+            "theme": {
+              "primaryColor": "#627EEA",
+              "badgeText": "Wrapped"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#0A0D17",
+                "#1D2646"
+              ],
+              "angle": 135
+            }
+          },
+          "widgets": [
+            {
+              "type": "key_value",
+              "title": "Wrapping",
+              "items": [
+                {
+                  "label": "Backing",
+                  "value": "1:1 ETH (bridged)"
+                }
+              ]
+            },
+            {
+              "type": "price_chart",
+              "coingeckoId": "binance-peg-weth",
+              "days": 1
+            }
+          ]
+        },
+        {
+          "name": "ChainLink Token (BSC)",
+          "symbol": "LINK",
+          "type": "BEP20",
+          "id": "0xF8A0BF9cF54Bb92F17374d9e9A321E6a111a51bD",
+          "decimals": 18,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/smartchain/assets/0xF8A0BF9cF54Bb92F17374d9e9A321E6a111a51bD/logo.png",
+          "website": "https://chain.link",
+          "description": "Binance-Peg LINK, Chainlink's oracle network token.",
+          "status": "active",
+          "tags": [
+            "oracle"
+          ],
+          "explorer": "https://bscscan.com/token/0xF8A0BF9cF54Bb92F17374d9e9A321E6a111a51bD",
+          "ui": {
+            "theme": {
+              "primaryColor": "#2A5ADA",
+              "badgeText": "Oracle"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#040916",
+                "#0D1B41"
+              ],
+              "angle": 135
+            }
+          },
+          "actions": {
+            "swap_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/swap?output=LINK",
+              "openIn": "in_app_browser"
+            },
+            "protocol_dapp": {
+              "type": "wallet_connect",
+              "dappUrl": "https://stake.example.com/link"
+            }
+          },
+          "widgets": [
+            {
+              "type": "action_group",
+              "title": "Protocol Actions",
+              "items": [
+                {
+                  "label": "Swap for LINK",
+                  "action": "swap_dapp"
+                },
+                {
+                  "label": "Stake LINK",
+                  "action": "protocol_dapp"
+                }
+              ]
+            },
+            {
+              "type": "price_chart",
+              "coingeckoId": "chainlink",
+              "days": 1
+            }
+          ]
+        },
+        {
+          "name": "Uniswap (BSC)",
+          "symbol": "UNI",
+          "type": "BEP20",
+          "id": "0xBf5140A22578168FD562DCcF235E5D43A02ce9B1",
+          "decimals": 18,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/smartchain/assets/0xBf5140A22578168FD562DCcF235E5D43A02ce9B1/logo.png",
+          "website": "https://uniswap.org",
+          "description": "Binance-Peg UNI, Uniswap's governance token.",
+          "status": "active",
+          "tags": [
+            "governance",
+            "dex"
+          ],
+          "explorer": "https://bscscan.com/token/0xBf5140A22578168FD562DCcF235E5D43A02ce9B1",
+          "ui": {
+            "theme": {
+              "primaryColor": "#FF007A",
+              "badgeText": "Governance"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#19000C",
+                "#4D0025"
+              ],
+              "angle": 135
+            }
+          },
+          "actions": {
+            "swap_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/swap?output=UNI",
+              "openIn": "in_app_browser"
+            },
+            "protocol_dapp": {
+              "type": "wallet_connect",
+              "dappUrl": "https://stake.example.com/uni"
+            }
+          },
+          "widgets": [
+            {
+              "type": "action_group",
+              "title": "Protocol Actions",
+              "items": [
+                {
+                  "label": "Swap for UNI",
+                  "action": "swap_dapp"
+                },
+                {
+                  "label": "Vote on Proposals",
+                  "action": "protocol_dapp"
+                }
+              ]
+            },
+            {
+              "type": "price_chart",
+              "coingeckoId": "uniswap",
+              "days": 1
+            }
+          ]
+        },
+        {
+          "name": "Aave (BSC)",
+          "symbol": "AAVE",
+          "type": "BEP20",
+          "id": "0xfb6115445Bff7b52FeB98650C87f44907E58f802",
+          "decimals": 18,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/smartchain/assets/0xfb6115445Bff7b52FeB98650C87f44907E58f802/logo.png",
+          "website": "https://aave.com",
+          "description": "Binance-Peg AAVE, the Aave lending protocol's governance token.",
+          "status": "active",
+          "tags": [
+            "governance",
+            "lending"
+          ],
+          "explorer": "https://bscscan.com/token/0xfb6115445Bff7b52FeB98650C87f44907E58f802",
+          "ui": {
+            "theme": {
+              "primaryColor": "#B6509E",
+              "badgeText": "Governance"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#120810",
+                "#37182F"
+              ],
+              "angle": 135
+            }
+          },
+          "actions": {
+            "swap_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/swap?output=AAVE",
+              "openIn": "in_app_browser"
+            },
+            "protocol_dapp": {
+              "type": "wallet_connect",
+              "dappUrl": "https://stake.example.com/aave"
+            }
+          },
+          "widgets": [
+            {
+              "type": "action_group",
+              "title": "Protocol Actions",
+              "items": [
+                {
+                  "label": "Swap for AAVE",
+                  "action": "swap_dapp"
+                },
+                {
+                  "label": "Supply & Earn",
+                  "action": "protocol_dapp"
+                }
+              ]
+            },
+            {
+              "type": "price_chart",
+              "coingeckoId": "aave",
+              "days": 1
+            }
+          ]
+        },
+        {
+          "name": "Compound (BSC)",
+          "symbol": "COMP",
+          "type": "BEP20",
+          "id": "0x52CE071Bd9b1C4B00A0b92D298c512478CaD67e8",
+          "decimals": 18,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/smartchain/assets/0x52CE071Bd9b1C4B00A0b92D298c512478CaD67e8/logo.png",
+          "website": "https://compound.finance",
+          "description": "Binance-Peg COMP, the Compound lending protocol's governance token.",
+          "status": "active",
+          "tags": [
+            "governance",
+            "lending"
+          ],
+          "explorer": "https://bscscan.com/token/0x52CE071Bd9b1C4B00A0b92D298c512478CaD67e8",
+          "ui": {
+            "theme": {
+              "primaryColor": "#00D395",
+              "badgeText": "Governance"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#00150F",
+                "#003F2D"
+              ],
+              "angle": 135
+            }
+          },
+          "actions": {
+            "swap_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/swap?output=COMP",
+              "openIn": "in_app_browser"
+            },
+            "protocol_dapp": {
+              "type": "wallet_connect",
+              "dappUrl": "https://stake.example.com/comp"
+            }
+          },
+          "widgets": [
+            {
+              "type": "action_group",
+              "title": "Protocol Actions",
+              "items": [
+                {
+                  "label": "Swap for COMP",
+                  "action": "swap_dapp"
+                },
+                {
+                  "label": "Supply & Earn",
+                  "action": "protocol_dapp"
+                }
+              ]
+            },
+            {
+              "type": "price_chart",
+              "coingeckoId": "compound-governance-token",
+              "days": 1
+            }
+          ]
+        },
+        {
+          "name": "SushiToken (BSC)",
+          "symbol": "SUSHI",
+          "type": "BEP20",
+          "id": "0x947950BcC74888a40Ffa2593C5798F11Fc9124C4",
+          "decimals": 18,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/smartchain/assets/0x947950BcC74888a40Ffa2593C5798F11Fc9124C4/logo.png",
+          "website": "https://sushi.com",
+          "description": "Binance-Peg SUSHI, SushiSwap's governance token.",
+          "status": "active",
+          "tags": [
+            "governance",
+            "dex"
+          ],
+          "explorer": "https://bscscan.com/token/0x947950BcC74888a40Ffa2593C5798F11Fc9124C4",
+          "ui": {
+            "theme": {
+              "primaryColor": "#FA52A0",
+              "badgeText": "Governance"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#190810",
+                "#4B1930"
+              ],
+              "angle": 135
+            }
+          },
+          "actions": {
+            "swap_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/swap?output=SUSHI",
+              "openIn": "in_app_browser"
+            },
+            "protocol_dapp": {
+              "type": "wallet_connect",
+              "dappUrl": "https://stake.example.com/sushi"
+            }
+          },
+          "widgets": [
+            {
+              "type": "action_group",
+              "title": "Protocol Actions",
+              "items": [
+                {
+                  "label": "Swap for SUSHI",
+                  "action": "swap_dapp"
+                },
+                {
+                  "label": "Stake (xSUSHI)",
+                  "action": "protocol_dapp"
+                }
+              ]
+            },
+            {
+              "type": "price_chart",
+              "coingeckoId": "sushi",
+              "days": 1
+            }
+          ]
+        },
+        {
+          "name": "Polygon (BSC)",
+          "symbol": "MATIC",
+          "type": "BEP20",
+          "id": "0xCC42724C6683B7E57334c4E856f4c9965ED682bD",
+          "decimals": 18,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/smartchain/assets/0xCC42724C6683B7E57334c4E856f4c9965ED682bD/logo.png",
+          "website": "https://polygon.technology",
+          "description": "Binance-Peg MATIC, the Polygon network's legacy token.",
+          "status": "active",
+          "tags": [
+            "layer2"
+          ],
+          "explorer": "https://bscscan.com/token/0xCC42724C6683B7E57334c4E856f4c9965ED682bD",
+          "ui": {
+            "theme": {
+              "primaryColor": "#8247E5",
+              "badgeText": "Layer 2"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#0D0717",
+                "#271545"
+              ],
+              "angle": 135
+            }
+          },
+          "actions": {
+            "swap_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/swap?output=MATIC",
+              "openIn": "in_app_browser"
+            },
+            "protocol_dapp": {
+              "type": "wallet_connect",
+              "dappUrl": "https://stake.example.com/matic"
+            }
+          },
+          "widgets": [
+            {
+              "type": "action_group",
+              "title": "Protocol Actions",
+              "items": [
+                {
+                  "label": "Swap for MATIC",
+                  "action": "swap_dapp"
+                },
+                {
+                  "label": "Bridge to Polygon",
+                  "action": "protocol_dapp"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Axie Infinity Shard (BSC)",
+          "symbol": "AXS",
+          "type": "BEP20",
+          "id": "0x715D400F88C167884bbCc41C5FeA407ed4D2f8A0",
+          "decimals": 18,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/smartchain/assets/0x715D400F88C167884bbCc41C5FeA407ed4D2f8A0/logo.png",
+          "website": "https://axieinfinity.com",
+          "description": "Governance token of the Axie Infinity play-to-earn game.",
+          "status": "active",
+          "tags": [
+            "gaming"
+          ],
+          "explorer": "https://bscscan.com/token/0x715D400F88C167884bbCc41C5FeA407ed4D2f8A0",
+          "ui": {
+            "theme": {
+              "primaryColor": "#0055D4",
+              "badgeText": "Gaming"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#000815",
+                "#001A40"
+              ],
+              "angle": 135
+            }
+          },
+          "actions": {
+            "play_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/play?game=axie",
+              "openIn": "external_browser"
+            },
+            "marketplace_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/marketplace?token=AXS",
+              "openIn": "in_app_browser"
+            }
+          },
+          "widgets": [
+            {
+              "type": "action_group",
+              "title": "Axie Infinity",
+              "items": [
+                {
+                  "label": "Play Now",
+                  "action": "play_dapp"
+                },
+                {
+                  "label": "Marketplace",
+                  "action": "marketplace_dapp"
+                }
+              ]
+            },
+            {
+              "type": "price_chart",
+              "coingeckoId": "axie-infinity",
+              "days": 1
+            }
+          ]
+        },
+        {
+          "name": "Floki",
+          "symbol": "FLOKI",
+          "type": "BEP20",
+          "id": "0xfb5B838b6cfEEdC2873aB27866079AC55363D37E",
+          "decimals": 9,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/smartchain/assets/0xfb5B838b6cfEEdC2873aB27866079AC55363D37E/logo.png",
+          "website": "https://www.floki.com",
+          "description": "Community meme token with 9 decimals (not the more common 18) — verified live via eth_call.",
+          "status": "active",
+          "tags": [
+            "meme"
+          ],
+          "explorer": "https://bscscan.com/token/0xfb5B838b6cfEEdC2873aB27866079AC55363D37E",
+          "ui": {
+            "theme": {
+              "primaryColor": "#F0B90B",
+              "badgeText": "Community"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#181201",
+                "#483803"
+              ],
+              "angle": 135
+            }
+          },
+          "widgets": [
+            {
+              "type": "notice",
+              "message": "No intrinsic value. DYOR.",
+              "severity": "warning"
+            },
+            {
+              "type": "banner",
+              "title": "Buy FLOKI",
+              "description": "Community meme token — trade at your own risk",
+              "action": "buy_dapp"
+            },
+            {
+              "type": "price_chart",
+              "coingeckoId": "floki",
+              "days": 1
+            }
+          ],
+          "actions": {
+            "buy_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/swap?output=FLOKI",
+              "openIn": "external_browser"
+            }
+          }
+        },
+        {
+          "name": "1inch (BSC)",
+          "symbol": "1INCH",
+          "type": "BEP20",
+          "id": "0x111111111117dC0aa78b770fA6A738034120C302",
+          "decimals": 18,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/smartchain/assets/0x111111111117dC0aa78b770fA6A738034120C302/logo.png",
+          "website": "https://1inch.io",
+          "description": "Governance token of the 1inch DEX-aggregator.",
+          "status": "active",
+          "tags": [
+            "governance",
+            "dex"
+          ],
+          "explorer": "https://bscscan.com/token/0x111111111117dC0aa78b770fA6A738034120C302",
+          "ui": {
+            "theme": {
+              "primaryColor": "#94A6C3",
+              "badgeText": "Governance"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#0F1113",
+                "#2C323B"
+              ],
+              "angle": 135
+            }
+          },
+          "actions": {
+            "swap_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/swap?output=1INCH",
+              "openIn": "in_app_browser"
+            },
+            "protocol_dapp": {
+              "type": "wallet_connect",
+              "dappUrl": "https://stake.example.com/1inch"
+            }
+          },
+          "widgets": [
+            {
+              "type": "action_group",
+              "title": "Protocol Actions",
+              "items": [
+                {
+                  "label": "Swap for 1INCH",
+                  "action": "swap_dapp"
+                },
+                {
+                  "label": "Vote on Proposals",
+                  "action": "protocol_dapp"
+                }
+              ]
+            },
+            {
+              "type": "price_chart",
+              "coingeckoId": "1inch",
+              "days": 1
+            }
+          ]
+        },
+        {
+          "name": "Ankr Network (BSC)",
+          "symbol": "ANKR",
+          "type": "BEP20",
+          "id": "0xf307910A4c7bbc79691fD374889b36d8531B08e3",
+          "decimals": 18,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/smartchain/assets/0xf307910A4c7bbc79691fD374889b36d8531B08e3/logo.png",
+          "website": "https://www.ankr.com",
+          "description": "Utility token of the Ankr distributed Web3 infrastructure network.",
+          "status": "active",
+          "tags": [
+            "infrastructure"
+          ],
+          "explorer": "https://bscscan.com/token/0xf307910A4c7bbc79691fD374889b36d8531B08e3",
+          "ui": {
+            "theme": {
+              "primaryColor": "#2D74FF",
+              "badgeText": "Infrastructure"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#040C19",
+                "#0E234D"
+              ],
+              "angle": 135
+            }
+          },
+          "actions": {
+            "swap_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/swap?output=ANKR",
+              "openIn": "in_app_browser"
+            },
+            "protocol_dapp": {
+              "type": "wallet_connect",
+              "dappUrl": "https://stake.example.com/ankr"
+            }
+          },
+          "widgets": [
+            {
+              "type": "action_group",
+              "title": "Protocol Actions",
+              "items": [
+                {
+                  "label": "Swap for ANKR",
+                  "action": "swap_dapp"
+                },
+                {
+                  "label": "Stake for Node Rewards",
+                  "action": "protocol_dapp"
+                }
+              ]
+            },
+            {
+              "type": "price_chart",
+              "coingeckoId": "ankr",
+              "days": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Tron",
+      "tokens": [
+        {
+          "name": "TRON",
+          "symbol": "TRX",
+          "type": "NATIVE",
+          "id": "native",
+          "decimals": 6,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/tron/info/logo.png",
+          "website": "https://tron.network",
+          "description": "The native asset of the Tron network.",
+          "status": "active",
+          "tags": [
+            "native"
+          ],
+          "explorer": "https://tronscan.org",
+          "ui": {
+            "theme": {
+              "primaryColor": "#FF060A",
+              "badgeText": "Native"
+            },
+            "background": {
+              "type": "image",
+              "url": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/tron/info/logo.png",
+              "overlayColor": "#1A0000"
+            }
+          },
+          "widgets": [
+            {
+              "type": "price_chart",
+              "coingeckoId": "tron",
+              "days": 1
+            }
+          ]
+        },
+        {
+          "name": "Tether USD (TRC-20)",
+          "symbol": "USDT",
+          "type": "TRC20",
+          "id": "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t",
+          "decimals": 6,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/tron/assets/TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t/logo.png",
+          "website": "https://tether.to",
+          "description": "By far the most-used stablecoin on Tron — the network's dominant transfer asset.",
+          "status": "active",
+          "tags": [
+            "stablecoin"
+          ],
+          "explorer": "https://tronscan.org/#/token20/TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t",
+          "ui": {
+            "theme": {
+              "primaryColor": "#26A17B",
+              "badgeText": "Stablecoin"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#04100C",
+                "#0B3025"
+              ],
+              "angle": 135
+            }
+          },
+          "actions": {
+            "mint_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/mint?token=USDT",
+              "openIn": "in_app_browser"
+            },
+            "redeem_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/redeem?token=USDT",
+              "openIn": "in_app_browser"
+            }
+          },
+          "widgets": [
+            {
+              "type": "banner",
+              "title": "Mint & Redeem",
+              "description": "Mint or redeem USDT 1:1 via the issuer's app",
+              "action": "mint_dapp"
+            },
+            {
+              "type": "key_value",
+              "title": "Reserve Info",
+              "items": [
+                {
+                  "label": "Peg",
+                  "value": "1 USDT = 1 USD"
+                },
+                {
+                  "label": "Redemption",
+                  "value": "Same-day"
+                }
+              ]
+            },
+            {
+              "type": "price_chart",
+              "coingeckoId": "tether",
+              "days": 1
+            }
+          ]
+        },
+        {
+          "name": "USD Coin (TRC-20)",
+          "symbol": "USDC",
+          "type": "TRC20",
+          "id": "TEkxiTehnzSmSe2XqrBj4w32RUN966rdz8",
+          "decimals": 6,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/tron/assets/TEkxiTehnzSmSe2XqrBj4w32RUN966rdz8/logo.png",
+          "website": "https://www.circle.com/usdc",
+          "description": "Circle's USD Coin, issued natively on Tron as a TRC-20 token.",
+          "status": "active",
+          "tags": [
+            "stablecoin"
+          ],
+          "explorer": "https://tronscan.org/#/token20/TEkxiTehnzSmSe2XqrBj4w32RUN966rdz8",
+          "ui": {
+            "theme": {
+              "primaryColor": "#2775CA",
+              "badgeText": "Stablecoin"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#040C14",
+                "#0C233D"
+              ],
+              "angle": 135
+            }
+          },
+          "actions": {
+            "mint_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/mint?token=USDC",
+              "openIn": "in_app_browser"
+            },
+            "redeem_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/redeem?token=USDC",
+              "openIn": "in_app_browser"
+            }
+          },
+          "widgets": [
+            {
+              "type": "banner",
+              "title": "Mint & Redeem",
+              "description": "Mint or redeem USDC 1:1 via the issuer's app",
+              "action": "mint_dapp"
+            },
+            {
+              "type": "key_value",
+              "title": "Reserve Info",
+              "items": [
+                {
+                  "label": "Peg",
+                  "value": "1 USDC = 1 USD"
+                },
+                {
+                  "label": "Redemption",
+                  "value": "Same-day"
+                }
+              ]
+            },
+            {
+              "type": "price_chart",
+              "coingeckoId": "usd-coin",
+              "days": 1
+            }
+          ]
+        },
+        {
+          "name": "A7A5",
+          "symbol": "A7A5",
+          "type": "TRC20",
+          "id": "TLeVfrdym8RoJreJ23dAGyfJDygRtiWKBZ",
+          "decimals": 6,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/tron/assets/TLeVfrdym8RoJreJ23dAGyfJDygRtiWKBZ/logo.png",
+          "description": "Ruble-pegged stablecoin. Tracked internally by Aegis AML monitoring alongside TRX/USDT as one of the higher-volume TRON transfer assets.",
+          "status": "active",
+          "tags": [
+            "stablecoin"
+          ],
+          "explorer": "https://tronscan.org/#/token20/TLeVfrdym8RoJreJ23dAGyfJDygRtiWKBZ",
+          "ui": {
+            "theme": {
+              "primaryColor": "#0039A6",
+              "badgeText": "Stablecoin"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#000611",
+                "#001132"
+              ],
+              "angle": 135
+            }
+          },
+          "actions": {
+            "mint_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/mint?token=A7A5",
+              "openIn": "in_app_browser"
+            },
+            "redeem_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/redeem?token=A7A5",
+              "openIn": "in_app_browser"
+            }
+          },
+          "widgets": [
+            {
+              "type": "banner",
+              "title": "Mint & Redeem",
+              "description": "Mint or redeem A7A5 1:1 via the issuer's app",
+              "action": "mint_dapp"
+            },
+            {
+              "type": "key_value",
+              "title": "Reserve Info",
+              "items": [
+                {
+                  "label": "Peg",
+                  "value": "1 A7A5 = 1 RUB"
+                },
+                {
+                  "label": "Redemption",
+                  "value": "Same-day"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "APENFT",
+          "symbol": "APENFT",
+          "type": "TRC20",
+          "id": "TFczxzPhnThNSqr5by8tvxsdCFRRz6cPNq",
+          "decimals": 6,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/tron/assets/TFczxzPhnThNSqr5by8tvxsdCFRRz6cPNq/logo.png",
+          "description": "Token of the APENFT platform, a Tron-ecosystem NFT marketplace.",
+          "status": "active",
+          "tags": [
+            "nft"
+          ],
+          "explorer": "https://tronscan.org/#/token20/TFczxzPhnThNSqr5by8tvxsdCFRRz6cPNq",
+          "ui": {
+            "theme": {
+              "primaryColor": "#111111",
+              "badgeText": "NFT"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#120814",
+                "#2E1233"
+              ],
+              "angle": 135
+            }
+          },
+          "actions": {
+            "marketplace_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/marketplace?token=APENFT",
+              "openIn": "in_app_browser"
+            }
+          },
+          "widgets": [
+            {
+              "type": "action_group",
+              "title": "APENFT",
+              "items": [
+                {
+                  "label": "Browse Marketplace",
+                  "action": "marketplace_dapp"
+                }
+              ]
+            },
+            {
+              "type": "price_chart",
+              "coingeckoId": "apenft",
+              "days": 1
+            }
+          ]
+        },
+        {
+          "name": "SUN",
+          "symbol": "SUN",
+          "type": "TRC20",
+          "id": "TKkeiboTkxXKJpbmVFbv4a8ov5rAfRDMf9",
+          "decimals": 18,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/tron/assets/TKkeiboTkxXKJpbmVFbv4a8ov5rAfRDMf9/logo.png",
+          "description": "Governance token of Sun.io, a Tron-ecosystem DEX/yield protocol. Notable for using 18 decimals, unlike most other TRC-20 tokens on this list (6) — verified live via TronScan.",
+          "status": "active",
+          "tags": [
+            "governance",
+            "dex"
+          ],
+          "explorer": "https://tronscan.org/#/token20/TKkeiboTkxXKJpbmVFbv4a8ov5rAfRDMf9",
+          "ui": {
+            "theme": {
+              "primaryColor": "#F7931A",
+              "badgeText": "Governance"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#190F03",
+                "#4A2C08"
+              ],
+              "angle": 135
+            }
+          },
+          "actions": {
+            "swap_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/swap?output=SUN",
+              "openIn": "in_app_browser"
+            },
+            "farm_dapp": {
+              "type": "wallet_connect",
+              "dappUrl": "https://stake.example.com/sun"
+            }
+          },
+          "widgets": [
+            {
+              "type": "action_group",
+              "title": "Sun.io",
+              "items": [
+                {
+                  "label": "Swap",
+                  "action": "swap_dapp"
+                },
+                {
+                  "label": "Farm",
+                  "action": "farm_dapp"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "WINkLink",
+          "symbol": "WIN",
+          "type": "TRC20",
+          "id": "TLa2f6VPqDgRE67v1736s7bJ8Ray5wYjU7",
+          "decimals": 6,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/tron/assets/TLa2f6VPqDgRE67v1736s7bJ8Ray5wYjU7/logo.png",
+          "description": "Token of WINk, a Tron-ecosystem gaming/gambling platform.",
+          "status": "active",
+          "tags": [
+            "gaming"
+          ],
+          "explorer": "https://tronscan.org/#/token20/TLa2f6VPqDgRE67v1736s7bJ8Ray5wYjU7",
+          "ui": {
+            "theme": {
+              "primaryColor": "#00B4D8",
+              "badgeText": "Gaming"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#001216",
+                "#003641"
+              ],
+              "angle": 135
+            }
+          },
+          "actions": {
+            "play_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/play?game=wink",
+              "openIn": "external_browser"
+            }
+          },
+          "widgets": [
+            {
+              "type": "action_group",
+              "title": "WINk",
+              "items": [
+                {
+                  "label": "Play Now",
+                  "action": "play_dapp"
+                }
+              ]
+            },
+            {
+              "type": "price_chart",
+              "coingeckoId": "wink",
+              "days": 1
+            }
+          ]
+        },
+        {
+          "name": "BitTorrent",
+          "symbol": "BTT",
+          "type": "TRC20",
+          "id": "TAFjULxiVgT4qWk6UZwjqwZXTSaGaqnVp4",
+          "decimals": 18,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/tron/assets/TAFjULxiVgT4qWk6UZwjqwZXTSaGaqnVp4/logo.png",
+          "website": "https://bittorrent.com",
+          "description": "Token of the BitTorrent file-sharing protocol (BTTC), acquired by the Tron Foundation. Uses 18 decimals — verified live via TronScan.",
+          "status": "active",
+          "tags": [
+            "infrastructure"
+          ],
+          "explorer": "https://tronscan.org/#/token20/TAFjULxiVgT4qWk6UZwjqwZXTSaGaqnVp4",
+          "ui": {
+            "theme": {
+              "primaryColor": "#0EE07A",
+              "badgeText": "Infrastructure"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#01160C",
+                "#044325"
+              ],
+              "angle": 135
+            }
+          },
+          "actions": {
+            "bridge_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/bridge?token=BTT",
+              "openIn": "in_app_browser"
+            }
+          },
+          "widgets": [
+            {
+              "type": "action_group",
+              "title": "BitTorrent Chain",
+              "items": [
+                {
+                  "label": "Bridge Assets",
+                  "action": "bridge_dapp"
+                }
+              ]
+            },
+            {
+              "type": "price_chart",
+              "coingeckoId": "bittorrent",
+              "days": 1
+            }
+          ]
+        },
+        {
+          "name": "JUST",
+          "symbol": "JST",
+          "type": "TRC20",
+          "id": "TSSMHYeV2uE9qYH95DqyoCuNCzEL1NvU3S",
+          "decimals": 18,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/tron/assets/TSSMHYeV2uE9qYH95DqyoCuNCzEL1NvU3S/logo.png",
+          "description": "Governance token of JUST, a Tron-ecosystem lending/stablecoin protocol. Uses 18 decimals — verified live via TronScan.",
+          "status": "active",
+          "tags": [
+            "governance",
+            "lending"
+          ],
+          "explorer": "https://tronscan.org/#/token20/TSSMHYeV2uE9qYH95DqyoCuNCzEL1NvU3S",
+          "ui": {
+            "theme": {
+              "primaryColor": "#E01A59",
+              "badgeText": "Governance"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#160309",
+                "#43081B"
+              ],
+              "angle": 135
+            }
+          },
+          "actions": {
+            "supply_dapp": {
+              "type": "wallet_connect",
+              "dappUrl": "https://stake.example.com/jst"
+            },
+            "borrow_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/borrow?token=JST",
+              "openIn": "in_app_browser"
+            }
+          },
+          "widgets": [
+            {
+              "type": "action_group",
+              "title": "JUST Lending",
+              "items": [
+                {
+                  "label": "Supply",
+                  "action": "supply_dapp"
+                },
+                {
+                  "label": "Borrow",
+                  "action": "borrow_dapp"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

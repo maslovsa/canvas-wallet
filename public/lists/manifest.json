@@ -12,6 +12,18 @@
       "name": "Uniswap Labs Default (sample)",
       "description": "Real, well-known Ethereum tokens borrowed from Uniswap's official default token list — real addresses, real logos, minimal styling. Shows what importing an existing real-world token list looks like.",
       "file": "uniswap-default.json"
+    },
+    {
+      "id": "aegis-super-list",
+      "name": "Aegis Super List (ETH + BSC + TRON)",
+      "description": "46 real tokens across Ethereum, BSC and TRON, sourced from the Aegis Platform's own network whitelists. Every contract address, decimals value and logo was verified live on-chain before shipping — including catching Binance-Peg USDT/USDC's 18-decimal BSC contracts (vs 6 on Ethereum).",
+      "file": "aegis-super-list.json"
+    },
+    {
+      "id": "paras",
+      "name": "Paras — Top International Stablecoins",
+      "description": "22 top stablecoins (USDT, USDC, DAI, USDe, PYUSD, TUSD, EURC, USDP, FRAX, FDUSD, USD1) across Ethereum, BSC, Tron and Solana, sourced from Pharos Watch (pharos.watch) — the stablecoin-tracking service already integrated into the Aegis Platform. Every contract/mint was independently re-verified live (decimals + logo) before shipping.",
+      "file": "paras.json"
     }
   ]
 }

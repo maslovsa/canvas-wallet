@@ -14,12 +14,63 @@
           "website": "https://www.circle.com/usdc",
           "description": "Fully-reserved US dollar stablecoin issued by Circle.",
           "status": "active",
-          "tags": ["stablecoin"],
+          "tags": [
+            "stablecoin"
+          ],
           "explorer": "https://etherscan.io/token/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
           "ui": {
-            "theme": { "primaryColor": "#2775CA", "badgeText": "Stablecoin" },
-            "background": { "type": "solid", "colors": ["#0B1E33"] }
-          }
+            "theme": {
+              "primaryColor": "#2775CA",
+              "badgeText": "Stablecoin"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#040C14",
+                "#0C233D"
+              ],
+              "angle": 135
+            }
+          },
+          "actions": {
+            "mint_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/mint?token=USDC",
+              "openIn": "in_app_browser"
+            },
+            "redeem_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/redeem?token=USDC",
+              "openIn": "in_app_browser"
+            }
+          },
+          "widgets": [
+            {
+              "type": "banner",
+              "title": "Mint & Redeem",
+              "description": "Mint or redeem USDC 1:1 via the issuer's app",
+              "action": "mint_dapp"
+            },
+            {
+              "type": "key_value",
+              "title": "Reserve Info",
+              "items": [
+                {
+                  "label": "Peg",
+                  "value": "1 USDC = 1 USD"
+                },
+                {
+                  "label": "Redemption",
+                  "value": "Same-day"
+                }
+              ]
+            },
+            {
+              "type": "price_chart",
+              "coingeckoId": "usd-coin",
+              "days": 1
+            }
+          ]
         },
         {
           "name": "Tether USD",
@@ -31,12 +82,63 @@
           "website": "https://tether.to",
           "description": "The largest stablecoin by market cap, pegged 1:1 to the US dollar.",
           "status": "active",
-          "tags": ["stablecoin"],
+          "tags": [
+            "stablecoin"
+          ],
           "explorer": "https://etherscan.io/token/0xdAC17F958D2ee523a2206206994597C13D831ec7",
           "ui": {
-            "theme": { "primaryColor": "#26A17B", "badgeText": "Stablecoin" },
-            "background": { "type": "solid", "colors": ["#0B1E17"] }
-          }
+            "theme": {
+              "primaryColor": "#26A17B",
+              "badgeText": "Stablecoin"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#04100C",
+                "#0B3025"
+              ],
+              "angle": 135
+            }
+          },
+          "actions": {
+            "mint_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/mint?token=USDT",
+              "openIn": "in_app_browser"
+            },
+            "redeem_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/redeem?token=USDT",
+              "openIn": "in_app_browser"
+            }
+          },
+          "widgets": [
+            {
+              "type": "banner",
+              "title": "Mint & Redeem",
+              "description": "Mint or redeem USDT 1:1 via the issuer's app",
+              "action": "mint_dapp"
+            },
+            {
+              "type": "key_value",
+              "title": "Reserve Info",
+              "items": [
+                {
+                  "label": "Peg",
+                  "value": "1 USDT = 1 USD"
+                },
+                {
+                  "label": "Redemption",
+                  "value": "Same-day"
+                }
+              ]
+            },
+            {
+              "type": "price_chart",
+              "coingeckoId": "tether",
+              "days": 1
+            }
+          ]
         },
         {
           "name": "Dai Stablecoin",
@@ -48,12 +150,63 @@
           "website": "https://makerdao.com",
           "description": "Decentralized, crypto-collateralized stablecoin from MakerDAO.",
           "status": "active",
-          "tags": ["stablecoin"],
+          "tags": [
+            "stablecoin"
+          ],
           "explorer": "https://etherscan.io/token/0x6B175474E89094C44Da98b954EedeAC495271d0F",
           "ui": {
-            "theme": { "primaryColor": "#F5AC37", "badgeText": "Stablecoin" },
-            "background": { "type": "solid", "colors": ["#2B1F0B"] }
-          }
+            "theme": {
+              "primaryColor": "#F5AC37",
+              "badgeText": "Stablecoin"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#181105",
+                "#4A3411"
+              ],
+              "angle": 135
+            }
+          },
+          "actions": {
+            "mint_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/mint?token=DAI",
+              "openIn": "in_app_browser"
+            },
+            "redeem_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/redeem?token=DAI",
+              "openIn": "in_app_browser"
+            }
+          },
+          "widgets": [
+            {
+              "type": "banner",
+              "title": "Mint & Redeem",
+              "description": "Mint or redeem DAI 1:1 via the issuer's app",
+              "action": "mint_dapp"
+            },
+            {
+              "type": "key_value",
+              "title": "Reserve Info",
+              "items": [
+                {
+                  "label": "Peg",
+                  "value": "1 DAI = 1 USD"
+                },
+                {
+                  "label": "Redemption",
+                  "value": "Same-day"
+                }
+              ]
+            },
+            {
+              "type": "price_chart",
+              "coingeckoId": "dai",
+              "days": 1
+            }
+          ]
         },
         {
           "name": "Wrapped BTC",
@@ -65,15 +218,73 @@
           "website": "https://wbtc.network",
           "description": "ERC-20 representation of Bitcoin, 1:1 custodial-backed.",
           "status": "active",
-          "tags": ["wrapped"],
+          "tags": [
+            "wrapped"
+          ],
           "explorer": "https://etherscan.io/token/0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
           "ui": {
-            "theme": { "primaryColor": "#F09242", "badgeText": "Wrapped 1:1" },
-            "background": { "type": "solid", "colors": ["#2B1B0B"] }
+            "theme": {
+              "primaryColor": "#F09242",
+              "badgeText": "Wrapped 1:1"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#180F07",
+                "#482C14"
+              ],
+              "angle": 135
+            }
           },
           "widgets": [
-            { "type": "key_value", "title": "Peg", "items": [{ "label": "Backing", "value": "1:1 BTC custodial" }] }
-          ]
+            {
+              "type": "key_value",
+              "title": "Peg",
+              "items": [
+                {
+                  "label": "Backing",
+                  "value": "1:1 BTC custodial"
+                }
+              ]
+            },
+            {
+              "type": "banner",
+              "title": "Mint & Redeem",
+              "description": "Mint or redeem WBTC 1:1 via the issuer's app",
+              "action": "mint_dapp"
+            },
+            {
+              "type": "key_value",
+              "title": "Reserve Info",
+              "items": [
+                {
+                  "label": "Peg",
+                  "value": "1 WBTC = 1 BTC"
+                },
+                {
+                  "label": "Redemption",
+                  "value": "Same-day"
+                }
+              ]
+            },
+            {
+              "type": "price_chart",
+              "coingeckoId": "wrapped-bitcoin",
+              "days": 1
+            }
+          ],
+          "actions": {
+            "mint_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/mint?token=WBTC",
+              "openIn": "in_app_browser"
+            },
+            "redeem_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/redeem?token=WBTC",
+              "openIn": "in_app_browser"
+            }
+          }
         },
         {
           "name": "Uniswap",
@@ -85,12 +296,57 @@
           "website": "https://uniswap.org",
           "description": "Governance token of the Uniswap Protocol.",
           "status": "active",
-          "tags": ["governance", "dex"],
+          "tags": [
+            "governance",
+            "dex"
+          ],
           "explorer": "https://etherscan.io/token/0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
           "ui": {
-            "theme": { "primaryColor": "#FF007A", "badgeText": "Governance" },
-            "background": { "type": "solid", "colors": ["#2B0B1D"] }
-          }
+            "theme": {
+              "primaryColor": "#FF007A",
+              "badgeText": "Governance"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#19000C",
+                "#4D0025"
+              ],
+              "angle": 135
+            }
+          },
+          "actions": {
+            "swap_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/swap?output=UNI",
+              "openIn": "in_app_browser"
+            },
+            "protocol_dapp": {
+              "type": "wallet_connect",
+              "dappUrl": "https://stake.example.com/uni"
+            }
+          },
+          "widgets": [
+            {
+              "type": "action_group",
+              "title": "Protocol Actions",
+              "items": [
+                {
+                  "label": "Swap for UNI",
+                  "action": "swap_dapp"
+                },
+                {
+                  "label": "Vote on Proposals",
+                  "action": "protocol_dapp"
+                }
+              ]
+            },
+            {
+              "type": "price_chart",
+              "coingeckoId": "uniswap",
+              "days": 1
+            }
+          ]
         },
         {
           "name": "ChainLink Token",
@@ -102,12 +358,56 @@
           "website": "https://chain.link",
           "description": "Native token of the Chainlink decentralized oracle network.",
           "status": "active",
-          "tags": ["oracle"],
+          "tags": [
+            "oracle"
+          ],
           "explorer": "https://etherscan.io/token/0x514910771AF9Ca656af840dff83E8264EcF986CA",
           "ui": {
-            "theme": { "primaryColor": "#2A5ADA", "badgeText": "Oracle" },
-            "background": { "type": "solid", "colors": ["#0B1330"] }
-          }
+            "theme": {
+              "primaryColor": "#2A5ADA",
+              "badgeText": "Oracle"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#040916",
+                "#0D1B41"
+              ],
+              "angle": 135
+            }
+          },
+          "actions": {
+            "swap_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/swap?output=LINK",
+              "openIn": "in_app_browser"
+            },
+            "protocol_dapp": {
+              "type": "wallet_connect",
+              "dappUrl": "https://stake.example.com/link"
+            }
+          },
+          "widgets": [
+            {
+              "type": "action_group",
+              "title": "Protocol Actions",
+              "items": [
+                {
+                  "label": "Swap for LINK",
+                  "action": "swap_dapp"
+                },
+                {
+                  "label": "Stake LINK",
+                  "action": "protocol_dapp"
+                }
+              ]
+            },
+            {
+              "type": "price_chart",
+              "coingeckoId": "chainlink",
+              "days": 1
+            }
+          ]
         },
         {
           "name": "Aave",
@@ -119,12 +419,57 @@
           "website": "https://aave.com",
           "description": "Governance token of the Aave lending protocol.",
           "status": "active",
-          "tags": ["governance", "lending"],
+          "tags": [
+            "governance",
+            "lending"
+          ],
           "explorer": "https://etherscan.io/token/0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9",
           "ui": {
-            "theme": { "primaryColor": "#B6509E", "badgeText": "Governance" },
-            "background": { "type": "solid", "colors": ["#210B1E"] }
-          }
+            "theme": {
+              "primaryColor": "#B6509E",
+              "badgeText": "Governance"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#120810",
+                "#37182F"
+              ],
+              "angle": 135
+            }
+          },
+          "actions": {
+            "swap_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/swap?output=AAVE",
+              "openIn": "in_app_browser"
+            },
+            "protocol_dapp": {
+              "type": "wallet_connect",
+              "dappUrl": "https://stake.example.com/aave"
+            }
+          },
+          "widgets": [
+            {
+              "type": "action_group",
+              "title": "Protocol Actions",
+              "items": [
+                {
+                  "label": "Swap for AAVE",
+                  "action": "swap_dapp"
+                },
+                {
+                  "label": "Supply & Earn",
+                  "action": "protocol_dapp"
+                }
+              ]
+            },
+            {
+              "type": "price_chart",
+              "coingeckoId": "aave",
+              "days": 1
+            }
+          ]
         }
       ]
     }

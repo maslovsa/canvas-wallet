@@ -1,0 +1,1518 @@
+{
+  "schemaVersion": "1.0.0",
+  "networks": [
+    {
+      "name": "Ethereum",
+      "tokens": [
+        {
+          "name": "Tether USD",
+          "symbol": "USDT",
+          "type": "ERC20",
+          "id": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+          "decimals": 6,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xdAC17F958D2ee523a2206206994597C13D831ec7/logo.png",
+          "website": "https://tether.to",
+          "description": "The largest stablecoin by market cap, pegged 1:1 to the US dollar.",
+          "status": "active",
+          "tags": [
+            "stablecoin"
+          ],
+          "explorer": "https://etherscan.io/token/0xdAC17F958D2ee523a2206206994597C13D831ec7",
+          "ui": {
+            "theme": {
+              "primaryColor": "#26A17B",
+              "badgeText": "Stablecoin"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#04100C",
+                "#0B3025"
+              ],
+              "angle": 135
+            }
+          },
+          "actions": {
+            "mint_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/mint?token=USDT",
+              "openIn": "in_app_browser"
+            },
+            "redeem_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/redeem?token=USDT",
+              "openIn": "in_app_browser"
+            }
+          },
+          "widgets": [
+            {
+              "type": "banner",
+              "title": "Mint & Redeem",
+              "description": "Mint or redeem USDT 1:1 via the issuer's app",
+              "action": "mint_dapp"
+            },
+            {
+              "type": "key_value",
+              "title": "Reserve Info",
+              "items": [
+                {
+                  "label": "Peg",
+                  "value": "1 USDT = 1 USD"
+                },
+                {
+                  "label": "Redemption",
+                  "value": "Same-day"
+                }
+              ]
+            },
+            {
+              "type": "price_chart",
+              "coingeckoId": "tether",
+              "days": 1
+            }
+          ]
+        },
+        {
+          "name": "USD Coin",
+          "symbol": "USDC",
+          "type": "ERC20",
+          "id": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+          "decimals": 6,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48/logo.png",
+          "website": "https://www.circle.com/usdc",
+          "description": "Fully-reserved US dollar stablecoin issued by Circle.",
+          "status": "active",
+          "tags": [
+            "stablecoin"
+          ],
+          "explorer": "https://etherscan.io/token/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+          "ui": {
+            "theme": {
+              "primaryColor": "#2775CA",
+              "badgeText": "Stablecoin"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#040C14",
+                "#0C233D"
+              ],
+              "angle": 135
+            }
+          },
+          "actions": {
+            "mint_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/mint?token=USDC",
+              "openIn": "in_app_browser"
+            },
+            "redeem_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/redeem?token=USDC",
+              "openIn": "in_app_browser"
+            }
+          },
+          "widgets": [
+            {
+              "type": "banner",
+              "title": "Mint & Redeem",
+              "description": "Mint or redeem USDC 1:1 via the issuer's app",
+              "action": "mint_dapp"
+            },
+            {
+              "type": "key_value",
+              "title": "Reserve Info",
+              "items": [
+                {
+                  "label": "Peg",
+                  "value": "1 USDC = 1 USD"
+                },
+                {
+                  "label": "Redemption",
+                  "value": "Same-day"
+                }
+              ]
+            },
+            {
+              "type": "price_chart",
+              "coingeckoId": "usd-coin",
+              "days": 1
+            }
+          ]
+        },
+        {
+          "name": "Dai Stablecoin",
+          "symbol": "DAI",
+          "type": "ERC20",
+          "id": "0x6B175474E89094C44Da98b954EedeAC495271d0F",
+          "decimals": 18,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x6B175474E89094C44Da98b954EedeAC495271d0F/logo.png",
+          "website": "https://makerdao.com",
+          "description": "Decentralized, crypto-collateralized stablecoin from MakerDAO.",
+          "status": "active",
+          "tags": [
+            "stablecoin"
+          ],
+          "explorer": "https://etherscan.io/token/0x6B175474E89094C44Da98b954EedeAC495271d0F",
+          "ui": {
+            "theme": {
+              "primaryColor": "#F5AC37",
+              "badgeText": "Stablecoin"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#181105",
+                "#4A3411"
+              ],
+              "angle": 135
+            }
+          },
+          "actions": {
+            "mint_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/mint?token=DAI",
+              "openIn": "in_app_browser"
+            },
+            "redeem_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/redeem?token=DAI",
+              "openIn": "in_app_browser"
+            }
+          },
+          "widgets": [
+            {
+              "type": "banner",
+              "title": "Mint & Redeem",
+              "description": "Mint or redeem DAI 1:1 via the issuer's app",
+              "action": "mint_dapp"
+            },
+            {
+              "type": "key_value",
+              "title": "Reserve Info",
+              "items": [
+                {
+                  "label": "Peg",
+                  "value": "1 DAI = 1 USD"
+                },
+                {
+                  "label": "Redemption",
+                  "value": "Same-day"
+                }
+              ]
+            },
+            {
+              "type": "price_chart",
+              "coingeckoId": "dai",
+              "days": 1
+            }
+          ]
+        },
+        {
+          "name": "USDe",
+          "symbol": "USDe",
+          "type": "ERC20",
+          "id": "0x4c9EDD5852cd905f086C759E8383e09bff1E68B3",
+          "decimals": 18,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x4c9EDD5852cd905f086C759E8383e09bff1E68B3/logo.png",
+          "website": "https://ethena.fi",
+          "description": "Synthetic dollar from Ethena Labs, backed by a delta-neutral hedged crypto position rather than fiat reserves.",
+          "status": "active",
+          "tags": [
+            "stablecoin",
+            "synthetic"
+          ],
+          "explorer": "https://etherscan.io/token/0x4c9EDD5852cd905f086C759E8383e09bff1E68B3",
+          "ui": {
+            "theme": {
+              "primaryColor": "#000000",
+              "badgeText": "Synthetic"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#0D0D16",
+                "#1E1E33"
+              ],
+              "angle": 135
+            }
+          },
+          "actions": {
+            "mint_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/mint?token=USDe",
+              "openIn": "in_app_browser"
+            },
+            "redeem_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/redeem?token=USDe",
+              "openIn": "in_app_browser"
+            }
+          },
+          "widgets": [
+            {
+              "type": "banner",
+              "title": "Mint & Redeem",
+              "description": "Mint or redeem USDe 1:1 via the issuer's app",
+              "action": "mint_dapp"
+            },
+            {
+              "type": "key_value",
+              "title": "Reserve Info",
+              "items": [
+                {
+                  "label": "Peg",
+                  "value": "1 USDe = 1 USD"
+                },
+                {
+                  "label": "Redemption",
+                  "value": "Same-day"
+                }
+              ]
+            },
+            {
+              "type": "price_chart",
+              "coingeckoId": "ethena-usde",
+              "days": 1
+            }
+          ]
+        },
+        {
+          "name": "PayPal USD",
+          "symbol": "PYUSD",
+          "type": "ERC20",
+          "id": "0x6c3ea9036406852006290770BEdFcAbA0e23A0e8",
+          "decimals": 6,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x6c3ea9036406852006290770BEdFcAbA0e23A0e8/logo.png",
+          "website": "https://www.paypal.com/us/digital-wallet/manage-money/crypto/pyusd",
+          "description": "USD stablecoin issued by Paxos on behalf of PayPal.",
+          "status": "active",
+          "tags": [
+            "stablecoin"
+          ],
+          "explorer": "https://etherscan.io/token/0x6c3ea9036406852006290770BEdFcAbA0e23A0e8",
+          "ui": {
+            "theme": {
+              "primaryColor": "#0070E0",
+              "badgeText": "Stablecoin"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#000B16",
+                "#002243"
+              ],
+              "angle": 135
+            }
+          },
+          "actions": {
+            "mint_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/mint?token=PYUSD",
+              "openIn": "in_app_browser"
+            },
+            "redeem_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/redeem?token=PYUSD",
+              "openIn": "in_app_browser"
+            }
+          },
+          "widgets": [
+            {
+              "type": "banner",
+              "title": "Mint & Redeem",
+              "description": "Mint or redeem PYUSD 1:1 via the issuer's app",
+              "action": "mint_dapp"
+            },
+            {
+              "type": "key_value",
+              "title": "Reserve Info",
+              "items": [
+                {
+                  "label": "Peg",
+                  "value": "1 PYUSD = 1 USD"
+                },
+                {
+                  "label": "Redemption",
+                  "value": "Same-day"
+                }
+              ]
+            },
+            {
+              "type": "price_chart",
+              "coingeckoId": "paypal-usd",
+              "days": 1
+            }
+          ]
+        },
+        {
+          "name": "TrueUSD",
+          "symbol": "TUSD",
+          "type": "ERC20",
+          "id": "0x0000000000085d4780B73119b644AE5ecd22b376",
+          "decimals": 18,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x0000000000085d4780B73119b644AE5ecd22b376/logo.png",
+          "website": "https://tusd.io",
+          "description": "USD-collateralized stablecoin with real-time attestations, now managed by Techteryx.",
+          "status": "active",
+          "tags": [
+            "stablecoin"
+          ],
+          "explorer": "https://etherscan.io/token/0x0000000000085d4780B73119b644AE5ecd22b376",
+          "ui": {
+            "theme": {
+              "primaryColor": "#002868",
+              "badgeText": "Stablecoin"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#00040A",
+                "#000C1F"
+              ],
+              "angle": 135
+            }
+          },
+          "actions": {
+            "mint_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/mint?token=TUSD",
+              "openIn": "in_app_browser"
+            },
+            "redeem_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/redeem?token=TUSD",
+              "openIn": "in_app_browser"
+            }
+          },
+          "widgets": [
+            {
+              "type": "banner",
+              "title": "Mint & Redeem",
+              "description": "Mint or redeem TUSD 1:1 via the issuer's app",
+              "action": "mint_dapp"
+            },
+            {
+              "type": "key_value",
+              "title": "Reserve Info",
+              "items": [
+                {
+                  "label": "Peg",
+                  "value": "1 TUSD = 1 USD"
+                },
+                {
+                  "label": "Redemption",
+                  "value": "Same-day"
+                }
+              ]
+            },
+            {
+              "type": "price_chart",
+              "coingeckoId": "true-usd",
+              "days": 1
+            }
+          ]
+        },
+        {
+          "name": "Euro Coin",
+          "symbol": "EURC",
+          "type": "ERC20",
+          "id": "0x1aBaEA1f7C830bD89Acc67eC4af516284b1bC33c",
+          "decimals": 6,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x1aBaEA1f7C830bD89Acc67eC4af516284b1bC33c/logo.png",
+          "website": "https://www.circle.com/eurc",
+          "description": "Fully-reserved euro stablecoin issued by Circle.",
+          "status": "active",
+          "tags": [
+            "stablecoin"
+          ],
+          "explorer": "https://etherscan.io/token/0x1aBaEA1f7C830bD89Acc67eC4af516284b1bC33c",
+          "ui": {
+            "theme": {
+              "primaryColor": "#2775CA",
+              "badgeText": "Stablecoin · EUR"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#040C14",
+                "#0C233D"
+              ],
+              "angle": 135
+            }
+          },
+          "actions": {
+            "mint_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/mint?token=EURC",
+              "openIn": "in_app_browser"
+            },
+            "redeem_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/redeem?token=EURC",
+              "openIn": "in_app_browser"
+            }
+          },
+          "widgets": [
+            {
+              "type": "banner",
+              "title": "Mint & Redeem",
+              "description": "Mint or redeem EURC 1:1 via the issuer's app",
+              "action": "mint_dapp"
+            },
+            {
+              "type": "key_value",
+              "title": "Reserve Info",
+              "items": [
+                {
+                  "label": "Peg",
+                  "value": "1 EURC = 1 EUR"
+                },
+                {
+                  "label": "Redemption",
+                  "value": "Same-day"
+                }
+              ]
+            },
+            {
+              "type": "price_chart",
+              "coingeckoId": "euro-coin",
+              "days": 1
+            }
+          ]
+        },
+        {
+          "name": "Pax Dollar",
+          "symbol": "USDP",
+          "type": "ERC20",
+          "id": "0x8E870D67F660D95d5be530380D0eC0bd388289E1",
+          "decimals": 18,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x8E870D67F660D95d5be530380D0eC0bd388289E1/logo.png",
+          "website": "https://paxos.com/usdp",
+          "description": "USD-backed, monthly-attested stablecoin issued by Paxos.",
+          "status": "active",
+          "tags": [
+            "stablecoin"
+          ],
+          "explorer": "https://etherscan.io/token/0x8E870D67F660D95d5be530380D0eC0bd388289E1",
+          "ui": {
+            "theme": {
+              "primaryColor": "#00543C",
+              "badgeText": "Stablecoin"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#000806",
+                "#001912"
+              ],
+              "angle": 135
+            }
+          },
+          "actions": {
+            "mint_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/mint?token=USDP",
+              "openIn": "in_app_browser"
+            },
+            "redeem_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/redeem?token=USDP",
+              "openIn": "in_app_browser"
+            }
+          },
+          "widgets": [
+            {
+              "type": "banner",
+              "title": "Mint & Redeem",
+              "description": "Mint or redeem USDP 1:1 via the issuer's app",
+              "action": "mint_dapp"
+            },
+            {
+              "type": "key_value",
+              "title": "Reserve Info",
+              "items": [
+                {
+                  "label": "Peg",
+                  "value": "1 USDP = 1 USD"
+                },
+                {
+                  "label": "Redemption",
+                  "value": "Same-day"
+                }
+              ]
+            },
+            {
+              "type": "price_chart",
+              "coingeckoId": "paxos-standard",
+              "days": 1
+            }
+          ]
+        },
+        {
+          "name": "Frax",
+          "symbol": "FRAX",
+          "type": "ERC20",
+          "id": "0x853d955aCEf822Db058eb8505911ED77F175b99e",
+          "decimals": 18,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x853d955aCEf822Db058eb8505911ED77F175b99e/logo.png",
+          "website": "https://frax.finance",
+          "description": "Fractional-algorithmic stablecoin from the Frax Finance protocol.",
+          "status": "active",
+          "tags": [
+            "stablecoin"
+          ],
+          "explorer": "https://etherscan.io/token/0x853d955aCEf822Db058eb8505911ED77F175b99e",
+          "ui": {
+            "theme": {
+              "primaryColor": "#000000",
+              "badgeText": "Stablecoin"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#0D0D0D",
+                "#242424"
+              ],
+              "angle": 135
+            }
+          },
+          "actions": {
+            "mint_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/mint?token=FRAX",
+              "openIn": "in_app_browser"
+            },
+            "redeem_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/redeem?token=FRAX",
+              "openIn": "in_app_browser"
+            }
+          },
+          "widgets": [
+            {
+              "type": "banner",
+              "title": "Mint & Redeem",
+              "description": "Mint or redeem FRAX 1:1 via the issuer's app",
+              "action": "mint_dapp"
+            },
+            {
+              "type": "key_value",
+              "title": "Reserve Info",
+              "items": [
+                {
+                  "label": "Peg",
+                  "value": "1 FRAX = 1 USD"
+                },
+                {
+                  "label": "Redemption",
+                  "value": "Same-day"
+                }
+              ]
+            },
+            {
+              "type": "price_chart",
+              "coingeckoId": "frax",
+              "days": 1
+            }
+          ]
+        },
+        {
+          "name": "World Liberty Financial USD",
+          "symbol": "USD1",
+          "type": "ERC20",
+          "id": "0x8d0D000Ee44948FC98c9B98A4FA4921476f08B0d",
+          "decimals": 18,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x8d0D000Ee44948FC98c9B98A4FA4921476f08B0d/logo.png",
+          "description": "USD-pegged stablecoin from World Liberty Financial. Same deployed address across Ethereum and BSC — verified independently as an 18-decimal contract on both chains.",
+          "status": "active",
+          "tags": [
+            "stablecoin"
+          ],
+          "explorer": "https://etherscan.io/token/0x8d0D000Ee44948FC98c9B98A4FA4921476f08B0d",
+          "ui": {
+            "theme": {
+              "primaryColor": "#C8A45C",
+              "badgeText": "Stablecoin"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#141009",
+                "#3C311C"
+              ],
+              "angle": 135
+            }
+          },
+          "actions": {
+            "mint_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/mint?token=USD1",
+              "openIn": "in_app_browser"
+            },
+            "redeem_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/redeem?token=USD1",
+              "openIn": "in_app_browser"
+            }
+          },
+          "widgets": [
+            {
+              "type": "banner",
+              "title": "Mint & Redeem",
+              "description": "Mint or redeem USD1 1:1 via the issuer's app",
+              "action": "mint_dapp"
+            },
+            {
+              "type": "key_value",
+              "title": "Reserve Info",
+              "items": [
+                {
+                  "label": "Peg",
+                  "value": "1 USD1 = 1 USD"
+                },
+                {
+                  "label": "Redemption",
+                  "value": "Same-day"
+                }
+              ]
+            },
+            {
+              "type": "price_chart",
+              "coingeckoId": "usd1-wlfi",
+              "days": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "BSC",
+      "tokens": [
+        {
+          "name": "Tether USD (BSC)",
+          "symbol": "USDT",
+          "type": "BEP20",
+          "id": "0x55d398326f99059fF775485246999027B3197955",
+          "decimals": 18,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/smartchain/assets/0x55d398326f99059fF775485246999027B3197955/logo.png",
+          "website": "https://tether.to",
+          "description": "Binance-Peg USDT. Reports 18 decimals on-chain on BSC (Ethereum USDT is 6) — verified live via eth_call.",
+          "status": "active",
+          "tags": [
+            "stablecoin"
+          ],
+          "explorer": "https://bscscan.com/token/0x55d398326f99059fF775485246999027B3197955",
+          "ui": {
+            "theme": {
+              "primaryColor": "#26A17B",
+              "badgeText": "Stablecoin"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#04100C",
+                "#0B3025"
+              ],
+              "angle": 135
+            }
+          },
+          "actions": {
+            "mint_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/mint?token=USDT",
+              "openIn": "in_app_browser"
+            },
+            "redeem_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/redeem?token=USDT",
+              "openIn": "in_app_browser"
+            }
+          },
+          "widgets": [
+            {
+              "type": "banner",
+              "title": "Mint & Redeem",
+              "description": "Mint or redeem USDT 1:1 via the issuer's app",
+              "action": "mint_dapp"
+            },
+            {
+              "type": "key_value",
+              "title": "Reserve Info",
+              "items": [
+                {
+                  "label": "Peg",
+                  "value": "1 USDT = 1 USD"
+                },
+                {
+                  "label": "Redemption",
+                  "value": "Same-day"
+                }
+              ]
+            },
+            {
+              "type": "price_chart",
+              "coingeckoId": "binance-bridged-usdt-bnb-smart-chain",
+              "days": 1
+            }
+          ]
+        },
+        {
+          "name": "USD Coin (BSC)",
+          "symbol": "USDC",
+          "type": "BEP20",
+          "id": "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d",
+          "decimals": 18,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/smartchain/assets/0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d/logo.png",
+          "website": "https://www.circle.com/usdc",
+          "description": "Binance-Peg USDC. Reports 18 decimals on-chain on BSC (Ethereum USDC is 6) — verified live via eth_call.",
+          "status": "active",
+          "tags": [
+            "stablecoin"
+          ],
+          "explorer": "https://bscscan.com/token/0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d",
+          "ui": {
+            "theme": {
+              "primaryColor": "#2775CA",
+              "badgeText": "Stablecoin"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#040C14",
+                "#0C233D"
+              ],
+              "angle": 135
+            }
+          },
+          "actions": {
+            "mint_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/mint?token=USDC",
+              "openIn": "in_app_browser"
+            },
+            "redeem_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/redeem?token=USDC",
+              "openIn": "in_app_browser"
+            }
+          },
+          "widgets": [
+            {
+              "type": "banner",
+              "title": "Mint & Redeem",
+              "description": "Mint or redeem USDC 1:1 via the issuer's app",
+              "action": "mint_dapp"
+            },
+            {
+              "type": "key_value",
+              "title": "Reserve Info",
+              "items": [
+                {
+                  "label": "Peg",
+                  "value": "1 USDC = 1 USD"
+                },
+                {
+                  "label": "Redemption",
+                  "value": "Same-day"
+                }
+              ]
+            },
+            {
+              "type": "price_chart",
+              "coingeckoId": "binance-bridged-usdc-bnb-smart-chain",
+              "days": 1
+            }
+          ]
+        },
+        {
+          "name": "First Digital USD",
+          "symbol": "FDUSD",
+          "type": "BEP20",
+          "id": "0xc5f0f7b66764F6ec8C8Dff7BA683102295E16409",
+          "decimals": 18,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/smartchain/assets/0xc5f0f7b66764F6ec8C8Dff7BA683102295E16409/logo.png",
+          "website": "https://firstdigitallabs.com",
+          "description": "USD-backed stablecoin issued by First Digital Labs (Hong Kong), primarily used on BNB Smart Chain.",
+          "status": "active",
+          "tags": [
+            "stablecoin"
+          ],
+          "explorer": "https://bscscan.com/token/0xc5f0f7b66764F6ec8C8Dff7BA683102295E16409",
+          "ui": {
+            "theme": {
+              "primaryColor": "#1B48EF",
+              "badgeText": "Stablecoin"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#030718",
+                "#081648"
+              ],
+              "angle": 135
+            }
+          },
+          "actions": {
+            "mint_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/mint?token=FDUSD",
+              "openIn": "in_app_browser"
+            },
+            "redeem_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/redeem?token=FDUSD",
+              "openIn": "in_app_browser"
+            }
+          },
+          "widgets": [
+            {
+              "type": "banner",
+              "title": "Mint & Redeem",
+              "description": "Mint or redeem FDUSD 1:1 via the issuer's app",
+              "action": "mint_dapp"
+            },
+            {
+              "type": "key_value",
+              "title": "Reserve Info",
+              "items": [
+                {
+                  "label": "Peg",
+                  "value": "1 FDUSD = 1 USD"
+                },
+                {
+                  "label": "Redemption",
+                  "value": "Same-day"
+                }
+              ]
+            },
+            {
+              "type": "price_chart",
+              "coingeckoId": "first-digital-usd",
+              "days": 1
+            }
+          ]
+        },
+        {
+          "name": "World Liberty Financial USD (BSC)",
+          "symbol": "USD1",
+          "type": "BEP20",
+          "id": "0x8d0D000Ee44948FC98c9B98A4FA4921476f08B0d",
+          "decimals": 18,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/smartchain/assets/0x8d0D000Ee44948FC98c9B98A4FA4921476f08B0d/logo.png",
+          "description": "USD-pegged stablecoin from World Liberty Financial, deployed on BNB Smart Chain at the same address as its Ethereum contract.",
+          "status": "active",
+          "tags": [
+            "stablecoin"
+          ],
+          "explorer": "https://bscscan.com/token/0x8d0D000Ee44948FC98c9B98A4FA4921476f08B0d",
+          "ui": {
+            "theme": {
+              "primaryColor": "#C8A45C",
+              "badgeText": "Stablecoin"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#141009",
+                "#3C311C"
+              ],
+              "angle": 135
+            }
+          },
+          "actions": {
+            "mint_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/mint?token=USD1",
+              "openIn": "in_app_browser"
+            },
+            "redeem_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/redeem?token=USD1",
+              "openIn": "in_app_browser"
+            }
+          },
+          "widgets": [
+            {
+              "type": "banner",
+              "title": "Mint & Redeem",
+              "description": "Mint or redeem USD1 1:1 via the issuer's app",
+              "action": "mint_dapp"
+            },
+            {
+              "type": "key_value",
+              "title": "Reserve Info",
+              "items": [
+                {
+                  "label": "Peg",
+                  "value": "1 USD1 = 1 USD"
+                },
+                {
+                  "label": "Redemption",
+                  "value": "Same-day"
+                }
+              ]
+            },
+            {
+              "type": "price_chart",
+              "coingeckoId": "usd1-wlfi",
+              "days": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Tron",
+      "tokens": [
+        {
+          "name": "Tether USD (TRC-20)",
+          "symbol": "USDT",
+          "type": "TRC20",
+          "id": "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t",
+          "decimals": 6,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/tron/assets/TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t/logo.png",
+          "website": "https://tether.to",
+          "description": "By far the most-used stablecoin on Tron — the network's dominant transfer asset.",
+          "status": "active",
+          "tags": [
+            "stablecoin"
+          ],
+          "explorer": "https://tronscan.org/#/token20/TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t",
+          "ui": {
+            "theme": {
+              "primaryColor": "#26A17B",
+              "badgeText": "Stablecoin"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#04100C",
+                "#0B3025"
+              ],
+              "angle": 135
+            }
+          },
+          "actions": {
+            "mint_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/mint?token=USDT",
+              "openIn": "in_app_browser"
+            },
+            "redeem_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/redeem?token=USDT",
+              "openIn": "in_app_browser"
+            }
+          },
+          "widgets": [
+            {
+              "type": "banner",
+              "title": "Mint & Redeem",
+              "description": "Mint or redeem USDT 1:1 via the issuer's app",
+              "action": "mint_dapp"
+            },
+            {
+              "type": "key_value",
+              "title": "Reserve Info",
+              "items": [
+                {
+                  "label": "Peg",
+                  "value": "1 USDT = 1 USD"
+                },
+                {
+                  "label": "Redemption",
+                  "value": "Same-day"
+                }
+              ]
+            },
+            {
+              "type": "price_chart",
+              "coingeckoId": "tether",
+              "days": 1
+            }
+          ]
+        },
+        {
+          "name": "USD Coin (TRC-20)",
+          "symbol": "USDC",
+          "type": "TRC20",
+          "id": "TEkxiTehnzSmSe2XqrBj4w32RUN966rdz8",
+          "decimals": 6,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/tron/assets/TEkxiTehnzSmSe2XqrBj4w32RUN966rdz8/logo.png",
+          "website": "https://www.circle.com/usdc",
+          "description": "Circle's USD Coin, issued natively on Tron as a TRC-20 token.",
+          "status": "active",
+          "tags": [
+            "stablecoin"
+          ],
+          "explorer": "https://tronscan.org/#/token20/TEkxiTehnzSmSe2XqrBj4w32RUN966rdz8",
+          "ui": {
+            "theme": {
+              "primaryColor": "#2775CA",
+              "badgeText": "Stablecoin"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#040C14",
+                "#0C233D"
+              ],
+              "angle": 135
+            }
+          },
+          "actions": {
+            "mint_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/mint?token=USDC",
+              "openIn": "in_app_browser"
+            },
+            "redeem_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/redeem?token=USDC",
+              "openIn": "in_app_browser"
+            }
+          },
+          "widgets": [
+            {
+              "type": "banner",
+              "title": "Mint & Redeem",
+              "description": "Mint or redeem USDC 1:1 via the issuer's app",
+              "action": "mint_dapp"
+            },
+            {
+              "type": "key_value",
+              "title": "Reserve Info",
+              "items": [
+                {
+                  "label": "Peg",
+                  "value": "1 USDC = 1 USD"
+                },
+                {
+                  "label": "Redemption",
+                  "value": "Same-day"
+                }
+              ]
+            },
+            {
+              "type": "price_chart",
+              "coingeckoId": "usd-coin",
+              "days": 1
+            }
+          ]
+        },
+        {
+          "name": "TrueUSD (TRC-20)",
+          "symbol": "TUSD",
+          "type": "TRC20",
+          "id": "TUpMhErZL2fhh4sVNULAbNKLokS4GjC1F4",
+          "decimals": 18,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/tron/assets/TUpMhErZL2fhh4sVNULAbNKLokS4GjC1F4/logo.png",
+          "website": "https://tusd.io",
+          "description": "TrueUSD's Tron deployment. Uses 18 decimals — verified live via TronScan.",
+          "status": "active",
+          "tags": [
+            "stablecoin"
+          ],
+          "explorer": "https://tronscan.org/#/token20/TUpMhErZL2fhh4sVNULAbNKLokS4GjC1F4",
+          "ui": {
+            "theme": {
+              "primaryColor": "#002868",
+              "badgeText": "Stablecoin"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#00040A",
+                "#000C1F"
+              ],
+              "angle": 135
+            }
+          },
+          "actions": {
+            "mint_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/mint?token=TUSD",
+              "openIn": "in_app_browser"
+            },
+            "redeem_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/redeem?token=TUSD",
+              "openIn": "in_app_browser"
+            }
+          },
+          "widgets": [
+            {
+              "type": "banner",
+              "title": "Mint & Redeem",
+              "description": "Mint or redeem TUSD 1:1 via the issuer's app",
+              "action": "mint_dapp"
+            },
+            {
+              "type": "key_value",
+              "title": "Reserve Info",
+              "items": [
+                {
+                  "label": "Peg",
+                  "value": "1 TUSD = 1 USD"
+                },
+                {
+                  "label": "Redemption",
+                  "value": "Same-day"
+                }
+              ]
+            },
+            {
+              "type": "price_chart",
+              "coingeckoId": "true-usd",
+              "days": 1
+            }
+          ]
+        },
+        {
+          "name": "World Liberty Financial USD (TRC-20)",
+          "symbol": "USD1",
+          "type": "TRC20",
+          "id": "TPFqcBAaaUMCSVRCqPaQ9QnzKhmuoLR6Rc",
+          "decimals": 18,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/tron/assets/TPFqcBAaaUMCSVRCqPaQ9QnzKhmuoLR6Rc/logo.png",
+          "description": "World Liberty Financial's USD1 stablecoin, deployed natively on Tron. Uses 18 decimals — verified live via TronScan.",
+          "status": "active",
+          "tags": [
+            "stablecoin"
+          ],
+          "explorer": "https://tronscan.org/#/token20/TPFqcBAaaUMCSVRCqPaQ9QnzKhmuoLR6Rc",
+          "ui": {
+            "theme": {
+              "primaryColor": "#C8A45C",
+              "badgeText": "Stablecoin"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#141009",
+                "#3C311C"
+              ],
+              "angle": 135
+            }
+          },
+          "actions": {
+            "mint_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/mint?token=USD1",
+              "openIn": "in_app_browser"
+            },
+            "redeem_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/redeem?token=USD1",
+              "openIn": "in_app_browser"
+            }
+          },
+          "widgets": [
+            {
+              "type": "banner",
+              "title": "Mint & Redeem",
+              "description": "Mint or redeem USD1 1:1 via the issuer's app",
+              "action": "mint_dapp"
+            },
+            {
+              "type": "key_value",
+              "title": "Reserve Info",
+              "items": [
+                {
+                  "label": "Peg",
+                  "value": "1 USD1 = 1 USD"
+                },
+                {
+                  "label": "Redemption",
+                  "value": "Same-day"
+                }
+              ]
+            },
+            {
+              "type": "price_chart",
+              "coingeckoId": "usd1-wlfi",
+              "days": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Solana",
+      "tokens": [
+        {
+          "name": "Tether USD (SPL)",
+          "symbol": "USDT",
+          "type": "SPL",
+          "id": "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB",
+          "decimals": 6,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/solana/assets/Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB/logo.png",
+          "website": "https://tether.to",
+          "description": "Tether USD issued as an SPL token on Solana.",
+          "status": "active",
+          "tags": [
+            "stablecoin"
+          ],
+          "explorer": "https://solscan.io/token/Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB",
+          "ui": {
+            "theme": {
+              "primaryColor": "#26A17B",
+              "badgeText": "Stablecoin"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#04100C",
+                "#0B3025"
+              ],
+              "angle": 135
+            }
+          },
+          "actions": {
+            "mint_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/mint?token=USDT",
+              "openIn": "in_app_browser"
+            },
+            "redeem_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/redeem?token=USDT",
+              "openIn": "in_app_browser"
+            }
+          },
+          "widgets": [
+            {
+              "type": "banner",
+              "title": "Mint & Redeem",
+              "description": "Mint or redeem USDT 1:1 via the issuer's app",
+              "action": "mint_dapp"
+            },
+            {
+              "type": "key_value",
+              "title": "Reserve Info",
+              "items": [
+                {
+                  "label": "Peg",
+                  "value": "1 USDT = 1 USD"
+                },
+                {
+                  "label": "Redemption",
+                  "value": "Same-day"
+                }
+              ]
+            },
+            {
+              "type": "price_chart",
+              "coingeckoId": "tether",
+              "days": 1
+            }
+          ]
+        },
+        {
+          "name": "USD Coin (SPL)",
+          "symbol": "USDC",
+          "type": "SPL",
+          "id": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+          "decimals": 6,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/solana/assets/EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v/logo.png",
+          "website": "https://www.circle.com/usdc",
+          "description": "Circle's USD Coin issued natively on Solana — one of the highest-volume SPL tokens.",
+          "status": "active",
+          "tags": [
+            "stablecoin"
+          ],
+          "explorer": "https://solscan.io/token/EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+          "ui": {
+            "theme": {
+              "primaryColor": "#2775CA",
+              "badgeText": "Stablecoin"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#040C14",
+                "#0C233D"
+              ],
+              "angle": 135
+            }
+          },
+          "actions": {
+            "mint_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/mint?token=USDC",
+              "openIn": "in_app_browser"
+            },
+            "redeem_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/redeem?token=USDC",
+              "openIn": "in_app_browser"
+            }
+          },
+          "widgets": [
+            {
+              "type": "banner",
+              "title": "Mint & Redeem",
+              "description": "Mint or redeem USDC 1:1 via the issuer's app",
+              "action": "mint_dapp"
+            },
+            {
+              "type": "key_value",
+              "title": "Reserve Info",
+              "items": [
+                {
+                  "label": "Peg",
+                  "value": "1 USDC = 1 USD"
+                },
+                {
+                  "label": "Redemption",
+                  "value": "Same-day"
+                }
+              ]
+            },
+            {
+              "type": "price_chart",
+              "coingeckoId": "usd-coin",
+              "days": 1
+            }
+          ]
+        },
+        {
+          "name": "PayPal USD (SPL)",
+          "symbol": "PYUSD",
+          "type": "SPL",
+          "id": "2b1kV6DkPAnxd5ixfnxCpjxmKwqjjaYmCZfHsFu24GXo",
+          "decimals": 6,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/solana/assets/2b1kV6DkPAnxd5ixfnxCpjxmKwqjjaYmCZfHsFu24GXo/logo.png",
+          "website": "https://www.paypal.com/us/digital-wallet/manage-money/crypto/pyusd",
+          "description": "PayPal USD's Solana deployment.",
+          "status": "active",
+          "tags": [
+            "stablecoin"
+          ],
+          "explorer": "https://solscan.io/token/2b1kV6DkPAnxd5ixfnxCpjxmKwqjjaYmCZfHsFu24GXo",
+          "ui": {
+            "theme": {
+              "primaryColor": "#0070E0",
+              "badgeText": "Stablecoin"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#000B16",
+                "#002243"
+              ],
+              "angle": 135
+            }
+          },
+          "actions": {
+            "mint_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/mint?token=PYUSD",
+              "openIn": "in_app_browser"
+            },
+            "redeem_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/redeem?token=PYUSD",
+              "openIn": "in_app_browser"
+            }
+          },
+          "widgets": [
+            {
+              "type": "banner",
+              "title": "Mint & Redeem",
+              "description": "Mint or redeem PYUSD 1:1 via the issuer's app",
+              "action": "mint_dapp"
+            },
+            {
+              "type": "key_value",
+              "title": "Reserve Info",
+              "items": [
+                {
+                  "label": "Peg",
+                  "value": "1 PYUSD = 1 USD"
+                },
+                {
+                  "label": "Redemption",
+                  "value": "Same-day"
+                }
+              ]
+            },
+            {
+              "type": "price_chart",
+              "coingeckoId": "paypal-usd",
+              "days": 1
+            }
+          ]
+        },
+        {
+          "name": "World Liberty Financial USD (SPL)",
+          "symbol": "USD1",
+          "type": "SPL",
+          "id": "USD1ttGY1N17NEEHLmELoaybftRBUSErhqYiQzvEmuB",
+          "decimals": 6,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/solana/assets/USD1ttGY1N17NEEHLmELoaybftRBUSErhqYiQzvEmuB/logo.png",
+          "description": "World Liberty Financial's USD1 stablecoin, deployed natively on Solana as an SPL token (6 decimals — unlike its 18-decimal EVM/Tron contracts, verified live via getTokenSupply).",
+          "status": "active",
+          "tags": [
+            "stablecoin"
+          ],
+          "explorer": "https://solscan.io/token/USD1ttGY1N17NEEHLmELoaybftRBUSErhqYiQzvEmuB",
+          "ui": {
+            "theme": {
+              "primaryColor": "#C8A45C",
+              "badgeText": "Stablecoin"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#141009",
+                "#3C311C"
+              ],
+              "angle": 135
+            }
+          },
+          "actions": {
+            "mint_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/mint?token=USD1",
+              "openIn": "in_app_browser"
+            },
+            "redeem_dapp": {
+              "type": "external_url",
+              "url": "https://app.example.com/redeem?token=USD1",
+              "openIn": "in_app_browser"
+            }
+          },
+          "widgets": [
+            {
+              "type": "banner",
+              "title": "Mint & Redeem",
+              "description": "Mint or redeem USD1 1:1 via the issuer's app",
+              "action": "mint_dapp"
+            },
+            {
+              "type": "key_value",
+              "title": "Reserve Info",
+              "items": [
+                {
+                  "label": "Peg",
+                  "value": "1 USD1 = 1 USD"
+                },
+                {
+                  "label": "Redemption",
+                  "value": "Same-day"
+                }
+              ]
+            },
+            {
+              "type": "price_chart",
+              "coingeckoId": "usd1-wlfi",
+              "days": 1
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
