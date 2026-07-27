@@ -52,6 +52,45 @@ card — subject to the same domain allowlist as widget icons
 lettered avatar rather than a blank space — don't invent a fake logo URL
 just to fill it in.
 
+### Verifying a token before adding it — decimals, checksum, logo
+
+Don't hand-copy `decimals` from another network's contract with the same
+symbol, and don't hand-guess an EVM address's checksum casing for the Trust
+Wallet logo URL — both are easy to get wrong silently. Run:
+
+```bash
+npm run verify:token -- --network ETH --address 0xdAC17F958D2ee523a2206206994597C13D831ec7
+npm run verify:token -- --network BSC --address 0x55d398326f99059fF775485246999027B3197955
+npm run verify:token -- --network TRON --address TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t
+npm run verify:token -- --network SOLANA --address EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v
+```
+
+(`scripts/verify-token.ts` — not a CI gate, an author-time aid.) It fetches
+`decimals()`/`symbol()` live via a public RPC (EVM), TronScan (TRON), or
+`getTokenSupply` (Solana), computes the EIP-55 checksum for EVM addresses,
+builds the Trust Wallet logo URL for that exact checksummed
+address/contract/mint, and does a live HTTP check on it — so you find out
+*before* committing a `logo` field that 404s, not after a reviewer clicks it.
+
+**Confirmed finding (2026-07-27), the reason this script exists:**
+Binance-Peg USDT and USDC on BSC report **18 decimals on-chain**, not the 6
+their Ethereum contracts use — verified live via `eth_call`, not assumed
+from the symbol. `public/lists/aegis-super-list.json` and
+`public/lists/paras.json` both carry a `USDT`/`USDC` entry on both Ethereum
+(6 decimals) and BSC (18 decimals) as a result — see those files' token
+`description` fields for the specific contracts. Getting this wrong doesn't
+fail schema validation (both are valid integers), it just silently mis-renders
+every balance shown against that token.
+
+Those two lists are also worked examples of the whole verification loop:
+`aegis-super-list.json` sources its token set from a private KYT platform's
+own network whitelists (real contracts already used in production risk
+scoring, not hand-picked); `paras.json` sources its stablecoin set from
+[Pharos Watch](https://pharos.watch)'s public per-coin pages. In both cases
+every single contract/mint was independently re-verified with this script
+before the file was written, rather than trusting the source's address
+formatting or decimals claim as-is.
+
 ### Background images
 
 `ui.background` supports `solid`, `gradient`, or `image`
@@ -160,6 +199,7 @@ npm install            # also generates src/generated/registry-schema.d.ts
 npm run dev             # Vite dev server
 npm test                 # Vitest unit + integration tests
 npm run validate:fixtures  # the same check CI runs against public/lists/*.json + fixtures/
+npm run verify:token      # author-time decimals/checksum/logo check for one token — see above
 npm run build             # type-check + production build
 ```
 

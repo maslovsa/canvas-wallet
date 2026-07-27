@@ -58,6 +58,7 @@ src/icon/                         Icon loading with a domain allowlist
 src/ui/                            Sidebar, phone-frame simulator, editor, gallery cards
 fixtures/                          Adversarial + valid test fixtures for CI (not real data)
 scripts/validate-fixtures.ts       Shared validator (used locally and by CI)
+scripts/verify-token.ts            Author-time decimals/checksum/logo check for one token
 .github/workflows/                 validate-registry.yml (PR gate), deploy.yml
 ```
 
@@ -68,6 +69,7 @@ scripts/validate-fixtures.ts       Shared validator (used locally and by CI)
 | `npm run dev` | Vite dev server |
 | `npm test` | Vitest unit + integration tests |
 | `npm run validate:fixtures` | Schema + icon-allowlist check against `public/lists/*.json` + `fixtures/` (same check CI runs) |
+| `npm run verify:token -- --network <net> --address <addr>` | Author-time decimals/checksum/logo check for one token before adding it — see CONTRIBUTING.md |
 | `npm run build` | Type-check + production build |
 | `npm run test:e2e` | Playwright smoke test |
 

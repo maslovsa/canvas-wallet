@@ -24,13 +24,15 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "gen:schema-types": "json2ts registry.schema.json -o src/generated/registry-schema.d.ts",
-    "validate:fixtures": "tsx scripts/validate-fixtures.ts"
+    "validate:fixtures": "tsx scripts/validate-fixtures.ts",
+    "verify:token": "tsx scripts/verify-token.ts"
   },
   "devDependencies": {
     "@playwright/test": "^1.47.0",
     "@types/punycode": "^2.1.4",
     "ajv": "^8.17.1",
     "happy-dom": "^20.11.1",
+    "js-sha3": "^0.12.0",
     "json-schema-to-typescript": "^15.0.0",
     "tsx": "^4.19.0",
     "typescript": "^5.6.0",
