@@ -4,12 +4,13 @@
 //  2. the risk-check Worker (VITE_RISK_PROXY_URL), which holds the Aegis key. Without that URL the site is
 //     seed-only and every other address is "unavailable".
 // The client NEVER holds an Aegis key and never sees a score or a reason: a result is only clear, caution
-// or unavailable, and a label (the VASP's name) and its logo exist only on a clear result (plan decisions R1, E6, E7).
+// or unavailable. A label (a VASP's name) and its logo may accompany clear and caution results (plan R14; the Worker
+// only sends a corroborated VASP identity on caution); never a score or a reason (plan decisions R1, E6, E7).
 import { sanitizeLogoUrl } from "./entity-logo.ts";
 
 export type RiskResult =
   | { state: "clear"; label?: string; logo?: string }
-  | { state: "caution" }
+  | { state: "caution"; label?: string; logo?: string }
   | { state: "unavailable" };
 
 export interface SeedEntry {
@@ -123,8 +124,8 @@ export interface RiskDeps {
 }
 
 /**
- * Parses the Worker's answer strictly: exactly {level}, or {level:"clear", label?, logo?} (a logo only with a
- * label, and only an acceptable URL). A label or logo on any other level is not trusted.
+ * Parses the Worker's answer strictly: {level:"clear"|"caution", label?, logo?} (a logo only with a label, and
+ * only an acceptable URL). A label or logo on any other level is not trusted.
  * Anything else (extra keys, an unknown level, a label on caution) is treated as unavailable rather than trusted.
  */
 export function parseProxyAnswer(body: unknown): RiskResult {
@@ -132,13 +133,13 @@ export function parseProxyAnswer(body: unknown): RiskResult {
   const keys = Object.keys(body);
   const { level, label, logo } = body as { level?: unknown; label?: unknown; logo?: unknown };
   if (keys.some((k) => k !== "level" && k !== "label" && k !== "logo")) return { state: "unavailable" };
-  if (level === "caution" && label === undefined && logo === undefined) return { state: "caution" };
-  if (level === "clear") {
-    if (label === undefined && logo === undefined) return { state: "clear" };
+  if (level === "clear" || level === "caution") {
+    const state = level;
+    if (label === undefined && logo === undefined) return { state };
     if (typeof label === "string" && label.length > 0 && label.length <= MAX_LABEL_LENGTH) {
-      if (logo === undefined) return { state: "clear", label };
+      if (logo === undefined) return { state, label };
       const safe = sanitizeLogoUrl(logo);
-      if (safe) return { state: "clear", label, logo: safe };
+      if (safe) return { state, label, logo: safe };
     }
   }
   return { state: "unavailable" }; // "unknown", garbage, or a label where none is allowed

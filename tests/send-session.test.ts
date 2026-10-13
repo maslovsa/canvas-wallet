@@ -95,7 +95,7 @@ describe("address -> risk status", () => {
     await c.setAddress(CLEAR_LABELED);
     await settle();
     const v = c.view();
-    expect(v.address.status).toEqual({ tone: "success", icon: "check", text: "Binance", spinner: false, checkAgain: false, checkAgainWaitSec: 0, owner: { logo: null } });
+    expect(v.address.status).toEqual({ tone: "success", icon: "check", text: "Binance", spinner: false, checkAgain: false, checkAgainWaitSec: 0, owner: { logo: null }, identity: null });
     expect(feeCalls).toEqual([CLEAR_LABELED]);
     expect(v.fee).toEqual({ label: "Network fee (estimate)", value: "~6.4 TRX", note: null });
   });

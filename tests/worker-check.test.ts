@@ -168,21 +168,39 @@ describe("VASP name and logo (clear results only)", () => {
 });
 
 // Shapes taken from live Aegis answers (2026-10-13): an OFAC SDN match, and an exchange-named address that
-// Aegis nevertheless puts at the sanctioned level through sanctions exposure. The user sees the same neutral
-// caution for all of them: no name, no logo, no category, no score.
-describe("sanctions and exposure: what leaves the Worker", () => {
-  const scenarios: Array<[string, string, Record<string, unknown>]> = [
-    ["OFAC SDN match", "sanctioned", { risk_categories: ["ofac-sdn"], sdn_match: { list: "OFAC" }, label: "Example Sanctioned Person" }],
-    ["named exchange address at sanctioned level through exposure", "sanctioned", { risk_categories: ["sanctioned", "high_risk_exchange", "sanctions_exposure", "exchange", "defi"], label: "Example Exchange", entity: entity() }],
+// Aegis nevertheless puts at the sanctioned level through sanctions exposure. A risky address leaves the Worker
+// as {level: caution} plus, only when Aegis has a corroborated VASP (verdict.entity), that VASP's name and logo
+// (plan R14). Never verdict.label (a sanctioned person or a risk annotation), a category, a score or a list.
+describe("risk: what leaves the Worker", () => {
+  const bare: Array<[string, string, Record<string, unknown>]> = [
+    ["OFAC SDN match (the label is a person's name)", "sanctioned", { risk_categories: ["ofac-sdn"], sdn_match: { list: "OFAC" }, label: "Example Sanctioned Person" }],
+    ["named exchange address at sanctioned level through exposure, no entity", "sanctioned", { risk_categories: ["sanctioned", "high_risk_exchange", "sanctions_exposure", "exchange", "defi"], label: "Example Exchange", entity: null }],
     ["critical: mixer", "critical", { risk_categories: ["mixer"], label: "Example Mixer" }],
-    ["high: scam", "high", { risk_categories: ["scam"], label: null }],
-    ["medium: sanctions exposure", "medium", { risk_categories: ["sanctions_exposure"], label: "Example Exchange", entity: entity() }],
+    ["high: scam, no label", "high", { risk_categories: ["scam"], label: null }],
   ];
-  it.each(scenarios)("%s -> exactly {level: caution}", async (_name, level, extra) => {
+  it.each(bare)("%s -> exactly {level: caution}", async (_name, level, extra) => {
     aegisAnswer = () => aegisBody(level, null, true, extra);
     const text = await (await post(makeEnv().env, ADDRESS)).text();
     expect(JSON.parse(text)).toEqual({ level: "caution" });
     expect(text).not.toMatch(/Example|logo|jsdelivr|ofac|sdn|exposure|mixer|scam|score|categor/i);
+  });
+
+  const withVasp: Array<[string, string, Record<string, unknown>]> = [
+    ["sanctioned level through exposure", "sanctioned", { risk_categories: ["sanctions_exposure", "exchange"], label: "Some Raw Label", entity: entity() }],
+    ["medium: sanctions exposure", "medium", { risk_categories: ["sanctions_exposure"], label: "Some Raw Label", entity: entity() }],
+  ];
+  it.each(withVasp)("%s, with a corroborated VASP -> caution + its name and logo, nothing else", async (_name, level, extra) => {
+    aegisAnswer = () => aegisBody(level, null, true, extra);
+    const text = await (await post(makeEnv().env, ADDRESS)).text();
+    expect(JSON.parse(text)).toEqual({ level: "caution", label: "Example Exchange", logo: LOGO });
+    expect(text).not.toMatch(/Raw Label|ofac|sdn|exposure|mixer|scam|score|categor/i);
+  });
+
+  it("a VASP name without a logo is still shown on caution; a bad logo URL is dropped", async () => {
+    aegisAnswer = () => aegisBody("high", null, true, { entity: entity({ logo_url: null }) });
+    expect(await (await post(makeEnv().env, ADDRESS)).json()).toEqual({ level: "caution", label: "Example Exchange" });
+    aegisAnswer = () => aegisBody("high", null, true, { entity: entity({ logo_url: "https://evil.example/x.png" }) });
+    expect(await (await post(makeEnv().env, OTHER)).json()).toEqual({ level: "caution", label: "Example Exchange" });
   });
 });
 
@@ -190,7 +208,7 @@ describe("alert threshold: risk score 50 and above", () => {
   const map = (verdict: Record<string, unknown>, data = true) => mapAegisVerdict({ verdict, coverage: { data_available: data } });
   it("49 is clear (the VASP name still shows), 50 is caution", () => {
     expect(map({ risk_level: "medium", risk_score: 49, entity: entity() })).toEqual({ level: "clear", label: "Example Exchange", logo: LOGO });
-    expect(map({ risk_level: "medium", risk_score: 50, entity: entity() })).toEqual({ level: "caution" });
+    expect(map({ risk_level: "medium", risk_score: 50, entity: entity() })).toEqual({ level: "caution", label: "Example Exchange", logo: LOGO });
     expect(map({ risk_level: "low", risk_score: 20 })).toEqual({ level: "clear" });
   });
   it("a high score is caution even when the level says low", () => {
@@ -374,7 +392,7 @@ describe("cache", () => {
     const { env, kv } = makeEnv({ PER_VISITOR_PER_HOUR: "1" });
     await post(env, ADDRESS);
     expect(await (await post(env, OTHER)).json()).toEqual({ level: "unknown" }); // visitor limit hit
-    expect(kv.store.has(`v2:TRON:${OTHER}`)).toBe(false);
+    expect(kv.store.has(`v3:TRON:${OTHER}`)).toBe(false);
     expect(await (await post(env, OTHER, { ip: "198.51.100.9" })).json()).toEqual({ level: "clear", label: "Binance" });
   });
 

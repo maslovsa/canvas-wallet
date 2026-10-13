@@ -142,7 +142,7 @@ test("5. sanctions list match (a real OFAC SDN address from the seed): neutral l
   await openSend(page);
   await enter(page, SEED_SANCTIONED);
   await expect(page.locator(".send-status-text")).toHaveText("Risk signals found for this address");
-  await expect(page.locator(".send-owner")).toBeHidden();
+  await expect(page.locator(".send-identity")).toBeHidden();
   await shot(page, "5a-sanctions-match-line");
   await page.locator(".send-form .send-submit").click();
   const dialog = page.locator(".phone-dialog");
@@ -157,17 +157,31 @@ test("5. sanctions list match (a real OFAC SDN address from the seed): neutral l
   await shot(page, "5c-popup-android-light");
 });
 
-test("6. risk exposure on an address that Aegis also names as an exchange: same neutral caution, the name never shown", async ({ page }) => {
-  await mockWorker(page, { level: "caution" }); // the Worker drops the name, the logo and every reason
+test("6. a risky address that is a known exchange: its logo and name, plus the risk line, and the confirmation on Send", async ({ page }) => {
+  await page.route(LOGO_URL, (route) => route.fulfill({ contentType: "image/png", body: standInLogo() }));
+  await mockWorker(page, { level: "caution", label: "Example Exchange", logo: LOGO_URL }); // the Worker sends no reason
+  await openSend(page);
+  await enter(page, NOT_IN_SEED);
+  await expect(page.locator(".send-identity-name")).toHaveText("Example Exchange");
+  await expect(page.locator(".send-identity .send-owner-logo")).toBeVisible();
+  await expect(page.locator(".send-status-text")).toHaveText("Risk signals found for this address");
+  await shot(page, "6a-risky-known-exchange-logo-name-and-risk-line");
+  await page.locator(".send-form .send-submit").click();
+  await expect(page.locator(".phone-dialog")).toContainText("Risk signals found for this address");
+  await shot(page, "6b-risky-known-exchange-popup");
+});
+
+test("6c. a risky address with no name and no logo: only the risk line", async ({ page }) => {
+  await mockWorker(page, { level: "caution" });
   await openSend(page);
   await enter(page, NOT_IN_SEED);
   await expect(page.locator(".send-status-text")).toHaveText("Risk signals found for this address");
-  await expect(page.locator("body")).not.toContainText("Example Exchange");
-  await shot(page, "6-exposure-same-neutral-line");
+  await expect(page.locator(".send-identity")).toBeHidden();
+  await shot(page, "6c-risky-no-identity-risk-line-only");
 });
 
-test("7. a Worker answer that tries to attach a name to a caution is not trusted", async ({ page }) => {
-  await mockWorker(page, { level: "caution", label: "Example Exchange", logo: LOGO_URL });
+test("7. a Worker answer with a logo URL from another host is not trusted, on a risky address too", async ({ page }) => {
+  await mockWorker(page, { level: "caution", label: "Example Exchange", logo: "https://evil.example/logo.png" });
   await openSend(page);
   await enter(page, NOT_IN_SEED);
   await expect(page.locator(".send-status-text")).toHaveText("Couldn't verify this address.");

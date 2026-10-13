@@ -32,7 +32,7 @@ export interface SendTokenInfo {
 }
 
 type AddressStatus = { kind: "empty" } | { kind: "pending" } | { kind: "invalid"; reason: Exclude<TronAddressCheck, { ok: true }>["reason"] } | { kind: "valid" };
-type RiskUi = { kind: "idle" } | { kind: "checking"; startedAt: number } | { kind: "clear"; label?: string; logo?: string } | { kind: "caution" } | { kind: "unavailable" };
+type RiskUi = { kind: "idle" } | { kind: "checking"; startedAt: number } | { kind: "clear"; label?: string; logo?: string } | { kind: "caution"; label?: string; logo?: string } | { kind: "unavailable" };
 type FeeUi = { kind: "none" } | { kind: "loading"; estimate: FeeEstimate } | { kind: "ready"; estimate: FeeEstimate };
 
 export interface SendState {
@@ -84,6 +84,8 @@ export interface SendView {
       checkAgainWaitSec: number;
       /** Set when the text is the owner's (VASP's) name: the screen shows its logo, or an initial when there is none. */
       owner: { logo: string | null } | null;
+      /** On a risky address that is a known VASP: its name and logo are shown on a row above the risk line. */
+      identity: { name: string; logo: string | null } | null;
     } | null;
   };
   amount: { value: string; error: string | null; balanceText: string };
@@ -142,18 +144,27 @@ function addressView(state: SendState, nowMs: number): SendView["address"]["stat
   }
   if (risk.kind === "checking") {
     const slow = nowMs - risk.startedAt >= SPINNER_DELAY_MS; // no flicker for a sub-250 ms check (DR7)
-    return slow ? { tone: "dim", icon: "none", text: "Checking address…", spinner: true, checkAgain: false, checkAgainWaitSec: 0, owner: null } : null;
+    return slow ? { tone: "dim", icon: "none", text: "Checking address…", spinner: true, checkAgain: false, checkAgainWaitSec: 0, owner: null, identity: null } : null;
   }
   if (risk.kind === "clear") {
     return risk.label
-      ? { tone: "success", icon: "check", text: risk.label, spinner: false, checkAgain: false, checkAgainWaitSec: 0, owner: { logo: risk.logo ?? null } }
-      : { tone: "dim", icon: "none", text: "No risk signals found", spinner: false, checkAgain: false, checkAgainWaitSec: 0, owner: null }; // never "Safe" (DR3)
+      ? { tone: "success", icon: "check", text: risk.label, spinner: false, checkAgain: false, checkAgainWaitSec: 0, owner: { logo: risk.logo ?? null }, identity: null }
+      : { tone: "dim", icon: "none", text: "No risk signals found", spinner: false, checkAgain: false, checkAgainWaitSec: 0, owner: null, identity: null }; // never "Safe" (DR3)
   }
   if (risk.kind === "caution") {
-    return { tone: "caution", icon: "alert", text: "Risk signals found for this address", spinner: false, checkAgain: false, checkAgainWaitSec: 0, owner: null };
+    return {
+      tone: "caution",
+      icon: "alert",
+      text: "Risk signals found for this address",
+      spinner: false,
+      checkAgain: false,
+      checkAgainWaitSec: 0,
+      owner: null,
+      identity: risk.label ? { name: risk.label, logo: risk.logo ?? null } : null,
+    };
   }
   if (risk.kind === "unavailable") {
-    return { tone: "dim", icon: "help", text: "Couldn't verify this address.", spinner: false, checkAgain: true, checkAgainWaitSec: cooldownSec(state, nowMs), owner: null };
+    return { tone: "dim", icon: "help", text: "Couldn't verify this address.", spinner: false, checkAgain: true, checkAgainWaitSec: cooldownSec(state, nowMs), owner: null, identity: null };
   }
   return null;
 }
@@ -335,12 +346,12 @@ export class SendController {
       .then((result) => {
         if (!this.guard.isCurrent(token)) return; // stale reply for an address no longer in the field
         this.state.risk =
-          result.state === "clear"
+          result.state === "clear" || result.state === "caution"
             ? result.label
               ? result.logo
-                ? { kind: "clear", label: result.label, logo: result.logo }
-                : { kind: "clear", label: result.label }
-              : { kind: "clear" }
+                ? { kind: result.state, label: result.label, logo: result.logo }
+                : { kind: result.state, label: result.label }
+              : { kind: result.state }
             : { kind: result.state };
         this.emit();
         this.tickCooldown();

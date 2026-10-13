@@ -14,10 +14,12 @@ const USDT: SendTokenInfo = {
 };
 
 const LOGO_ADDR = "TJDENsfBJs4RFETt1X1W8wMDc8M5XnJhCe";
+const RISKY_VASP = "TNaRAoLUyYEV2uF7GUrzSjRQTU8v5ZJ5VR";
 const NAMED_ADDR = "TWd4WrZ9wn84f5x1hZhL4DHvk738ns5jwb";
 const LOGO_URL = "https://cdn.jsdelivr.net/gh/example/kyt-entity-registry@main/logos/example.png";
 const SEED: Record<string, RiskResult> = {
   [LOGO_ADDR]: { state: "clear", label: "Example Exchange", logo: LOGO_URL },
+  [RISKY_VASP]: { state: "caution", label: "Example Exchange", logo: LOGO_URL },
   [NAMED_ADDR]: { state: "clear", label: "Åland Exchange" }, [CLEAR]: { state: "clear", label: "Binance" }, [RISKY]: { state: "caution" } };
 const deps: SendDeps = {
   validateAddress: (a) => validateTronAddress(a, webcrypto.subtle as SubtleCrypto),
@@ -167,11 +169,25 @@ describe("clear and caution flows", () => {
       expect(q(".send-owner-initial").textContent).toBe("Å");
     });
 
-    it("a caution address shows no badge and no name", async () => {
+    it("a caution address that is not a known VASP shows only the risk line", async () => {
       const { q, type } = mount();
       await type(q("#send-address"), RISKY);
-      expect(q<HTMLElement>(".send-owner").hidden).toBe(true);
+      expect(q(".send-status-text").textContent).toBe("Risk signals found for this address");
+      expect(q<HTMLElement>(".send-identity").hidden).toBe(true);
       expect(document.querySelector(".send-owner-logo")).toBeNull();
+    });
+
+    it("a risky address that is a known VASP shows its logo and name AND the risk line", async () => {
+      const { q, type, frame } = mount();
+      await type(q("#send-address"), RISKY_VASP);
+      expect(q<HTMLElement>(".send-identity").hidden).toBe(false);
+      expect(q(".send-identity-name").textContent).toBe("Example Exchange");
+      expect(q<HTMLImageElement>(".send-identity .send-owner-logo").getAttribute("src")).toBe(LOGO_URL);
+      expect(q(".send-status-text").textContent).toBe("Risk signals found for this address");
+      expect(q(".send-status-icon").textContent).toBe("⚠");
+      await type(q("#send-amount"), "10");
+      q<HTMLButtonElement>(".send-submit").click(); // the confirmation still appears on Send
+      expect(frame.querySelector(".phone-dialog")).not.toBeNull();
     });
   });
 
