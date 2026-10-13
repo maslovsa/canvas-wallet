@@ -121,7 +121,7 @@
   --send-caution: #8a5a00;
   --send-error: #c4262b;
   --send-success: #1a7f37;
-  --send-accent: #3375bb;
+  --send-accent: #2a66ab;
   --send-field-bg: #ffffff;
   --send-field-line: rgba(0, 0, 0, 0.12);
   --send-primary-bg: #111111;
@@ -259,6 +259,10 @@
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 14px;
   white-space: nowrap; /* the full address on ONE line, never wrapped or truncated (~290 px for 34 characters) */
+}
+.send-address-input::placeholder {
+  /* the hint is prose, not an address: UI font, not the monospace used for the value */
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter Variable", system-ui, sans-serif;
 }
 .send-amount-input {
   font-size: 22px;

@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="/src/style.css" />
 </head>
 <body>
-  <div id="app">
+  <main id="app">
     <div id="status-banner" class="status-banner" role="status"></div>
 
     <div id="gallery-view" class="gallery-view">
@@ -26,6 +26,7 @@
     </div>
 
     <div id="studio-view" class="studio-view" hidden>
+      <h1 class="sr-only">Token UI Studio</h1>
       <header class="topbar">
         <button id="back-to-gallery" class="icon-btn is-ghost" type="button"></button>
         <span id="topbar-sep" class="topbar-sep" aria-hidden="true"></span>
@@ -48,7 +49,7 @@
         <section id="editor-container" class="editor-panel" aria-label="Token JSON editor"></section>
       </div>
     </div>
-  </div>
+  </main>
   <script type="module" src="/src/main.ts"></script>
 </body>
 </html>

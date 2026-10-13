@@ -119,3 +119,19 @@ test.describe("on a desktop", () => {
     await page.screenshot({ path: `${SHOTS}/studio-list-light.png` });
   });
 });
+
+test("token rows are keyboard-operable: Tab to a row, Enter opens it (sidebar and phone list)", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/?list=aegis-super-list&network=Tron");
+  await expect(page.locator(".phone-list-title")).toBeVisible();
+  const row = page.locator(".sidebar .token-row", { hasText: "USDC" });
+  await row.focus();
+  await expect(row).toBeFocused();
+  await page.keyboard.press("Enter");
+  await expect(page.locator(".card-header-name")).toContainText("(USDC)");
+  await page.locator(".card-back-btn").click();
+  const phoneRow = page.locator(".phone-token-row", { hasText: "TRX" }).first();
+  await phoneRow.focus();
+  await page.keyboard.press("Space");
+  await expect(page.locator(".card-header-name")).toContainText("(TRX)");
+});

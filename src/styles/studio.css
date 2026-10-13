@@ -125,9 +125,9 @@
   height: 44px;
   margin-bottom: 20px;
   border-radius: 13px;
-  background: linear-gradient(160deg, #7aa8ff, #3d6fe0);
-  color: #fff;
-  box-shadow: 0 8px 24px rgba(61, 111, 224, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  background: var(--surface-3);
+  color: var(--studio-accent);
+  box-shadow: 0 0 0 1px var(--border), 0 1px 2px rgba(0, 0, 0, 0.4);
 }
 .gallery-header h1 {
   margin: 0;
@@ -146,7 +146,9 @@
 
 .gallery-cards {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr)); /* 4 lists sit as 2 x 2, not 3 + 1 */
+  max-width: 860px;
+  margin: 0 auto;
   gap: 16px;
 }
 .gallery-card {
@@ -336,7 +338,7 @@
   align-items: center;
   gap: 8px;
   margin: 0 0 10px;
-  color: var(--text-3);
+  color: var(--text-dim);
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.08em;
@@ -466,7 +468,7 @@
 }
 .trust-score-title {
   margin-bottom: 8px;
-  color: var(--text-3);
+  color: var(--text-dim);
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.08em;
@@ -655,7 +657,8 @@ html[data-fullscreen="true"][data-view="studio"] .phone-stage .phone-frame {
   zoom: 1;
 }
 html[data-fullscreen="true"][data-view="studio"] .phone-frame {
-  width: 100vw;
+  width: min(100vw, 600px); /* a tablet gets a centred phone-width column, not stretched cards */
+  margin: 0 auto;
   height: 100dvh;
   padding: 0;
   border-radius: 0;

@@ -521,7 +521,7 @@ async function init(): Promise<void> {
   el("topbar-sep").append(icon("chevron-right", { size: 16 }));
   const downloadBtn = el("download-list-btn");
   downloadBtn.append(icon("download", { size: 16 }), Object.assign(document.createElement("span"), { className: "icon-btn-label", textContent: "Export list" }));
-  downloadBtn.setAttribute("aria-label", "Download list JSON");
+  downloadBtn.setAttribute("aria-label", "Export list");
   downloadBtn.title = "Download list JSON";
   buildDock();
 

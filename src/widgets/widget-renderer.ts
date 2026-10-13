@@ -122,11 +122,15 @@ function renderSparklineInto(container: HTMLElement, prices: number[], isPlaceho
   stats.className = "price-chart-stats";
   const price = document.createElement("span");
   price.className = "price-chart-price";
-  price.textContent = isPlaceholder ? "~" : `$${latest < 1 ? latest.toPrecision(3) : latest.toFixed(2)}`;
-  const change = document.createElement("span");
-  change.className = `price-chart-change ${isRising ? "price-chart-up" : "price-chart-down"}`;
-  change.textContent = `${isRising ? "+" : ""}${changePct.toFixed(2)}%`;
-  stats.append(price, change);
+  price.textContent = isPlaceholder ? "Price unavailable" : `$${latest < 1 ? latest.toPrecision(3) : latest.toFixed(2)}`;
+  stats.append(price);
+  if (!isPlaceholder) {
+    // A sample series has no real price or change, so none is shown (an invented "+18%" on a stablecoin misleads).
+    const change = document.createElement("span");
+    change.className = `price-chart-change ${isRising ? "price-chart-up" : "price-chart-down"}`;
+    change.textContent = `${isRising ? "+" : ""}${changePct.toFixed(2)}%`;
+    stats.append(change);
+  }
   container.append(stats);
 
   const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
@@ -141,7 +145,7 @@ function renderSparklineInto(container: HTMLElement, prices: number[], isPlaceho
   if (isPlaceholder) {
     const caption = document.createElement("div");
     caption.className = "price-chart-caption";
-    caption.textContent = "Sample chart — live price unavailable right now.";
+    caption.textContent = "Illustrative sample chart, not real prices. Live data is unavailable right now.";
     container.append(caption);
   }
 }

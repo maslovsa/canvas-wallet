@@ -1,6 +1,7 @@
 import type { Registry, Token } from "../types.ts";
 import { createLogoBadge } from "./logo-badge.ts";
 import { icon } from "./icons.ts";
+import { makeActivatable } from "./a11y.ts";
 import { findNetworkInfo, type NetworkInfo } from "../networks/network-registry.ts";
 
 // Virtualized above ~200 tokens per network (CEO review Section 7 finding).
@@ -73,6 +74,9 @@ export function renderSidebar(
   addBtn.append(icon("plus", { size: 15 }), document.createTextNode("Add / Create token"));
   addBtn.addEventListener("click", callbacks.onAddToken);
   container.append(addBtn);
+
+  // A long list re-renders scrolled to the top: keep the selected token in view.
+  container.querySelector(".token-row.active")?.scrollIntoView?.({ block: "nearest" });
 }
 
 function renderTokenRow(token: Token, active: boolean, onSelect: (token: Token) => void): HTMLElement {
@@ -83,7 +87,8 @@ function renderTokenRow(token: Token, active: boolean, onSelect: (token: Token) 
   const label = document.createElement("span");
   label.textContent = `${token.symbol} — ${token.name}`;
   row.append(label);
-  row.addEventListener("click", () => onSelect(token));
+  makeActivatable(row, () => onSelect(token));
+  if (active) row.setAttribute("aria-current", "true");
   return row;
 }
 

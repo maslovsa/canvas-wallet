@@ -6,7 +6,7 @@
   --ph-card: #ffffff;
   --ph-line: rgba(60, 60, 67, 0.13);
   --ph-fill: rgba(120, 120, 128, 0.12);
-  --phone-dim: rgba(60, 60, 67, 0.62);
+  --phone-dim: rgba(60, 60, 67, 0.74);
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter Variable", "Segoe UI", system-ui, sans-serif;
   background: var(--ph-bg);
   color: #111214;
@@ -70,7 +70,8 @@
   background: transparent;
   color: #fff;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
-  padding: 6px 8px 6px 2px;
+  min-height: 44px; /* touch target */
+  padding: 6px 12px 6px 2px;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
@@ -167,16 +168,18 @@
   display: inline-flex;
   align-items: center;
   gap: 2px;
-  margin: 0 0 6px -6px;
+  min-height: 44px; /* touch target */
+  margin: 0 0 2px -6px;
   padding: 4px 8px 4px 2px;
   border: 0;
   background: transparent;
-  color: var(--accent);
+  color: var(--send-accent, #2a66ab);
   font: inherit;
   font-size: 17px;
   cursor: pointer;
 }
 .phone-list-title {
+  text-wrap: balance; /* no orphaned "+ TRON)" on a second line */
   font-weight: 700;
   font-size: 28px;
   letter-spacing: -0.035em;
@@ -528,6 +531,12 @@
 }
 .phone-frame.theme-dark .price-chart-price {
   color: #f2f3f5;
+}
+.price-chart-price:only-child {
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--phone-dim);
 }
 .price-chart-change {
   font-size: 14px;
