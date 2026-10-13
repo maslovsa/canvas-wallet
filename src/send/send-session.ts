@@ -181,7 +181,9 @@ export function deriveSendView(state: SendState, token: SendTokenInfo, nowMs: nu
     },
     amount: { value: state.amountText, error: amount.error, balanceText: `Balance ${formatDisplay(token.balanceUnits, token.decimals)} ${token.symbol}` },
     fee: feeLine,
-    button: { label: state.phase === "sending" ? "Sending…" : "Send", enabled, reason: enabled ? null : state.phase === "form" ? reason : null },
+    // The line above the button explains a disabled Send, but never repeats an error already shown inline
+    // right under its field (design review: "Not enough USDT" appeared twice on one screen).
+    button: { label: state.phase === "sending" ? "Sending…" : "Send", enabled, reason: enabled || state.phase !== "form" || reason === amount.error || reason === addressError(state) ? null : reason },
     backEnabled: state.phase !== "sending",
     popup: state.popupOpen,
     sent: state.sent
