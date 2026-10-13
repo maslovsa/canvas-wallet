@@ -230,3 +230,13 @@ never hand-edit that generated file. If you change the schema, add both a
 `fixtures/valid/` and `fixtures/adversarial/` case exercising the change, and
 never touch `fixtures/canary-bad.json` — it exists specifically to always
 fail, as a check that the validator itself hasn't silently broken.
+
+## Risk-check Worker (Send window)
+
+A static GitHub Pages site cannot hold a secret, so address risk checks go through a small Cloudflare Worker in `worker/` that holds the Aegis key. Design and limits: `docs/designs/send-window-plan.md`.
+
+- **The key never goes in the repo.** `worker/wrangler.toml` is public and contains no secrets. Set the key in the Cloudflare dashboard (Worker > Settings > Variables and Secrets > add secret `AEGIS_API_KEY`) or with `npx wrangler secret put AEGIS_API_KEY`. Use a dedicated key with a monthly cap.
+- **Connect the repo:** Cloudflare dashboard > Workers & Pages > Create > Import a repository > `maslovsa/canvas-wallet`. Root directory `worker`, deploy command `npx wrangler deploy`. Every push to `main` then redeploys the Worker.
+- **Local dev:** copy `worker/.dev.vars.example` to `worker/.dev.vars` (gitignored), then `npx wrangler dev` inside `worker/`.
+- **Site wiring:** set the public repo variable `VITE_RISK_PROXY_URL` (Settings > Secrets and variables > Actions > Variables) to the Worker URL. Empty means a seed-only site.
+- **Kill switch:** set the Worker variable `RISK_ENABLED` to `false`. Rollback: `npx wrangler rollback`.

@@ -29,3 +29,8 @@ coverage/
 
 # Logs
 npm-debug.log*
+
+# Cloudflare Worker local state and secrets
+worker/.dev.vars
+.dev.vars
+.wrangler/

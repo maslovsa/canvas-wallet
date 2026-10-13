@@ -1,0 +1,2 @@
+# Copy to worker/.dev.vars (gitignored) for `npx wrangler dev`. Never commit real values.
+AEGIS_API_KEY=

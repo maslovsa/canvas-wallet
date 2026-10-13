@@ -1,0 +1,21 @@
+# Cloudflare Worker: risk-check proxy for the Send window (docs/designs/send-window-plan.md, T9).
+# Nothing in this file is secret. The Aegis key is NOT here: it lives only as the Worker secret
+# AEGIS_API_KEY (Cloudflare dashboard > Worker > Settings > Variables and Secrets, or
+# `npx wrangler secret put AEGIS_API_KEY`). Local development reads worker/.dev.vars (gitignored).
+name = "canvas-wallet-risk"
+main = "src/index.ts"
+compatibility_date = "2026-10-01"
+workers_dev = true
+
+[vars]
+# Exact browser origin allowed to call the Worker (GitHub Pages origin has no path).
+ALLOWED_ORIGIN = "https://maslovsa.github.io"
+AEGIS_BASE_URL = "https://api.aegis-kyt.com"
+# Kill switch: set to "false" to turn live checks off; the site keeps working on the static seed.
+RISK_ENABLED = "true"
+# Abuse limits (see plan R4 / E3). Enforced once the real Worker lands (T9).
+DAILY_BUDGET = "30"
+PER_VISITOR_PER_HOUR = "10"
+
+# KV cache and the Durable Object counter are added in T9 (they need ids created in the account).
+# Free plan note: Durable Objects need the SQLite backend, i.e. `new_sqlite_classes` in a migration.
