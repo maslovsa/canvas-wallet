@@ -127,6 +127,16 @@ describe("address -> risk status", () => {
     expect(c.view().address.status).toMatchObject({ text: "No risk signals found" });
   });
 
+  it("the 'checked by Aegis' caption is hidden when the check failed", async () => {
+    const { c } = setup();
+    await c.setAddress(UNKNOWN);
+    await settle();
+    expect(c.view().address.showCaption).toBe(false);
+    await c.setAddress(CLEAR_PLAIN);
+    await settle();
+    expect(c.view().address.showCaption).toBe(true);
+  });
+
   it("a thrown risk check becomes unavailable (never safe, never a crash)", async () => {
     const { c } = setup({ checkRisk: async () => { throw new Error("boom"); } });
     await c.setAddress(UNKNOWN);

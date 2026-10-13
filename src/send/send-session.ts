@@ -177,7 +177,8 @@ export function deriveSendView(state: SendState, token: SendTokenInfo, nowMs: nu
       value: state.address,
       error: addressError(state),
       status: addressView(state, nowMs),
-      showCaption: addrOk,
+      // "Address is checked by Aegis" under "Couldn't verify this address" would contradict itself.
+      showCaption: addrOk && state.risk.kind !== "unavailable",
     },
     amount: { value: state.amountText, error: amount.error, balanceText: `Balance ${formatDisplay(token.balanceUnits, token.decimals)} ${token.symbol}` },
     fee: feeLine,
