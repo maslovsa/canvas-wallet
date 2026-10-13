@@ -90,8 +90,26 @@ test("phone navigation: token list -> token detail -> Back returns to the list",
   await expect(page.locator(".card-header-name")).toHaveCount(0);
 });
 
-// ---- Send window (plan T12). The Worker is not part of this PR: addresses are answered by the bundled
-// risk seed (public/risk-seed.json); anything else is "Couldn't verify".
+// ---- Send window (plan T12). Addresses in the bundled risk seed (public/risk-seed.json) are answered
+// locally; every other address goes to the risk-check Worker, which these tests mock with page.route().
+const WORKER = "https://risk-worker.test";
+type WorkerAnswer = { status?: number; body?: unknown; delayMs?: number; abort?: boolean };
+
+/** Mocks the Worker's /check (including the CORS preflight) and records the addresses it was asked about. */
+async function mockWorker(page: Page, answer: (address: string) => WorkerAnswer): Promise<string[]> {
+  const asked: string[] = [];
+  await page.route(`${WORKER}/check`, async (route) => {
+    const cors = { "access-control-allow-origin": "*", "access-control-allow-headers": "content-type", "access-control-allow-methods": "POST, OPTIONS" };
+    if (route.request().method() === "OPTIONS") return route.fulfill({ status: 204, headers: cors });
+    const { address } = route.request().postDataJSON() as { address: string };
+    asked.push(address);
+    const a = answer(address);
+    if (a.abort) return route.abort();
+    if (a.delayMs) await new Promise((r) => setTimeout(r, a.delayMs));
+    return route.fulfill({ status: a.status ?? 200, headers: cors, contentType: "application/json", body: JSON.stringify(a.body ?? { level: "unknown" }) });
+  });
+  return asked;
+}
 const SEED_CLEAR_LABELED = "TMuA6YqfCeX8EhbfYEg5y7S4DqzSJireY9"; // Binance, clear
 const SEED_CAUTION = "THJUJFyTnrBWb1ijWav7qfRBrjUuKgP49Z"; // risky
 const NOT_IN_SEED = "TLa2f6VPqDgRE67v1736s7bJ8Ray5wYjU7";
@@ -148,13 +166,70 @@ test("Send: a risky address shows the caution line first, the popup only on Send
   await expect(page.locator(".send-sent-headline")).toHaveText("10 USDT sent");
 });
 
-test("Send: an address that is not in the seed is 'Couldn't verify', never safe, and Send is still allowed", async ({ page }) => {
+test("Send: an address that is not in the seed goes to the Worker; if the Worker is down it is 'Couldn't verify', never safe, and Send is still allowed", async ({ page }) => {
+  const asked = await mockWorker(page, () => ({ abort: true }));
   await startSend(page);
   await page.locator("#send-address").fill(NOT_IN_SEED);
   await page.locator("#send-amount").fill("1");
   await expect(page.locator(".send-status-text")).toHaveText("Couldn't verify this address.");
   await expect(page.locator(".send-status .send-link")).toBeVisible();
   await expect(page.locator(".send-form .send-submit")).toBeEnabled();
+  expect(asked).toEqual([NOT_IN_SEED]);
+});
+
+test("Send: seed addresses never call the Worker", async ({ page }) => {
+  const asked = await mockWorker(page, () => ({ body: { level: "caution" } }));
+  await startSend(page);
+  await page.locator("#send-address").fill(SEED_CLEAR_LABELED);
+  await expect(page.locator(".send-status-text")).toHaveText("Binance");
+  expect(asked).toEqual([]);
+});
+
+test("Send: the Worker says clear with a label -> shown with the label", async ({ page }) => {
+  await mockWorker(page, () => ({ body: { level: "clear", label: "Example Exchange" } }));
+  await startSend(page);
+  await page.locator("#send-address").fill(NOT_IN_SEED);
+  await expect(page.locator(".send-status-text")).toHaveText("Example Exchange");
+});
+
+test("Send: the Worker says caution -> amber line, popup only on Send, nothing but the agreed copy", async ({ page }) => {
+  await mockWorker(page, () => ({ body: { level: "caution" } }));
+  await startSend(page);
+  await page.locator("#send-address").fill(NOT_IN_SEED);
+  await page.locator("#send-amount").fill("3");
+  await expect(page.locator(".send-status-text")).toHaveText("Caution: we don't recommend sending here");
+  await expect(page.locator(".phone-overlay")).toHaveCount(0);
+  await page.locator(".send-form .send-submit").click();
+  await expect(page.locator(".phone-dialog")).toContainText("We don't recommend sending to this address");
+});
+
+test("Send: a slow Worker shows 'Checking address…' after the spinner delay, Send waits, then the verdict arrives", async ({ page }) => {
+  await mockWorker(page, () => ({ body: { level: "clear" }, delayMs: 1500 }));
+  await startSend(page);
+  await page.locator("#send-address").fill(NOT_IN_SEED);
+  await page.locator("#send-amount").fill("2");
+  await expect(page.locator(".send-status-text")).toHaveText("Checking address…");
+  await expect(page.locator(".send-form .send-submit")).toBeDisabled();
+  await expect(page.locator(".send-status-text")).toHaveText("No risk signals found");
+  await expect(page.locator(".send-form .send-submit")).toBeEnabled();
+});
+
+test("Send: a Worker answer with extra fields is not trusted", async ({ page }) => {
+  await mockWorker(page, () => ({ body: { level: "clear", score: 1 } }));
+  await startSend(page);
+  await page.locator("#send-address").fill(NOT_IN_SEED);
+  await expect(page.locator(".send-status-text")).toHaveText("Couldn't verify this address.");
+});
+
+test("Send: Check again asks the Worker again and can recover", async ({ page }) => {
+  let n = 0;
+  const asked = await mockWorker(page, () => (++n === 1 ? { status: 503 } : { body: { level: "clear" } }));
+  await startSend(page);
+  await page.locator("#send-address").fill(NOT_IN_SEED);
+  await expect(page.locator(".send-status-text")).toHaveText("Couldn't verify this address.");
+  await page.locator(".send-status .send-link").click();
+  await expect(page.locator(".send-status-text")).toHaveText("No risk signals found");
+  expect(asked).toHaveLength(2);
 });
 
 test("Send: Back returns to the token and the form starts fresh next time", async ({ page }) => {

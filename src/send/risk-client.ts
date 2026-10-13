@@ -1,8 +1,10 @@
-// Address risk check for the Send screen. This PR is seed-only: a CI-validated list of demo
-// addresses (public/risk-seed.json, produced from Aegis POST /v2/screen results) answers instantly;
-// any other address is "unavailable" until the live Worker lands (next PR). The client NEVER holds
-// an Aegis key and never sees a score or a reason: a result is only clear, caution or unavailable,
-// and a label exists only on a clear result (plan decisions R1, E6, E7).
+// Address risk check for the Send screen. Two sources, in this order (plan decision R1):
+//  1. a CI-validated seed of demo addresses (public/risk-seed.json, produced from Aegis POST /v2/screen
+//     results): instant, free, works offline;
+//  2. the risk-check Worker (VITE_RISK_PROXY_URL), which holds the Aegis key. Without that URL the site is
+//     seed-only and every other address is "unavailable".
+// The client NEVER holds an Aegis key and never sees a score or a reason: a result is only clear, caution
+// or unavailable, and a label exists only on a clear result (plan decisions R1, E6, E7).
 
 export type RiskResult =
   | { state: "clear"; label?: string }
@@ -105,9 +107,50 @@ export function resetSeedCache(): void {
 export interface RiskDeps {
   seed: SeedEntry[];
   now: Date;
+  /** Base URL of the risk-check Worker; undefined or empty means seed-only. */
+  proxyUrl?: string | undefined;
+  fetchImpl?: typeof fetch;
+  /** Must stay below the screen's 15 s ceiling (plan R10). */
+  timeoutMs?: number;
 }
 
-/** Seed lookup now; the live Worker call is added in the next PR. Anything not answered is "unavailable" (never "safe"). */
+/**
+ * Parses the Worker's answer strictly: exactly {level} or {level, label}, a label only on "clear".
+ * Anything else (extra keys, an unknown level, a label on caution) is treated as unavailable rather than trusted.
+ */
+export function parseProxyAnswer(body: unknown): RiskResult {
+  if (!body || typeof body !== "object" || Array.isArray(body)) return { state: "unavailable" };
+  const keys = Object.keys(body);
+  const { level, label } = body as { level?: unknown; label?: unknown };
+  if (keys.some((k) => k !== "level" && k !== "label")) return { state: "unavailable" };
+  if (level === "caution" && label === undefined) return { state: "caution" };
+  if (level === "clear") {
+    if (label === undefined) return { state: "clear" };
+    if (typeof label === "string" && label.length > 0 && label.length <= MAX_LABEL_LENGTH) return { state: "clear", label };
+  }
+  return { state: "unavailable" }; // "unknown", garbage, or a label where none is allowed
+}
+
+/** One POST to the Worker. Never throws: any failure is "unavailable". */
+export async function proxyCheck(address: string, proxyUrl: string, fetchImpl: typeof fetch = fetch, timeoutMs = 14_000): Promise<RiskResult> {
+  try {
+    const res = await fetchImpl(`${proxyUrl.replace(/\/+$/, "")}/check`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ network: "TRON", address }),
+      signal: AbortSignal.timeout(timeoutMs),
+    });
+    if (!res.ok) return { state: "unavailable" };
+    return parseProxyAnswer(await res.json());
+  } catch {
+    return { state: "unavailable" };
+  }
+}
+
+/** Seed first; on a miss, the Worker when one is configured. Anything not answered is "unavailable" (never "safe"). */
 export async function checkAddress(address: string, deps: RiskDeps): Promise<RiskResult> {
-  return seedLookup(deps.seed, address, deps.now) ?? { state: "unavailable" };
+  const fromSeed = seedLookup(deps.seed, address, deps.now);
+  if (fromSeed) return fromSeed;
+  if (!deps.proxyUrl) return { state: "unavailable" };
+  return proxyCheck(address, deps.proxyUrl, deps.fetchImpl, deps.timeoutMs);
 }

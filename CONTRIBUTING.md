@@ -252,10 +252,18 @@ contains secret-shaped text: this repository is public and the built site is wor
 
 ## Risk-check Worker (Send window)
 
-A static GitHub Pages site cannot hold a secret, so address risk checks go through a small Cloudflare Worker in `worker/` that holds the Aegis key. Design and limits: `docs/designs/send-window-plan.md`.
+A static GitHub Pages site cannot hold a secret, so address risk checks go through a small Cloudflare Worker in `worker/` that holds the Aegis key. Design, limits and decisions: `docs/designs/send-window-plan.md`.
 
-- **The key never goes in the repo.** `worker/wrangler.toml` is public and contains no secrets. Set the key in the Cloudflare dashboard (Worker > Settings > Variables and Secrets > add secret `AEGIS_API_KEY`) or with `npx wrangler secret put AEGIS_API_KEY`. Use a dedicated key with a monthly cap.
-- **Connect the repo:** Cloudflare dashboard > Workers & Pages > Create > Import a repository > `maslovsa/canvas-wallet`. Root directory `worker`, deploy command `npx wrangler deploy`. Every push to `main` then redeploys the Worker.
-- **Local dev:** copy `worker/.dev.vars.example` to `worker/.dev.vars` (gitignored), then `npx wrangler dev` inside `worker/`.
-- **Site wiring:** set the public repo variable `VITE_RISK_PROXY_URL` (Settings > Secrets and variables > Actions > Variables) to the Worker URL. Empty means a seed-only site.
-- **Kill switch:** `RISK_ENABLED` is a Worker secret (not a variable, so Git deploys do not overwrite it). Live checks run only when it equals `true`; change it in the Cloudflare dashboard (Worker > Settings > Variables and Secrets) or with `npx wrangler secret put RISK_ENABLED`. Rollback: `npx wrangler rollback`.
+**What it does.** `POST /check {"network":"TRON","address":"T..."}` returns exactly `{"level":"clear","label"?}`, `{"level":"caution"}` or `{"level":"unknown"}`: never a score, a reason or flags, and a label only with a clear result. It validates the address (the same `src/send/tron-address.ts` the phone uses) before any paid call, caches verdicts in KV (24 h; a failed check 60 s), and enforces a per-visitor hourly limit and a daily budget with a Durable Object counter. If the cache or the counter is down, or the kill switch is off, it answers `unknown` without calling Aegis (fail closed). Each live check costs 0.1 Aegis credit; a repeat of the same address and day is free (Idempotency-Key).
+
+**Secrets and settings.**
+- `AEGIS_API_KEY` (secret): a dedicated key with a monthly cap. Never put it in the repo, `.env` of a deployed build, a `VITE_*` variable or the browser bundle (`npm run check:dist` fails the deploy on `aeg_...` text).
+- `RISK_ENABLED` (secret, not a variable, so Git deploys do not overwrite it): live checks run only when it equals `true`. Anything else, or a missing value, means seed-only.
+- `DAILY_BUDGET`, `PER_VISITOR_PER_HOUR`, `ALLOWED_ORIGIN` (comma-separated exact origins), `AEGIS_BASE_URL` live in `worker/wrangler.toml`; changing them is a normal commit.
+- Set secrets in the Cloudflare dashboard (Worker > Settings > Variables and Secrets) or with `npx wrangler secret put <NAME>`.
+
+**Deploy.** The repo is connected to Cloudflare Workers Builds (root directory `worker`), so a push to `main` redeploys the Worker. Recommended build settings: build command `npm test` (tests run before the deploy), deploy command `npx wrangler deploy`, and branch builds for non-production branches switched off. Manual deploy: `cd worker && npx wrangler deploy` with `CLOUDFLARE_API_TOKEN` set. Rollback: `npx wrangler rollback`. Logs: `npx wrangler tail`.
+
+**Site wiring.** Set the public repo variable `VITE_RISK_PROXY_URL` (GitHub: Settings > Secrets and variables > Actions > Variables) to the Worker URL; the Pages build picks it up on the next deploy. Empty or unset means a seed-only site. Kill switch: set the `RISK_ENABLED` secret to anything but `true`.
+
+**Local development.** Copy `worker/.dev.vars.example` to `worker/.dev.vars` (gitignored), fill in a key, and run `npx wrangler dev` inside `worker/`; the example also allows the Vite dev origin. Run `npx vitest run tests/worker-check.test.ts` for the Worker tests.

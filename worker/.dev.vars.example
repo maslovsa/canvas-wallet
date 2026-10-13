@@ -1,2 +1,5 @@
 # Copy to worker/.dev.vars (gitignored) for `npx wrangler dev`. Never commit real values.
 AEGIS_API_KEY=
+RISK_ENABLED=true
+# Allow the local Vite dev server in addition to the production origin:
+ALLOWED_ORIGIN=https://maslovsa.github.io,http://localhost:5173
