@@ -70,7 +70,8 @@
   background: transparent;
   color: #fff;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
-  padding: 6px 8px 6px 2px;
+  min-height: 44px; /* touch target */
+  padding: 6px 12px 6px 2px;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
@@ -167,7 +168,8 @@
   display: inline-flex;
   align-items: center;
   gap: 2px;
-  margin: 0 0 6px -6px;
+  min-height: 44px; /* touch target */
+  margin: 0 0 2px -6px;
   padding: 4px 8px 4px 2px;
   border: 0;
   background: transparent;
@@ -177,6 +179,7 @@
   cursor: pointer;
 }
 .phone-list-title {
+  text-wrap: balance; /* no orphaned "+ TRON)" on a second line */
   font-weight: 700;
   font-size: 28px;
   letter-spacing: -0.035em;
