@@ -9,10 +9,11 @@ describe("isSchemaVersionSupported", () => {
   it("accepts the supported versions", () => {
     expect(isSchemaVersionSupported("1.0.0")).toBe(true);
     expect(isSchemaVersionSupported("1.1.0")).toBe(true);
+    expect(isSchemaVersionSupported("1.2.0")).toBe(true);
   });
 
   it("refuses an unrecognized version rather than guessing", () => {
-    expect(isSchemaVersionSupported("1.2.0")).toBe(false);
+    expect(isSchemaVersionSupported("1.3.0")).toBe(false);
     expect(isSchemaVersionSupported("2.0.0")).toBe(false);
     expect(isSchemaVersionSupported("")).toBe(false);
   });
@@ -27,6 +28,11 @@ describe("requiredSchemaVersion", () => {
     expect(requiredSchemaVersion(registryWith({ a: { type: "external_url" } }))).toBe("1.0.0");
     expect(requiredSchemaVersion({ networks: [] })).toBe("1.0.0");
     expect(requiredSchemaVersion({})).toBe("1.0.0");
+  });
+
+  it("is 1.2.0 when any token uses receive, even next to send", () => {
+    expect(requiredSchemaVersion(registryWith({ r: { type: "receive" } }))).toBe("1.2.0");
+    expect(requiredSchemaVersion(registryWith({ s: { type: "send" }, r: { type: "receive" } }))).toBe("1.2.0");
   });
 
   it("is 1.1.0 when any token uses send", () => {

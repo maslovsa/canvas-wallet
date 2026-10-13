@@ -26,7 +26,7 @@ function substituteUrl(template: string, token: Token, userAddress: string | und
 
 /** Actions that leave the simulator for a URL (external_url, deeplink, wallet_connect). */
 export interface LinkActionResult {
-  type: Exclude<Action["type"], "send">;
+  type: Exclude<Action["type"], "send" | "receive">;
   targetUrl: string;
   requiresInterstitial: boolean;
 }
@@ -37,7 +37,13 @@ export interface SendActionResult {
   requiresInterstitial: false;
 }
 
-export type ActionResult = LinkActionResult | SendActionResult;
+/** The `receive` action opens the built-in Receive dialog (address, QR code, Copy): no URL, no interstitial. */
+export interface ReceiveActionResult {
+  type: "receive";
+  requiresInterstitial: false;
+}
+
+export type ActionResult = LinkActionResult | SendActionResult | ReceiveActionResult;
 
 type ActionHandler<A extends Action> = (action: A, token: Token, userAddress: string | undefined) => ActionResult;
 
@@ -64,11 +70,17 @@ const handleSend: ActionHandler<Extract<Action, { type: "send" }>> = () => ({
   requiresInterstitial: false,
 });
 
+const handleReceive: ActionHandler<Extract<Action, { type: "receive" }>> = () => ({
+  type: "receive",
+  requiresInterstitial: false,
+});
+
 const HANDLERS: { [K in Action["type"]]: ActionHandler<Extract<Action, { type: K }>> } = {
   external_url: handleExternalUrl,
   deeplink: handleDeeplink,
   wallet_connect: handleWalletConnect,
   send: handleSend,
+  receive: handleReceive,
 };
 
 /** Resolve an action key against a token's `actions` map. Unknown action -> disabled, per tz.md. */
@@ -94,6 +106,9 @@ export function resolveAction(
 export function demoAlertMessage(result: ActionResult, token: Token): string {
   if (result.type === "send") {
     return `Action: send\nOpens the Send screen for ${token.symbol}. (Simulated — nothing is sent.)`;
+  }
+  if (result.type === "receive") {
+    return `Action: receive\nShows the receiving address and QR code for ${token.symbol}. (Simulated — demo address.)`;
   }
   const interstitial = result.requiresInterstitial
     ? `\n\nYou're leaving to a third-party dApp for ${token.symbol}. (Simulated — no real navigation occurs.)`
