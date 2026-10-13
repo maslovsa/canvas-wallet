@@ -293,3 +293,23 @@ A static GitHub Pages site cannot hold a secret, so address risk checks go throu
 **Site wiring.** Set the public repo variable `VITE_RISK_PROXY_URL` (GitHub: Settings > Secrets and variables > Actions > Variables) to the Worker URL; the Pages build picks it up on the next deploy. Empty or unset means a seed-only site. Kill switch: set the `RISK_ENABLED` secret to anything but `true`.
 
 **Local development.** Copy `worker/.dev.vars.example` to `worker/.dev.vars` (gitignored), fill in a key, and run `npx wrangler dev` inside `worker/`; the example also allows the Vite dev origin. Run `npx vitest run tests/worker-check.test.ts` for the Worker tests.
+
+### Free-plan budget (the Worker must stay on Cloudflare Free)
+
+Staying free means never upgrading the account to Workers Paid and keeping usage under the free quotas. Free
+plans are never billed for overage: past a quota Cloudflare just starts refusing requests until the next UTC day.
+Quotas as documented when this was written (re-check at developers.cloudflare.com/workers/platform/limits):
+100,000 Worker requests/day, KV 100,000 reads and 1,000 writes/day, SQLite Durable Objects 100,000 requests/day,
+Workers Builds 3,000 build minutes/month.
+
+| Path | Cost per request | Bound |
+| --- | --- | --- |
+| Bad origin, bad JSON, invalid address | none (rejected before KV and the Durable Object) | n/a |
+| Cached verdict | 1 KV read | 24 h cache |
+| Live check | 1-2 DO requests, 1 KV write, 1 Aegis call | `DAILY_BUDGET` = 30/day, so at most 30 KV writes (quota 1,000) |
+| Refused by a limit (flood) | 0 DO requests after the first refusal: the isolate remembers it for 60 s | per-visitor 10/h, global budget |
+| Git build of `main` | about 1 build minute (`npm test`) | quota 3,000/month; branches other than `main` do not build |
+
+Settings that keep it free: no routes or custom domains, no Logpush or other paid add-ons, `[observability]`
+off, SQLite-backed Durable Object class (`new_sqlite_classes`). Check the dashboard (Account > Billing) shows
+"Workers Free" and has no payment method before relying on this.

@@ -154,6 +154,23 @@ async function counters(env: Env): Promise<{ take: (key: string, limit: number, 
   };
 }
 
+/** Per-isolate memory of refusals (keyed by the Durable Object namespace binding, so each deployment/test env has its own). */
+const REFUSAL_MEMORY_MS = 60_000;
+const MAX_REMEMBERED_REFUSALS = 1000;
+const refusals = new WeakMap<object, Map<string, number>>();
+
+function isBlocked(env: Env, key: string, now: number): boolean {
+  const until = refusals.get(env.COUNTER)?.get(key);
+  return until !== undefined && now < until;
+}
+
+function block(env: Env, key: string, now: number): void {
+  let map = refusals.get(env.COUNTER);
+  if (!map) refusals.set(env.COUNTER, (map = new Map()));
+  if (map.size >= MAX_REMEMBERED_REFUSALS) map.clear(); // bounded memory
+  map.set(key, now + REFUSAL_MEMORY_MS);
+}
+
 /** What to remember about a result: a real Aegis answer for 24 h, an Aegis failure for 60 s, and nothing when WE declined to call (limits, budget, configuration). */
 type CachePolicy = "definitive" | "brief" | "none";
 
@@ -163,13 +180,25 @@ async function liveCheck(address: string, request: Request, env: Env): Promise<{
   if (!Number.isFinite(dailyBudget) || !Number.isFinite(perVisitor) || !env.AEGIS_API_KEY) return { verdict: { level: "unknown" }, cache: "none" };
 
   const now = Date.now();
+  const visitor = await sha256Hex(request.headers.get("CF-Connecting-IP") ?? "unknown");
+  // Free-plan guard: once the budget or this visitor's limit has refused a call, this isolate remembers it for a
+  // minute and answers without touching the Durable Object, so a flood of refused requests costs no DO requests.
+  if (isBlocked(env, "budget", now) || isBlocked(env, `visitor:${visitor}`, now)) return { verdict: { level: "unknown" }, cache: "none" };
   const c = await counters(env); // any counter failure throws and is caught by the caller: fail closed
   // Read the global budget first; it is only written when a call is really made, so a flood of rejected
   // requests does not burn the Durable Object's free daily writes.
-  if ((await c.peek("budget", DAY_MS)) >= dailyBudget) return { verdict: { level: "unknown" }, cache: "none" };
-  const visitor = await sha256Hex(request.headers.get("CF-Connecting-IP") ?? "unknown");
-  if (!(await c.take(`visitor:${visitor}`, perVisitor, HOUR_MS))) return { verdict: { level: "unknown" }, cache: "none" };
-  if (!(await c.take("budget", dailyBudget, DAY_MS))) return { verdict: { level: "unknown" }, cache: "none" };
+  if ((await c.peek("budget", DAY_MS)) >= dailyBudget) {
+    block(env, "budget", now);
+    return { verdict: { level: "unknown" }, cache: "none" };
+  }
+  if (!(await c.take(`visitor:${visitor}`, perVisitor, HOUR_MS))) {
+    block(env, `visitor:${visitor}`, now);
+    return { verdict: { level: "unknown" }, cache: "none" };
+  }
+  if (!(await c.take("budget", dailyBudget, DAY_MS))) {
+    block(env, "budget", now);
+    return { verdict: { level: "unknown" }, cache: "none" };
+  }
 
   const day = new Date(now).toISOString().slice(0, 10);
   const idempotencyKey = await sha256Hex(`TRON:${address}:${day}`); // 64 hex chars, the documented maximum

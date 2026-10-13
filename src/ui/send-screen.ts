@@ -222,6 +222,9 @@ export function mountSendScreen(options: SendScreenOptions): void {
     spinner.hidden = !s?.spinner;
     statusText.textContent = s ? s.text : "";
     checkAgain.hidden = !s?.checkAgain;
+    const wait = s?.checkAgainWaitSec ?? 0;
+    checkAgain.disabled = wait > 0;
+    checkAgain.textContent = wait > 0 ? `Check again (${wait}s)` : "Check again";
     addrError.textContent = view.address.error ?? "";
 
     balance.textContent = view.amount.balanceText;

@@ -221,13 +221,22 @@ test("Send: a Worker answer with extra fields is not trusted", async ({ page }) 
   await expect(page.locator(".send-status-text")).toHaveText("Couldn't verify this address.");
 });
 
-test("Send: Check again asks the Worker again and can recover", async ({ page }) => {
+test("Send: Check again is throttled (10 s), then asks the Worker again and can recover", async ({ page }) => {
+  await page.clock.install();
   let n = 0;
   const asked = await mockWorker(page, () => (++n === 1 ? { status: 503 } : { body: { level: "clear" } }));
   await startSend(page);
   await page.locator("#send-address").fill(NOT_IN_SEED);
   await expect(page.locator(".send-status-text")).toHaveText("Couldn't verify this address.");
-  await page.locator(".send-status .send-link").click();
+  const again = page.locator(".send-status .send-link");
+  await expect(again).toBeDisabled();
+  await expect(again).toHaveText(/Check again \(\d+s\)/);
+  await again.click({ force: true }); // a disabled button ignores presses
+  expect(asked).toHaveLength(1);
+  await page.clock.fastForward(11_000);
+  await expect(again).toBeEnabled();
+  await expect(again).toHaveText("Check again");
+  await again.click();
   await expect(page.locator(".send-status-text")).toHaveText("No risk signals found");
   expect(asked).toHaveLength(2);
 });

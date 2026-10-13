@@ -415,6 +415,38 @@ describe("abuse limits (plan R4, E3)", () => {
     vi.useRealTimers();
   });
 
+  describe("Free-plan guard: refusals are remembered, so a flood costs no Durable Object requests", () => {
+    function counted(env: Env): { calls: () => number } {
+      const inner = env.COUNTER;
+      let n = 0;
+      env.COUNTER = { idFromName: (name) => inner.idFromName(name), get: (id) => { const stub = inner.get(id); return { fetch: (r: Request) => (n += 1, stub.fetch(r)) }; } };
+      return { calls: () => n };
+    }
+
+    it("after the daily budget refused a call, more requests make no Durable Object calls", async () => {
+      const { env } = makeEnv({ DAILY_BUDGET: "1" });
+      const counter = counted(env);
+      await post(env, ADDRESS, { ip: "10.0.0.1" });
+      expect(await (await post(env, OTHER, { ip: "10.0.0.2" })).json()).toEqual({ level: "unknown" }); // refused: remembered
+      const before = counter.calls();
+      for (let i = 0; i < 20; i += 1) expect(await (await post(env, OTHER, { ip: `10.0.1.${i}` })).json()).toEqual({ level: "unknown" });
+      expect(counter.calls()).toBe(before);
+      expect(aegisCalls).toHaveLength(1);
+    });
+
+    it("a visitor over their hourly limit is answered from memory", async () => {
+      const { env } = makeEnv({ PER_VISITOR_PER_HOUR: "1" });
+      const counter = counted(env);
+      await post(env, ADDRESS, { ip: "10.0.0.1" });
+      expect(await (await post(env, OTHER, { ip: "10.0.0.1" })).json()).toEqual({ level: "unknown" }); // refused: remembered
+      const before = counter.calls();
+      for (let i = 0; i < 20; i += 1) await post(env, OTHER, { ip: "10.0.0.1" });
+      expect(counter.calls()).toBe(before);
+      // another visitor is unaffected
+      expect(await (await post(env, OTHER, { ip: "10.0.0.2" })).json()).toEqual({ level: "clear", label: "Binance" });
+    });
+  });
+
   it("invalid DAILY_BUDGET configuration fails closed", async () => {
     const { env } = makeEnv({ DAILY_BUDGET: "lots" });
     expect(await (await post(env, ADDRESS)).json()).toEqual({ level: "unknown" });

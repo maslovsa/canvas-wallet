@@ -9,6 +9,11 @@ main = "src/index.ts"
 compatibility_date = "2026-10-01"
 workers_dev = true
 
+# Stay on the Cloudflare Free plan (see CONTRIBUTING.md, "Free-plan budget"): no routes, no paid add-ons.
+# Request logs are not stored (Workers Logs would be one more quota); `wrangler tail` still works live.
+[observability]
+enabled = false
+
 [vars]
 # Exact browser origins allowed to call the Worker (comma-separated; GitHub Pages origin has no path).
 ALLOWED_ORIGIN = "https://maslovsa.github.io"

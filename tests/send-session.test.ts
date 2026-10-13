@@ -8,6 +8,7 @@ import {
   resetSendSession,
   SPINNER_DELAY_MS,
   SOFT_TIMEOUT_MS,
+  CHECK_AGAIN_COOLDOWN_MS,
   SENDING_MS,
   type SendDeps,
   type SendTokenInfo,
@@ -94,7 +95,7 @@ describe("address -> risk status", () => {
     await c.setAddress(CLEAR_LABELED);
     await settle();
     const v = c.view();
-    expect(v.address.status).toEqual({ tone: "success", icon: "check", text: "Binance", spinner: false, checkAgain: false, owner: { logo: null } });
+    expect(v.address.status).toEqual({ tone: "success", icon: "check", text: "Binance", spinner: false, checkAgain: false, checkAgainWaitSec: 0, owner: { logo: null } });
     expect(feeCalls).toEqual([CLEAR_LABELED]);
     expect(v.fee).toEqual({ label: "Network fee (estimate)", value: "~6.4 TRX", note: null });
   });
@@ -116,14 +117,58 @@ describe("address -> risk status", () => {
 
   it("an address nobody answered for is 'Couldn't verify' with Check again, and Check again can recover", async () => {
     let answer: RiskResult = { state: "unavailable" };
-    const { c } = setup({ checkRisk: async () => answer });
+    const { c, clock } = setup({ checkRisk: async () => answer });
     await c.setAddress(UNKNOWN);
     await settle();
     expect(c.view().address.status).toMatchObject({ text: "Couldn't verify this address.", checkAgain: true, icon: "help" });
     answer = { state: "clear" };
+    clock.advance(CHECK_AGAIN_COOLDOWN_MS); // Check again is throttled: wait out the cooldown
     c.checkAgain();
     await settle();
     expect(c.view().address.status).toMatchObject({ text: "No risk signals found" });
+  });
+
+  describe("Check again throttle", () => {
+    it("presses inside the cooldown do nothing; the wait counts down and the button re-enables after 10 s", async () => {
+      const calls: string[] = [];
+      const { c, clock } = setup({ checkRisk: async (a) => (calls.push(a), { state: "unavailable" } as RiskResult) });
+      let renders = 0;
+      c.subscribe(() => (renders += 1));
+      await c.setAddress(UNKNOWN);
+      await settle();
+      expect(calls).toHaveLength(1);
+      expect(c.view().address.status).toMatchObject({ checkAgain: true, checkAgainWaitSec: 10 });
+
+      c.checkAgain(); // hammering: ignored
+      c.checkAgain();
+      await settle();
+      expect(calls).toHaveLength(1);
+
+      clock.advance(4000);
+      expect(c.view().address.status).toMatchObject({ checkAgainWaitSec: 6 });
+      c.checkAgain();
+      await settle();
+      expect(calls).toHaveLength(1);
+
+      const before = renders;
+      clock.advance(6000);
+      expect(renders).toBeGreaterThan(before); // a re-render each second moved the countdown
+      expect(c.view().address.status).toMatchObject({ checkAgain: true, checkAgainWaitSec: 0 });
+      c.checkAgain();
+      await settle();
+      expect(calls).toHaveLength(2);
+      expect(c.view().address.status).toMatchObject({ checkAgainWaitSec: 10 }); // and the cooldown starts again
+    });
+
+    it("typing a different address is not blocked by the cooldown", async () => {
+      const calls: string[] = [];
+      const { c } = setup({ checkRisk: async (a) => (calls.push(a), { state: "unavailable" } as RiskResult) });
+      await c.setAddress(UNKNOWN);
+      await settle();
+      await c.setAddress(CLEAR_PLAIN);
+      await settle();
+      expect(calls).toEqual([UNKNOWN, CLEAR_PLAIN]);
+    });
   });
 
   it("a thrown risk check becomes unavailable (never safe, never a crash)", async () => {
