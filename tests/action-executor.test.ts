@@ -46,12 +46,48 @@ describe("resolveAction", () => {
   });
 });
 
+// Characterization (plan E10): the exact shape every existing action type resolves to. Written
+// before the `send` action changes ActionResult, so any accidental change to these results fails.
+describe("resolveAction result shape (existing action types)", () => {
+  it("external_url", () => {
+    expect(resolveAction("mint", token, undefined)).toEqual({
+      type: "external_url",
+      targetUrl: "https://app.example.com/mint?token=TWT&id=0xABC",
+      requiresInterstitial: true,
+    });
+  });
+
+  it("deeplink", () => {
+    expect(resolveAction("move", token, undefined)).toEqual({
+      type: "deeplink",
+      targetUrl: "wallet://swap?from=TWT",
+      requiresInterstitial: false,
+    });
+  });
+
+  it("wallet_connect", () => {
+    expect(resolveAction("stake", token, undefined)).toEqual({
+      type: "wallet_connect",
+      targetUrl: "https://stake.example.com",
+      requiresInterstitial: true,
+    });
+  });
+});
+
 describe("demoAlertMessage", () => {
   it("includes the interstitial warning only when required", () => {
     const result = resolveAction("mint", token, undefined)!;
     const message = demoAlertMessage(result, token);
     expect(message).toContain("third-party dApp");
     expect(message).toContain("Simulated");
+  });
+
+  it("exact message text for an external_url action", () => {
+    const result = resolveAction("mint", token, undefined)!;
+    expect(demoAlertMessage(result, token)).toBe(
+      "Action: external_url\nTarget: https://app.example.com/mint?token=TWT&id=0xABC" +
+        "\n\nYou're leaving to a third-party dApp for TWT. (Simulated — no real navigation occurs.)",
+    );
   });
 
   it("omits the interstitial warning for deeplinks", () => {
