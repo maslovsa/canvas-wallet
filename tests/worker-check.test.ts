@@ -68,8 +68,10 @@ interface AegisCall { url: string; headers: Record<string, string>; body: { addr
 let aegisCalls: AegisCall[] = [];
 let aegisAnswer: () => Response | Promise<Response>;
 
+// Realistic default scores per level (live answers: low = 20, medium = 50, sanctioned = 100); override via `extra`.
+const DEFAULT_SCORE: Record<string, number> = { none: 0, low: 20, medium: 50, high: 75, critical: 90, sanctioned: 100 };
 const aegisBody = (risk_level: string, label: string | null = null, data = true, extra: Record<string, unknown> = {}) =>
-  new Response(JSON.stringify({ verdict: { risk_level, risk_score: 91, label, risk_categories: ["mixer"], ...extra }, coverage: { data_available: data } }));
+  new Response(JSON.stringify({ verdict: { risk_level, risk_score: DEFAULT_SCORE[risk_level] ?? null, label, risk_categories: ["mixer"], ...extra }, coverage: { data_available: data } }));
 
 beforeEach(() => {
   aegisCalls = [];
@@ -181,6 +183,32 @@ describe("sanctions and exposure: what leaves the Worker", () => {
     const text = await (await post(makeEnv().env, ADDRESS)).text();
     expect(JSON.parse(text)).toEqual({ level: "caution" });
     expect(text).not.toMatch(/Example|logo|jsdelivr|ofac|sdn|exposure|mixer|scam|score|categor/i);
+  });
+});
+
+describe("alert threshold: risk score 50 and above", () => {
+  const map = (verdict: Record<string, unknown>, data = true) => mapAegisVerdict({ verdict, coverage: { data_available: data } });
+  it("49 is clear (the VASP name still shows), 50 is caution", () => {
+    expect(map({ risk_level: "medium", risk_score: 49, entity: entity() })).toEqual({ level: "clear", label: "Example Exchange", logo: LOGO });
+    expect(map({ risk_level: "medium", risk_score: 50, entity: entity() })).toEqual({ level: "caution" });
+    expect(map({ risk_level: "low", risk_score: 20 })).toEqual({ level: "clear" });
+  });
+  it("a high score is caution even when the level says low", () => {
+    expect(map({ risk_level: "low", risk_score: 80 })).toEqual({ level: "caution" });
+    expect(map({ risk_score: 50 })).toEqual({ level: "caution" });
+  });
+  it("sanctioned level or a sanctions-list match is caution whatever the score", () => {
+    expect(map({ risk_level: "sanctioned", risk_score: 10 })).toEqual({ level: "caution" });
+    expect(map({ risk_level: "low", risk_score: 5, sdn_match: { list: "OFAC" } })).toEqual({ level: "caution" });
+  });
+  it("without a numeric score the level decides (medium and above are caution)", () => {
+    expect(map({ risk_level: "medium", risk_score: null })).toEqual({ level: "caution" });
+    expect(map({ risk_level: "high" })).toEqual({ level: "caution" });
+    expect(map({ risk_level: "low", risk_score: null })).toEqual({ level: "clear" });
+    expect(map({ risk_level: "low", risk_score: "50" })).toEqual({ level: "clear" }); // not a number: ignored
+  });
+  it("a score below 50 without any data is still unknown, not clear", () => {
+    expect(map({ risk_level: "none", risk_score: 0 }, false)).toEqual({ level: "unknown" });
   });
 });
 

@@ -1201,10 +1201,6 @@ body {
 .send-error:empty {
   display: none;
 }
-.send-caption {
-  font-size: 11px;
-  color: var(--phone-dim);
-}
 .send-fee {
   display: flex;
   justify-content: space-between;

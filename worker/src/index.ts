@@ -94,22 +94,40 @@ export function sanitizeLabel(raw: unknown): string | undefined {
   return cleaned === "" ? undefined : cleaned;
 }
 
+/** Aegis risk_score (0-100) at or above which the client shows the risk line and the confirmation alert. */
+export const RISK_ALERT_SCORE = 50;
+
 /**
  * Aegis /v2/screen answer -> the three client levels (plan E6) and, for clear only, the owner's name and logo
- * (plan E7). The name is verdict.entity.name (a corroborated VASP), else verdict.label; the logo is only taken
- * together with a name and only if it is an acceptable URL (sanitizeLogoUrl).
+ * (plan E7). Caution when the risk score is 50 or more, or the level is `sanctioned` / there is a sanctions-list
+ * match (always, whatever the score); without a numeric score the level decides (medium and above). The reason
+ * (categories, label, score) never leaves the Worker. The name is verdict.entity.name (a corroborated VASP), else
+ * verdict.label; the logo is only taken together with a name and only if it is an acceptable URL.
  */
 export function mapAegisVerdict(body: unknown): Verdict {
   const root = body as {
-    verdict?: { risk_level?: unknown; label?: unknown; entity?: { name?: unknown; logo_url?: unknown } | null };
+    verdict?: {
+      risk_level?: unknown;
+      risk_score?: unknown;
+      label?: unknown;
+      sdn_match?: unknown;
+      entity?: { name?: unknown; logo_url?: unknown } | null;
+    };
     coverage?: { data_available?: unknown };
   } | null;
-  const level = root?.verdict?.risk_level;
-  if (level === "medium" || level === "high" || level === "critical" || level === "sanctioned") return { level: "caution" };
+  const verdict = root?.verdict;
+  const level = verdict?.risk_level;
+  const score = typeof verdict?.risk_score === "number" && Number.isFinite(verdict.risk_score) ? verdict.risk_score : null;
+  if (level === "sanctioned" || (verdict?.sdn_match !== undefined && verdict.sdn_match !== null)) return { level: "caution" };
+  if (score !== null && score >= RISK_ALERT_SCORE) return { level: "caution" };
   const hasData = root?.coverage?.data_available === true;
-  if (level === "low" || (level === "none" && hasData)) {
-    const entity = root?.verdict?.entity;
-    const label = sanitizeLabel(entity?.name) ?? sanitizeLabel(root?.verdict?.label);
+  const known = level === "none" || level === "low" || level === "medium" || level === "high" || level === "critical";
+  const belowThreshold = score !== null && known && (level === "low" || hasData);
+  // No numeric score: the level decides (medium and above are caution, as before).
+  if (score === null && (level === "medium" || level === "high" || level === "critical")) return { level: "caution" };
+  if (belowThreshold || (score === null && (level === "low" || (level === "none" && hasData)))) {
+    const entity = verdict?.entity;
+    const label = sanitizeLabel(entity?.name) ?? sanitizeLabel(verdict?.label);
     if (!label) return { level: "clear" };
     const logo = sanitizeLogoUrl(entity?.logo_url);
     return logo ? { level: "clear", label, logo } : { level: "clear", label };

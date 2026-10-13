@@ -1,9 +1,38 @@
 {
   "version": 1,
   "entries": [
-    { "network": "TRON", "address": "TMuA6YqfCeX8EhbfYEg5y7S4DqzSJireY9", "level": "clear", "label": "Binance", "checkedAt": "2026-10-13" },
-    { "network": "TRON", "address": "TJDENsfBJs4RFETt1X1W8wMDc8M5XnJhCe", "level": "clear", "checkedAt": "2026-10-13" },
-    { "network": "TRON", "address": "THJUJFyTnrBWb1ijWav7qfRBrjUuKgP49Z", "level": "caution", "checkedAt": "2026-10-13" },
-    { "network": "TRON", "address": "TPyE2oSoaysrXfLzwf9wetBVr9JudLwjtD", "level": "caution", "checkedAt": "2026-10-13" }
+    {
+      "network": "TRON",
+      "address": "TMuA6YqfCeX8EhbfYEg5y7S4DqzSJireY9",
+      "level": "clear",
+      "label": "Binance",
+      "checkedAt": "2026-10-13"
+    },
+    {
+      "network": "TRON",
+      "address": "TJDENsfBJs4RFETt1X1W8wMDc8M5XnJhCe",
+      "level": "clear",
+      "checkedAt": "2026-10-13"
+    },
+    {
+      "network": "TRON",
+      "address": "THJUJFyTnrBWb1ijWav7qfRBrjUuKgP49Z",
+      "level": "caution",
+      "checkedAt": "2026-10-13"
+    },
+    {
+      "network": "TRON",
+      "address": "TPyE2oSoaysrXfLzwf9wetBVr9JudLwjtD",
+      "level": "caution",
+      "checkedAt": "2026-10-13"
+    },
+    {
+      "network": "TRON",
+      "address": "TDqSquXBgUCLYvYC4XZgrprLK589dkhSCf",
+      "level": "clear",
+      "label": "Binance",
+      "logo": "https://cdn.jsdelivr.net/gh/maslovsa/kyt-entity-registry@main/logos/exchanges/binance-com.png",
+      "checkedAt": "2026-10-13"
+    }
   ]
 }

@@ -260,7 +260,9 @@ of demo addresses produced from Aegis `POST /v2/screen` results. An entry stores
 `address`, `level` (`clear` or `caution`), an optional `label` (allowed on `clear` entries only, because
 an owner name on a risky address can reveal the reason) and `checkedAt`. Never store scores, reasons or
 flags: `npm run validate:fixtures` rejects them. A `clear` entry with a label may also carry `logo` (an https `cdn.jsdelivr.net` `.png` URL, the VASP logo from Aegis `verdict.entity.logo_url`). Entries older than 90 days are ignored at runtime, so
-re-check them with Aegis before they expire. **Wording rule for risk results: no advice.** The Send screen only states what the screening data shows
+re-check them with Aegis before they expire. **Alert threshold.** The risk-check Worker answers `caution` when Aegis `risk_score` is 50 or more, when the level is `sanctioned`, or on any sanctions-list match; below 50 the address is `clear`. The reason is never shown or sent to the browser.
+
+**Wording rule for risk results: no advice.** The Send screen only states what the screening data shows
 ("Risk signals found for this address", "No risk signals found", "Couldn't verify this address") and says
 it is information, not advice. Do not write "recommend", "safe", "dangerous", "avoid" or "should" in this
 UI. Names and logos of a VASP appear only on clear results; a risky address never shows a name, a logo,

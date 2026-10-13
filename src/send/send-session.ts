@@ -78,7 +78,6 @@ export interface SendView {
       /** Set when the text is the owner's (VASP's) name: the screen shows its logo, or an initial when there is none. */
       owner: { logo: string | null } | null;
     } | null;
-    showCaption: boolean;
   };
   amount: { value: string; error: string | null; balanceText: string };
   fee: { label: string; value: string; note: string | null };
@@ -185,8 +184,6 @@ export function deriveSendView(state: SendState, token: SendTokenInfo, nowMs: nu
       value: state.address,
       error: addressError(state),
       status: addressView(state, nowMs),
-      // "Address is checked by Aegis" under "Couldn't verify this address" would contradict itself.
-      showCaption: addrOk && state.risk.kind !== "unavailable",
     },
     amount: { value: state.amountText, error: amount.error, balanceText: `Balance ${formatDisplay(token.balanceUnits, token.decimals)} ${token.symbol}` },
     fee: feeLine,

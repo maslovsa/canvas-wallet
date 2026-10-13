@@ -8,6 +8,7 @@ import { deflateSync } from "node:zlib";
 const WORKER = "https://risk-worker.test";
 const OUT = "docs/designs/send-risk-screens";
 const SEED_SANCTIONED = "THJUJFyTnrBWb1ijWav7qfRBrjUuKgP49Z"; // OFAC SDN in the seed: answered locally as caution
+const SEED_BINANCE_HOT = "TDqSquXBgUCLYvYC4XZgrprLK589dkhSCf"; // Binance hot wallet in the seed, with its real Aegis logo
 const NOT_IN_SEED = "TLa2f6VPqDgRE67v1736s7bJ8Ray5wYjU7"; // goes to the (mocked) Worker
 const LOGO_URL = "https://cdn.jsdelivr.net/gh/example/kyt-entity-registry@main/logos/example-exchange.png";
 
@@ -86,10 +87,26 @@ test("1. an exchange (VASP) with a name and a logo", async ({ page }) => {
   await enter(page, NOT_IN_SEED);
   await expect(page.locator(".send-status-text")).toHaveText("Example Exchange");
   await expect(page.locator(".send-owner-logo")).toBeVisible();
-  await expect(page.locator(".send-caption")).toHaveText("Screened with Aegis data. Information only, not advice.");
+  await expect(page.locator(".send-caption")).toHaveCount(0); // no "Screened with Aegis…" line
   await shot(page, "1-exchange-name-and-logo");
   await page.locator("#chrome-theme-toggle").click();
   await shot(page, "1b-exchange-name-and-logo-light");
+});
+
+test("1c. the Binance hot wallet from the seed shows the real logo Aegis returned (no Worker call)", async ({ page }) => {
+  // The real image comes from jsDelivr; if the network is unavailable the stand-in is served so the test stays deterministic.
+  await page.route("https://cdn.jsdelivr.net/**/*.png", async (route) => {
+    try {
+      await route.fulfill({ response: await route.fetch({ timeout: 8000 }) });
+    } catch {
+      await route.fulfill({ contentType: "image/png", body: standInLogo() });
+    }
+  });
+  await openSend(page);
+  await enter(page, SEED_BINANCE_HOT);
+  await expect(page.locator(".send-status-text")).toHaveText("Binance");
+  await expect(page.locator(".send-owner-logo")).toBeVisible({ timeout: 15000 });
+  await shot(page, "1c-binance-hot-wallet-real-logo");
 });
 
 test("2. an exchange with a name but no logo gets an initial", async ({ page }) => {
@@ -162,6 +179,5 @@ test("8. screening unavailable: 'Couldn't verify', never read as safe or as risk
   await openSend(page);
   await enter(page, NOT_IN_SEED);
   await expect(page.locator(".send-status-text")).toHaveText("Couldn't verify this address.");
-  await expect(page.locator(".send-caption")).toBeHidden();
   await shot(page, "8-could-not-verify");
 });

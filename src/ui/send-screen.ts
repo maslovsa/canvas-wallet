@@ -102,7 +102,7 @@ export function mountSendScreen(options: SendScreenOptions): void {
   addrInput.setAttribute("autocomplete", "off");
   addrInput.spellcheck = false;
   addrInput.placeholder = "Tron address (starts with T)"; // a hint only: the visible "To" label stays
-  addrInput.setAttribute("aria-describedby", "send-address-status send-address-caption");
+  addrInput.setAttribute("aria-describedby", "send-address-status");
   addrField.append(addrInput);
   const status = el("div", "send-status");
   status.id = "send-address-status";
@@ -120,9 +120,7 @@ export function mountSendScreen(options: SendScreenOptions): void {
   status.append(statusIcon, ownerBadge, spinner, statusText, checkAgain);
   const addrError = el("div", "send-error");
   addrError.setAttribute("role", "alert");
-  const caption = el("div", "send-caption", "Screened with Aegis data. Information only, not advice.");
-  caption.id = "send-address-caption";
-  addrBlock.append(addrRow, addrField, status, addrError, caption);
+  addrBlock.append(addrRow, addrField, status, addrError);
 
   // --- amount
   const amountBlock = el("div", "send-block");
@@ -225,7 +223,6 @@ export function mountSendScreen(options: SendScreenOptions): void {
     statusText.textContent = s ? s.text : "";
     checkAgain.hidden = !s?.checkAgain;
     addrError.textContent = view.address.error ?? "";
-    caption.hidden = !view.address.showCaption;
 
     balance.textContent = view.amount.balanceText;
     amountError.textContent = view.amount.error ?? "";

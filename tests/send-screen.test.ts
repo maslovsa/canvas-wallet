@@ -91,12 +91,12 @@ describe("Send screen markup", () => {
 });
 
 describe("clear and caution flows", () => {
-  it("a labeled address shows the label and the caption; Send then reaches the Sent view with the Simulated pill", async () => {
+  it("a labeled address shows the label and no caption line; Send then reaches the Sent view with the Simulated pill", async () => {
     const { q, type, onDone } = mount();
     await type(q("#send-address"), CLEAR);
     await type(q("#send-amount"), "25.5");
     expect(q(".send-status-text").textContent).toBe("Binance");
-    expect(q(".send-caption").hasAttribute("hidden")).toBe(false);
+    expect(document.querySelector(".send-caption")).toBeNull();
     const submit = q<HTMLButtonElement>(".send-submit");
     expect(submit.disabled).toBe(false);
     submit.click();

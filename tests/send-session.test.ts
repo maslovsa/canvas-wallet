@@ -95,7 +95,6 @@ describe("address -> risk status", () => {
     await settle();
     const v = c.view();
     expect(v.address.status).toEqual({ tone: "success", icon: "check", text: "Binance", spinner: false, checkAgain: false, owner: { logo: null } });
-    expect(v.address.showCaption).toBe(true);
     expect(feeCalls).toEqual([CLEAR_LABELED]);
     expect(v.fee).toEqual({ label: "Network fee (estimate)", value: "~6.4 TRX", note: null });
   });
@@ -125,16 +124,6 @@ describe("address -> risk status", () => {
     c.checkAgain();
     await settle();
     expect(c.view().address.status).toMatchObject({ text: "No risk signals found" });
-  });
-
-  it("the 'checked by Aegis' caption is hidden when the check failed", async () => {
-    const { c } = setup();
-    await c.setAddress(UNKNOWN);
-    await settle();
-    expect(c.view().address.showCaption).toBe(false);
-    await c.setAddress(CLEAR_PLAIN);
-    await settle();
-    expect(c.view().address.showCaption).toBe(true);
   });
 
   it("a thrown risk check becomes unavailable (never safe, never a crash)", async () => {
