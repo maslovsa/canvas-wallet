@@ -1,4 +1,5 @@
 # Cloudflare Worker: risk-check proxy for the Send window (docs/designs/send-window-plan.md, T9).
+# Deployed by Cloudflare Workers Builds from main: build command `npm test`, deploy command `npx wrangler deploy`.
 # Nothing in this file is secret. Secrets (set once in the Cloudflare dashboard, Worker > Settings >
 # Variables and Secrets, or with `npx wrangler secret put <NAME>`): AEGIS_API_KEY and RISK_ENABLED.
 # RISK_ENABLED is deliberately a secret, not a var: Git deploys overwrite dashboard variables but keep
