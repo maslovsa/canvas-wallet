@@ -24,11 +24,20 @@ function substituteUrl(template: string, token: Token, userAddress: string | und
   );
 }
 
-export interface ActionResult {
-  type: Action["type"];
+/** Actions that leave the simulator for a URL (external_url, deeplink, wallet_connect). */
+export interface LinkActionResult {
+  type: Exclude<Action["type"], "send">;
   targetUrl: string;
   requiresInterstitial: boolean;
 }
+
+/** The `send` action opens the built-in Send screen: it has no URL and never needs the third-party interstitial. */
+export interface SendActionResult {
+  type: "send";
+  requiresInterstitial: false;
+}
+
+export type ActionResult = LinkActionResult | SendActionResult;
 
 type ActionHandler<A extends Action> = (action: A, token: Token, userAddress: string | undefined) => ActionResult;
 
@@ -50,10 +59,16 @@ const handleWalletConnect: ActionHandler<Extract<Action, { type: "wallet_connect
   requiresInterstitial: true,
 });
 
+const handleSend: ActionHandler<Extract<Action, { type: "send" }>> = () => ({
+  type: "send",
+  requiresInterstitial: false,
+});
+
 const HANDLERS: { [K in Action["type"]]: ActionHandler<Extract<Action, { type: K }>> } = {
   external_url: handleExternalUrl,
   deeplink: handleDeeplink,
   wallet_connect: handleWalletConnect,
+  send: handleSend,
 };
 
 /** Resolve an action key against a token's `actions` map. Unknown action -> disabled, per tz.md. */
@@ -77,6 +92,9 @@ export function resolveAction(
 
 /** Demo-alert copy the live simulator shows on click, modeling the required interstitial warning. */
 export function demoAlertMessage(result: ActionResult, token: Token): string {
+  if (result.type === "send") {
+    return `Action: send\nOpens the Send screen for ${token.symbol}. (Simulated — nothing is sent.)`;
+  }
   const interstitial = result.requiresInterstitial
     ? `\n\nYou're leaving to a third-party dApp for ${token.symbol}. (Simulated — no real navigation occurs.)`
     : "";

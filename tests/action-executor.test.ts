@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { resolveAction, demoAlertMessage } from "../src/widgets/action-executor.ts";
+import { resolveAction, demoAlertMessage, type ActionResult, type LinkActionResult } from "../src/widgets/action-executor.ts";
 import type { Token } from "../src/types.ts";
 
 const token: Token = {
@@ -13,19 +13,23 @@ const token: Token = {
     mint: { type: "external_url", url: "https://app.example.com/mint?token={symbol}&id={id}", openIn: "in_app_browser" },
     move: { type: "deeplink", url: "wallet://swap?from={symbol}" },
     stake: { type: "wallet_connect", dappUrl: "https://stake.example.com" },
+    send_money: { type: "send" },
   },
 };
 
+/** The union also has a URL-less `send` result; the link-action tests below only ever resolve link actions. */
+const asLink = (result: ActionResult | null): LinkActionResult | undefined => result as LinkActionResult | undefined;
+
 describe("resolveAction", () => {
   it("substitutes {symbol} and {id}, URL-encoding each value", () => {
-    const result = resolveAction("mint", token, undefined);
+    const result = asLink(resolveAction("mint", token, undefined));
     expect(result?.targetUrl).toBe("https://app.example.com/mint?token=TWT&id=0xABC");
     expect(result?.requiresInterstitial).toBe(true);
   });
 
   it("URL-encodes special characters in substituted values (injection prevention)", () => {
     const evil: Token = { ...token, symbol: "TW&T=x" };
-    const result = resolveAction("mint", evil, undefined);
+    const result = asLink(resolveAction("mint", evil, undefined));
     expect(result?.targetUrl).toContain(encodeURIComponent("TW&T=x"));
     expect(result?.targetUrl).not.toContain("TW&T=x&id"); // raw unencoded value never appears mid-query
   });
@@ -36,13 +40,47 @@ describe("resolveAction", () => {
   });
 
   it("wallet_connect resolves to dappUrl with an interstitial", () => {
-    const result = resolveAction("stake", token, undefined);
+    const result = asLink(resolveAction("stake", token, undefined));
     expect(result?.targetUrl).toBe("https://stake.example.com");
     expect(result?.requiresInterstitial).toBe(true);
   });
 
+  it("send resolves to a URL-less result that never needs the third-party interstitial", () => {
+    const result = resolveAction("send_money", token, undefined);
+    expect(result).toEqual({ type: "send", requiresInterstitial: false });
+    expect(result).not.toHaveProperty("targetUrl");
+  });
+
   it("returns null for an unknown action key (never throws)", () => {
     expect(resolveAction("does_not_exist", token, undefined)).toBeNull();
+  });
+});
+
+// Characterization (plan E10): the exact shape every existing action type resolves to. Written
+// before the `send` action changes ActionResult, so any accidental change to these results fails.
+describe("resolveAction result shape (existing action types)", () => {
+  it("external_url", () => {
+    expect(resolveAction("mint", token, undefined)).toEqual({
+      type: "external_url",
+      targetUrl: "https://app.example.com/mint?token=TWT&id=0xABC",
+      requiresInterstitial: true,
+    });
+  });
+
+  it("deeplink", () => {
+    expect(resolveAction("move", token, undefined)).toEqual({
+      type: "deeplink",
+      targetUrl: "wallet://swap?from=TWT",
+      requiresInterstitial: false,
+    });
+  });
+
+  it("wallet_connect", () => {
+    expect(resolveAction("stake", token, undefined)).toEqual({
+      type: "wallet_connect",
+      targetUrl: "https://stake.example.com",
+      requiresInterstitial: true,
+    });
   });
 });
 
@@ -52,6 +90,20 @@ describe("demoAlertMessage", () => {
     const message = demoAlertMessage(result, token);
     expect(message).toContain("third-party dApp");
     expect(message).toContain("Simulated");
+  });
+
+  it("exact message text for an external_url action", () => {
+    const result = resolveAction("mint", token, undefined)!;
+    expect(demoAlertMessage(result, token)).toBe(
+      "Action: external_url\nTarget: https://app.example.com/mint?token=TWT&id=0xABC" +
+        "\n\nYou're leaving to a third-party dApp for TWT. (Simulated — no real navigation occurs.)",
+    );
+  });
+
+  it("send message names the symbol and says nothing is sent", () => {
+    const message = demoAlertMessage(resolveAction("send_money", token, undefined)!, token);
+    expect(message).toBe("Action: send\nOpens the Send screen for TWT. (Simulated — nothing is sent.)");
+    expect(message).not.toContain("third-party dApp");
   });
 
   it("omits the interstitial warning for deeplinks", () => {

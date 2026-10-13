@@ -29,9 +29,13 @@ jobs:
           cache: "npm"
       - run: npm ci
       - run: npm run validate:fixtures
+      # Tests gate the deploy: this repo ships by pushing to main, where no PR check runs (plan E1).
+      - run: npm test
       - run: npm run build
         env:
           VITE_BASE: /${{ github.event.repository.name }}/
+      # The repo is public and dist/ is world-readable: fail the deploy on secret-shaped text (plan R11).
+      - run: npm run check:dist
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist

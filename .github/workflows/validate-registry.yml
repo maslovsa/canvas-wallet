@@ -2,18 +2,12 @@ name: Validate registry
 
 # CI-enforced schema gate — the actual security control behind this project's
 # "PR-gated review" thesis (see docs/designs/token-ui-studio.md). Runs on
-# every PR touching the schema, fixtures, or registry data; never on pushes
-# to the default branch directly (see deploy.yml for the separate,
-# merge-only deploy workflow — CEO review Section 9 finding: deploy and
-# validate must never share a trigger).
+# EVERY pull request (no path filter: a code-only PR must run the tests too,
+# plan decision E1); never on pushes to the default branch directly (see
+# deploy.yml for the separate, merge-only deploy workflow — CEO review
+# Section 9 finding: deploy and validate must never share a trigger).
 on:
   pull_request:
-    paths:
-      - "registry.schema.json"
-      - "fixtures/**"
-      - "src/icon/domain-allowlist.ts"
-      - "scripts/validate-fixtures.ts"
-      - "**/*.json"
 
 jobs:
   validate:
