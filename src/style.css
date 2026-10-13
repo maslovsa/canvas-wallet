@@ -1101,6 +1101,9 @@ body {
   font-size: 13px;
   color: var(--phone-dim);
 }
+.send-status-icon:empty {
+  display: none; /* no empty flex item: the text of an icon-less status lines up with the labels above */
+}
 .send-status.send-tone-success {
   color: var(--send-success);
 }
