@@ -118,3 +118,15 @@ that solo review has bigger gaps than "no visual preview").
 
 **Depends on / blocked by:** The Send screen (T8) landing first, so the tokens exist in code.
 
+## P3: Hide the Back control on the Send "Sent" view
+
+**What:** The "Sent (simulated)" view shows both Back and Done; Back does the same as Done.
+
+**Why:** Found by /design-review (2026-10-13). Redundant control on a confirmation screen.
+
+**Pros:** One obvious way out. **Cons:** Tiny change; Back also covers a swipe-back habit.
+
+**Context:** src/ui/send-screen.ts (back button) and the `sent` view; Back is already inactive during Sending.
+
+**Depends on / blocked by:** nothing.
+
