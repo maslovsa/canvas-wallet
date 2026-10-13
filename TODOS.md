@@ -67,3 +67,54 @@ against a live Pages deploy to confirm no conflict.
 **Depends on / blocked by:** A second active contributor actually needing
 this (the CODEOWNERS self-approval note in CONTRIBUTING.md already flags
 that solo review has bigger gaps than "no visual preview").
+
+## P3: Ethereum/EVM support for the Send window
+
+**What:** Add EVM fee estimation (gas via `eth_estimateGas` + fee history) and the address risk check for Ethereum to the Send window.
+
+**Why:** The Send window ships Tron-only; the user explicitly said "Tron first, think about Ethereum later" (/plan-ceo-review 2026-10-12).
+
+**Pros:** Covers the second network the Aegis inspect-address API supports (ETH, BSC, TRON).
+
+**Cons:** EIP-55 address checksum needs keccak256, which WebCrypto does not provide. `js-sha3` is already a devDependency (package.json:35), so it must move to `dependencies` rather than adding a new package. Gas estimation needs an RPC provider choice.
+
+**Context:** See docs/designs/send-window-plan.md (ledger rows R7, S1).
+
+**Effort estimate:** M (human team) -> CC+gstack: ~1h.
+
+**Priority:** P3
+
+**Depends on / blocked by:** Tron slice of the Send window landing first.
+
+## P3: Alert delivery for the risk-proxy Worker
+
+**What:** Decide who receives the Worker's alerts and by which channel, then wire them: daily budget at 80%, any Aegis 402/403 (cap hit or key revoked), and `unavailable` rate above 50% for 15 minutes.
+
+**Why:** The review (D13, /plan-ceo-review 2026-10-13) defined these alerts but no recipient or channel. Until then a nearly used-up live budget is noticed only by reading logs or when live checks fail.
+
+**Pros:** A drained budget or revoked key is noticed in minutes, not when the live path breaks.
+
+**Cons:** Needs a channel decision (email, Telegram, Slack) and a small amount of Worker code.
+
+**Context:** docs/designs/send-window-plan.md, Section 8 and ledger row S7. Day-1 backstops already exist: the provider-side monthly cap and the `RISK_ENABLED` off switch.
+
+**Effort estimate:** S (human team) -> CC+gstack: ~20 min.
+
+**Priority:** P3
+
+**Depends on / blocked by:** The Worker exists and logs the structured lines defined in Section 8.
+
+## P3: Create DESIGN.md for the phone UI
+
+**What:** Collect the phone screens' colors, sizes, type and motion into a DESIGN.md (for example with /design-consultation).
+
+**Why:** The Send screen defines its own `--send-*` tokens because the app tokens fail 4.5:1 contrast on the phone screen (measured 2.15:1 for the warning color on the light theme). Without a shared file, the next phone screen will invent its own colors.
+
+**Pros:** One vocabulary for all phone screens; contrast verified once.
+
+**Cons:** Some effort for a project that has worked without it; tokens may need renaming.
+
+**Context:** docs/designs/send-window-plan.md, Design review decision DR9.
+
+**Depends on / blocked by:** The Send screen (T8) landing first, so the tokens exist in code.
+
