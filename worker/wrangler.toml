@@ -11,8 +11,8 @@ workers_dev = true
 # Exact browser origin allowed to call the Worker (GitHub Pages origin has no path).
 ALLOWED_ORIGIN = "https://maslovsa.github.io"
 AEGIS_BASE_URL = "https://api.aegis-kyt.com"
-# Kill switch: set to "false" to turn live checks off; the site keeps working on the static seed.
-RISK_ENABLED = "true"
+# RISK_ENABLED is deliberately NOT here: it is a Worker secret (plan decision E5), because Git deploys
+# overwrite dashboard variables but keep secrets. Live checks run only when the secret equals "true".
 # Abuse limits (see plan R4 / E3). Enforced once the real Worker lands (T9).
 DAILY_BUDGET = "30"
 PER_VISITOR_PER_HOUR = "10"

@@ -239,4 +239,4 @@ A static GitHub Pages site cannot hold a secret, so address risk checks go throu
 - **Connect the repo:** Cloudflare dashboard > Workers & Pages > Create > Import a repository > `maslovsa/canvas-wallet`. Root directory `worker`, deploy command `npx wrangler deploy`. Every push to `main` then redeploys the Worker.
 - **Local dev:** copy `worker/.dev.vars.example` to `worker/.dev.vars` (gitignored), then `npx wrangler dev` inside `worker/`.
 - **Site wiring:** set the public repo variable `VITE_RISK_PROXY_URL` (Settings > Secrets and variables > Actions > Variables) to the Worker URL. Empty means a seed-only site.
-- **Kill switch:** set the Worker variable `RISK_ENABLED` to `false`. Rollback: `npx wrangler rollback`.
+- **Kill switch:** `RISK_ENABLED` is a Worker secret (not a variable, so Git deploys do not overwrite it). Live checks run only when it equals `true`; change it in the Cloudflare dashboard (Worker > Settings > Variables and Secrets) or with `npx wrangler secret put RISK_ENABLED`. Rollback: `npx wrangler rollback`.
