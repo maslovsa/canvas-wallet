@@ -28,6 +28,12 @@ case-insensitively; an unknown list shows a message and the gallery, an unknown 
 back to the default. Other query parameters are preserved. Example:
 `?list=aegis-super-list&network=Tron&token=USDT`.
 
+**Phone mode.** On a phone the same link opens as the bare phone interface: no sidebar, editor or toolbar, edge to
+edge, with iOS or Android chrome and light or dark taken from the device. A desktop can ask for it with
+`&view=phone` (the phone drawn as a device, centred; Share > Copy phone link adds it), and `&view=studio` forces the
+full studio even on a phone. The rule lives in `src/share-link/phone-mode.ts`: a viewport up to 640 px, or a touch
+device up to 900 px, counts as a phone.
+
 ### Adding a token to an existing list
 
 1. Fork this repo.

@@ -1,3 +1,5 @@
+import "@fontsource-variable/inter";
+import "@fontsource-variable/jetbrains-mono";
 import type { Registry, Token, RegistrySource, ListMeta } from "./types.ts";
 import { fetchRegistry } from "./registry-client/fetcher.ts";
 import { RegistryClientError, userMessageFor } from "./registry-client/errors.ts";
@@ -5,7 +7,7 @@ import { StaleFetchGuard } from "./registry-client/stale-fetch-guard.ts";
 import { checkGovernance, governanceWarning } from "./registry-client/governance-check.ts";
 import { loadManifest } from "./registry-client/manifest.ts";
 import { renderSidebar } from "./ui/sidebar.ts";
-import { renderPhoneFrame, setPhoneNavScreen, getPhoneNavScreen, type ChromeStyle, type ChromeTheme } from "./ui/phone-frame.ts";
+import { renderPhoneFrame, setPhoneNavScreen, getPhoneNavScreen, type ChromeStyle, type ChromeTheme, type PhoneFrameOptions } from "./ui/phone-frame.ts";
 import { renderGalleryCards, type GalleryEntry } from "./ui/gallery.ts";
 import { Editor } from "./ui/editor.ts";
 import { buildDeployPlan } from "./deploy-flow/build-deploy-url.ts";
@@ -14,6 +16,11 @@ import { decodeShareFragment, ShareLinkDecodeError } from "./share-link/decode.t
 import { parseStudioQuery, buildStudioQuery, findByName, type StudioUrlState } from "./share-link/studio-url.ts";
 import { parseRegistry, RegistryParseError, RegistrySchemaError } from "./schema-validator.ts";
 import { loadNetworkRegistry, findNetworkInfo, type NetworkInfo } from "./networks/network-registry.ts";
+import { icon, iconButton } from "./ui/icons.ts";
+import { showToast } from "./ui/toast.ts";
+import { attachMenu } from "./ui/menu.ts";
+import { copyText } from "./receive/copy-text.ts";
+import { resolvePhoneMode, detectChromeStyle, withViewParam, type PhoneModeResolution } from "./share-link/phone-mode.ts";
 
 type ViewMode = "gallery" | "studio";
 
@@ -47,6 +54,44 @@ const state: AppState = {
 
 const staleFetchGuard = new StaleFetchGuard();
 
+// Phone mode (see share-link/phone-mode.ts): the link opens as the bare phone interface on a phone.
+function measureDevice(): { width: number; coarsePointer: boolean } {
+  return { width: window.innerWidth, coarsePointer: window.matchMedia("(pointer: coarse)").matches };
+}
+let phone: PhoneModeResolution = resolvePhoneMode(location.search, measureDevice());
+
+function applyPhoneMode(): void {
+  const root = document.documentElement;
+  root.dataset.mode = phone.phoneMode ? "phone" : "studio";
+  root.dataset.fullscreen = String(phone.fullscreen);
+  root.dataset.view = state.view;
+}
+
+/** Leaves the bare phone view on a desktop: back to the full studio for the same list. */
+function switchToStudio(): void {
+  const next = new URL(location.href);
+  next.searchParams.set("view", "studio");
+  history.replaceState(null, "", `${next.pathname}${next.search}${next.hash}`);
+  phone = resolvePhoneMode(location.search, measureDevice());
+  applyPhoneMode();
+  renderAll();
+}
+
+/** Scales the 480 x 996 device so it always fits the space the stage has (the whole phone, never cropped). */
+function fitPhone(): void {
+  const stage = document.getElementById("phone-stage");
+  const frame = document.getElementById("phone-frame");
+  if (!stage || !frame) return;
+  if (phone.fullscreen) {
+    frame.style.removeProperty("--phone-zoom");
+    return;
+  }
+  const availableHeight = stage.clientHeight;
+  const availableWidth = stage.clientWidth;
+  if (availableHeight === 0 || availableWidth === 0) return;
+  frame.style.setProperty("--phone-zoom", String(Math.max(0.35, Math.min(1, availableHeight / 996, availableWidth / 480))));
+}
+
 function el(id: string): HTMLElement {
   const found = document.getElementById(id);
   if (!found) throw new Error(`Missing #${id} in index.html`);
@@ -57,6 +102,7 @@ function setView(view: ViewMode): void {
   state.view = view;
   el("gallery-view").hidden = view !== "gallery";
   el("studio-view").hidden = view !== "studio";
+  applyPhoneMode();
   syncUrl();
 }
 
@@ -93,7 +139,7 @@ async function loadGallery(): Promise<void> {
     }),
   );
   state.galleryEntries = entries;
-  renderGalleryCards(el("gallery-cards"), entries, (meta) => openBundledList(meta));
+  renderGalleryCards(el("gallery-cards"), entries, (meta) => openBundledList(meta), state.networks);
 }
 
 async function openBundledList(meta: ListMeta): Promise<void> {
@@ -149,6 +195,30 @@ function listDisplayDescription(): string {
   return "";
 }
 
+function phoneOptions(): PhoneFrameOptions {
+  const options: PhoneFrameOptions = {
+    chromeStyle: state.chromeStyle,
+    chromeTheme: state.chromeTheme,
+    networkName: state.selectedNetwork,
+    networkInfo: findNetworkInfo(state.networks, state.selectedNetwork),
+    registryNetworks: state.registry?.networks ?? [],
+    allNetworkInfo: state.networks,
+    listName: listDisplayName(),
+    listDescription: listDisplayDescription(),
+    onSelectNetwork: (network) => selectNetwork(network),
+    onSelectToken: (token) => selectToken(token, { confirmDiscard: true }),
+    onScreenChange: syncUrl,
+  };
+  if (phone.phoneMode) {
+    // In phone mode there is no toolbar, so the list screen carries the way out: back to the gallery on a phone,
+    // back to the studio when a desktop opened the bare phone view.
+    options.onExit = phone.fullscreen
+      ? { label: "Lists", run: () => setView("gallery") }
+      : { label: "Studio", run: () => switchToStudio() };
+  }
+  return options;
+}
+
 function renderAll(): void {
   if (!state.registry) return;
 
@@ -158,22 +228,11 @@ function renderAll(): void {
     onAddToken: () => selectToken(blankToken(), { confirmDiscard: true }),
   });
 
-  renderPhoneFrame(el("phone-frame"), state.selectedToken, {
-    chromeStyle: state.chromeStyle,
-    chromeTheme: state.chromeTheme,
-    networkName: state.selectedNetwork,
-    networkInfo: findNetworkInfo(state.networks, state.selectedNetwork),
-    registryNetworks: state.registry.networks,
-    allNetworkInfo: state.networks,
-    listName: listDisplayName(),
-    listDescription: listDisplayDescription(),
-    onSelectNetwork: (network) => selectNetwork(network),
-    onSelectToken: (token) => selectToken(token, { confirmDiscard: true }),
-    onScreenChange: syncUrl,
-  });
+  renderPhoneFrame(el("phone-frame"), state.selectedToken, phoneOptions());
+  fitPhone();
+  syncDock();
 
   renderRegistrySourceBanner();
-  renderDeployPanel();
 }
 
 function renderRegistrySourceBanner(): void {
@@ -200,21 +259,108 @@ function renderRegistrySourceBanner(): void {
   banner.textContent = `Viewing: ${state.source.owner}/${state.source.repo}`;
 }
 
-function renderDeployPanel(): void {
-  const panel = el("deploy-panel");
-  panel.innerHTML = "";
+// ---------------------------------------------------------------------------
+// Device dock: platform + appearance toggles, Share menu and Deploy, in one panel under the phone.
+// ---------------------------------------------------------------------------
 
-  const deployBtn = document.createElement("button");
-  deployBtn.className = "deploy-btn";
-  deployBtn.textContent = "\u{1F4BE} Deploy / Propose Token Card via GitHub";
-  deployBtn.addEventListener("click", () => runDeployFlow(deployBtn));
-  panel.append(deployBtn);
+function segmented<T extends string>(
+  label: string,
+  options: ReadonlyArray<{ value: T; text?: string; iconName?: Parameters<typeof icon>[0]; label: string; id: string }>,
+  onPick: (value: T) => void,
+): HTMLElement {
+  const group = document.createElement("div");
+  group.className = "segmented";
+  group.setAttribute("role", "radiogroup");
+  group.setAttribute("aria-label", label);
+  for (const option of options) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.id = option.id;
+    button.className = "segmented-btn";
+    button.dataset.value = option.value;
+    button.setAttribute("role", "radio");
+    button.setAttribute("aria-label", option.label);
+    button.title = option.label;
+    if (option.iconName) button.append(icon(option.iconName, { size: 15 }));
+    if (option.text) button.append(document.createTextNode(option.text));
+    button.addEventListener("click", () => onPick(option.value));
+    group.append(button);
+  }
+  return group;
+}
 
-  const shareBtn = document.createElement("button");
-  shareBtn.className = "share-btn";
-  shareBtn.textContent = "\u{1F517} Copy share link";
-  shareBtn.addEventListener("click", () => runShareFlow(shareBtn));
-  panel.append(shareBtn);
+function buildDock(): void {
+  const dock = el("device-dock");
+  dock.textContent = "";
+  dock.append(
+    segmented<ChromeStyle>(
+      "Platform",
+      [
+        { value: "ios", text: "iOS", label: "iOS", id: "chrome-style-ios" },
+        { value: "android", text: "Android", label: "Android", id: "chrome-style-android" },
+      ],
+      (value) => {
+        state.chromeStyle = value;
+        renderAll();
+      },
+    ),
+    segmented<ChromeTheme>(
+      "Appearance",
+      [
+        { value: "light", iconName: "sun", label: "Light", id: "chrome-theme-light" },
+        { value: "dark", iconName: "moon", label: "Dark", id: "chrome-theme-dark" },
+      ],
+      (value) => {
+        state.chromeTheme = value;
+        renderAll();
+      },
+    ),
+  );
+
+  const sep = document.createElement("span");
+  sep.className = "dock-sep";
+  dock.append(sep);
+
+  const share = iconButton("share", "Share", { size: 17 });
+  share.id = "share-menu-btn";
+  dock.append(share);
+  attachMenu(share, () => {
+    const shareable = state.source?.kind === "bundled" && !state.isPreviewOnly;
+    const hint = shareable ? undefined : "Only bundled lists have a public link";
+    return [
+      { label: "Copy link", ...(hint ? { hint } : { hint: "This list, network and token" }), icon: "link", disabled: !shareable, onSelect: () => void copyLink(undefined) },
+      { label: "Copy phone link", hint: hint ?? "Opens as the phone interface, no studio panels", icon: "smartphone", disabled: !shareable, onSelect: () => void copyLink("phone") },
+      { label: "Open phone view", hint: hint ?? "In a new tab", icon: "external-link", disabled: !shareable, onSelect: () => window.open(currentLink("phone"), "_blank", "noopener") },
+      { label: "Copy token preview link", hint: "Self-contained: works for any token", icon: "copy", onSelect: () => void runShareFlow() },
+    ];
+  });
+
+  const deploy = iconButton("git-pull-request", "Deploy / Propose Token Card via GitHub", { size: 17 });
+  deploy.id = "deploy-btn";
+  deploy.addEventListener("click", () => void runDeployFlow(deploy));
+  dock.append(deploy);
+  syncDock();
+}
+
+function syncDock(): void {
+  for (const [id, active] of [
+    ["chrome-style-ios", state.chromeStyle === "ios"],
+    ["chrome-style-android", state.chromeStyle === "android"],
+    ["chrome-theme-light", state.chromeTheme === "light"],
+    ["chrome-theme-dark", state.chromeTheme === "dark"],
+  ] as const) {
+    document.getElementById(id)?.setAttribute("aria-checked", String(active));
+  }
+}
+
+/** The current address with `view` set (phone) or removed. The query already mirrors the list, network and token. */
+function currentLink(view: "phone" | undefined): string {
+  return withViewParam(`${location.origin}${location.pathname}${location.search}`, view);
+}
+
+async function copyLink(view: "phone" | undefined): Promise<void> {
+  const ok = await copyText(currentLink(view));
+  showToast(ok ? (view === "phone" ? "Phone link copied" : "Link copied") : "Couldn't copy the link");
 }
 
 async function runDeployFlow(button: HTMLButtonElement): Promise<void> {
@@ -242,21 +388,15 @@ async function runDeployFlow(button: HTMLButtonElement): Promise<void> {
   }
 }
 
-async function runShareFlow(button: HTMLButtonElement): Promise<void> {
+async function runShareFlow(): Promise<void> {
   if (!state.selectedToken || !state.source) return;
-  button.disabled = true;
-  try {
-    const { fragment, json } = await encodeSharePayload({ token: state.selectedToken, registrySource: state.source });
-    if (fragment) {
-      const link = `${location.origin}${location.pathname}#${fragment}`;
-      await navigator.clipboard.writeText(link);
-      window.alert("Share link copied to clipboard.");
-    } else {
-      await navigator.clipboard.writeText(json);
-      window.alert("Config too large for a share link — JSON copied to clipboard instead.");
-    }
-  } finally {
-    button.disabled = false;
+  const { fragment, json } = await encodeSharePayload({ token: state.selectedToken, registrySource: state.source });
+  if (fragment) {
+    const ok = await copyText(`${location.origin}${location.pathname}#${fragment}`);
+    showToast(ok ? "Token preview link copied" : "Couldn't copy the link");
+  } else {
+    const ok = await copyText(json);
+    showToast(ok ? "Too large for a link: JSON copied instead" : "Couldn't copy the JSON");
   }
 }
 
@@ -367,29 +507,40 @@ async function init(): Promise<void> {
   editor = new Editor(el("editor-container"), {
     onValidToken: (token) => {
       state.selectedToken = token;
-      renderPhoneFrame(el("phone-frame"), token, {
-        chromeStyle: state.chromeStyle,
-        chromeTheme: state.chromeTheme,
-        networkName: state.selectedNetwork,
-        networkInfo: findNetworkInfo(state.networks, state.selectedNetwork),
-        registryNetworks: state.registry?.networks ?? [],
-        allNetworkInfo: state.networks,
-        listName: listDisplayName(),
-        listDescription: listDisplayDescription(),
-        onSelectNetwork: (network) => selectNetwork(network),
-        onSelectToken: (t) => selectToken(t, { confirmDiscard: true }),
-        onScreenChange: syncUrl,
-      });
+      renderPhoneFrame(el("phone-frame"), token, phoneOptions());
     },
   });
 
-  el("chrome-style-toggle").addEventListener("click", () => {
-    state.chromeStyle = state.chromeStyle === "ios" ? "android" : "ios";
-    renderAll();
-  });
-  el("chrome-theme-toggle").addEventListener("click", () => {
-    state.chromeTheme = state.chromeTheme === "dark" ? "light" : "dark";
-    renderAll();
+  // Chrome that is the same on every load: icons in the gallery and the top bar, the device dock.
+  el("gallery-brand").append(icon("layers", { size: 22, strokeWidth: 1.9 }));
+  el("upload-label").prepend(icon("upload", { size: 15 }));
+  const backBtn = el("back-to-gallery");
+  backBtn.append(icon("arrow-left", { size: 16 }), Object.assign(document.createElement("span"), { className: "icon-btn-label", textContent: "Gallery" }));
+  backBtn.setAttribute("aria-label", "Back to Gallery");
+  backBtn.title = "Back to Gallery";
+  el("topbar-sep").append(icon("chevron-right", { size: 16 }));
+  const downloadBtn = el("download-list-btn");
+  downloadBtn.append(icon("download", { size: 16 }), Object.assign(document.createElement("span"), { className: "icon-btn-label", textContent: "Export list" }));
+  downloadBtn.setAttribute("aria-label", "Download list JSON");
+  downloadBtn.title = "Download list JSON";
+  buildDock();
+
+  // A real phone looks like the device it is: iOS or Android chrome, and the system light/dark setting.
+  const detected = detectChromeStyle(navigator.userAgent, navigator.maxTouchPoints);
+  if (phone.fullscreen) {
+    if (detected) state.chromeStyle = detected;
+    state.chromeTheme = window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+  }
+  applyPhoneMode();
+  new ResizeObserver(() => fitPhone()).observe(el("phone-stage"));
+  window.addEventListener("resize", () => {
+    const next = resolvePhoneMode(location.search, measureDevice());
+    if (next.phoneMode !== phone.phoneMode || next.fullscreen !== phone.fullscreen) {
+      phone = next;
+      applyPhoneMode();
+      renderAll();
+    }
+    fitPhone();
   });
   el("back-to-gallery").addEventListener("click", () => setView("gallery"));
   el("download-list-btn").addEventListener("click", () => downloadListJson());

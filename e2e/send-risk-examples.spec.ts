@@ -89,7 +89,7 @@ test("1. an exchange (VASP) with a name and a logo", async ({ page }) => {
   await expect(page.locator(".send-owner-logo")).toBeVisible();
   await expect(page.locator(".send-caption")).toHaveCount(0); // no "Screened with Aegis…" line
   await shot(page, "1-exchange-name-and-logo");
-  await page.locator("#chrome-theme-toggle").click();
+  await page.locator("#chrome-theme-light").click();
   await shot(page, "1b-exchange-name-and-logo-light");
 });
 
@@ -152,8 +152,8 @@ test("5. sanctions list match (a real OFAC SDN address from the seed): neutral l
   const text = (await dialog.innerText()).toLowerCase();
   expect(text).not.toMatch(/sanction|ofac|sdn|score|reason|critical|high|medium|mixer|scam|recommend|should|safe\b|dangerous|avoid/);
   await shot(page, "5b-sanctions-match-popup");
-  await page.locator("#chrome-theme-toggle").click();
-  await page.locator("#chrome-style-toggle").click();
+  await page.locator("#chrome-theme-light").click();
+  await page.locator("#chrome-style-android").click();
   await shot(page, "5c-popup-android-light");
 });
 

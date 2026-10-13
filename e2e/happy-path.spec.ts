@@ -372,6 +372,8 @@ test("the Send button is the tall accent one and Receive sits beside it", async 
   await page.goto("/?list=aegis-super-list&network=Tron&token=USDT");
   const send = page.locator(".phone-screen .action-group-btn.action-primary", { hasText: "Send" });
   const receive = page.locator(".phone-screen .action-group-btn.action-secondary", { hasText: "Receive" });
-  expect((await send.boundingBox())!.height).toBeGreaterThanOrEqual(48);
-  expect((await receive.boundingBox())!.height).toBeGreaterThanOrEqual(48);
+  // The phone is scaled to fit the window, so read the CSS height, not the scaled box.
+  const minHeight = (button: typeof send) => button.evaluate((el) => parseFloat(getComputedStyle(el).minHeight));
+  expect(await minHeight(send)).toBeGreaterThanOrEqual(48);
+  expect(await minHeight(receive)).toBeGreaterThanOrEqual(48);
 });

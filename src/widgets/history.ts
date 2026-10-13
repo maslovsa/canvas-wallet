@@ -64,7 +64,7 @@ export function formatHistoryTimestamp(timestamp: number): string {
 }
 
 export function formatAmount(amount: number): string {
-  if (amount >= 1000) return amount.toFixed(0);
+  if (amount >= 1000) return Math.round(amount).toLocaleString("en-US");
   if (amount >= 1) return amount.toFixed(2);
   return amount.toPrecision(2);
 }

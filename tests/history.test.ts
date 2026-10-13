@@ -63,7 +63,7 @@ describe("formatAmount", () => {
   });
 
   it("drops decimals for large amounts", () => {
-    expect(formatAmount(15000)).toBe("15000");
+    expect(formatAmount(15000)).toBe("15,000");
   });
 
   it("uses more precision for sub-1 amounts", () => {

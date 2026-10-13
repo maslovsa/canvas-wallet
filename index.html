@@ -2,46 +2,50 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Token UI Studio &amp; Multi-Chain Registry</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#08090b" />
+  <meta name="color-scheme" content="dark light" />
+  <title>Token UI Studio</title>
   <link rel="stylesheet" href="/src/style.css" />
 </head>
 <body>
   <div id="app">
-    <div id="status-banner" class="status-banner"></div>
+    <div id="status-banner" class="status-banner" role="status"></div>
 
     <div id="gallery-view" class="gallery-view">
       <header class="gallery-header">
-        <h1>Token UI Studio &amp; Multi-Chain Registry</h1>
-        <p>Pick a token list to view and edit — or upload your own registry.json.</p>
+        <div id="gallery-brand" class="brand-mark" aria-hidden="true"></div>
+        <h1>Token UI Studio</h1>
+        <p>Pick a token list to preview as a wallet and edit, or upload your own registry.json.</p>
       </header>
       <div id="gallery-cards" class="gallery-cards"></div>
       <div class="gallery-upload">
-        <label class="upload-btn" for="upload-input">Upload your own list</label>
+        <label id="upload-label" class="upload-btn" for="upload-input"><span>Upload your own list</span></label>
         <input id="upload-input" type="file" accept="application/json,.json" hidden />
       </div>
     </div>
 
     <div id="studio-view" class="studio-view" hidden>
-      <div class="studio-toolbar">
-        <button id="back-to-gallery" class="toolbar-btn">&larr; Back to Gallery</button>
+      <header class="topbar">
+        <button id="back-to-gallery" class="icon-btn is-ghost" type="button"></button>
+        <span id="topbar-sep" class="topbar-sep" aria-hidden="true"></span>
         <div id="registry-source-banner" class="registry-source-banner"></div>
-        <button id="download-list-btn" class="toolbar-btn">Download list JSON</button>
-      </div>
+        <div class="topbar-actions">
+          <button id="download-list-btn" class="icon-btn" type="button"></button>
+        </div>
+      </header>
 
       <div class="app-grid">
-        <div id="sidebar" class="sidebar"></div>
+        <aside id="sidebar" class="sidebar" aria-label="Networks and tokens"></aside>
 
-        <div class="simulator-column">
-          <div id="phone-frame" class="phone-frame"></div>
-          <div id="deploy-panel" class="deploy-panel"></div>
-          <div class="simulator-toolbar">
-            <button id="chrome-style-toggle" class="toolbar-btn">Toggle iOS/Android</button>
-            <button id="chrome-theme-toggle" class="toolbar-btn">Toggle Light/Dark</button>
+        <section class="simulator-column" aria-label="Phone simulator">
+          <div id="phone-stage" class="phone-stage">
+            <div id="phone-frame" class="phone-frame"></div>
           </div>
-        </div>
+          <div id="device-dock" class="device-dock" role="toolbar" aria-label="Device preview"></div>
+        </section>
 
-        <div id="editor-container" class="editor-panel"></div>
+        <section id="editor-container" class="editor-panel" aria-label="Token JSON editor"></section>
       </div>
     </div>
   </div>

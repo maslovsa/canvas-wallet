@@ -3,6 +3,7 @@ import { loadIcon } from "../icon/icon-loader.ts";
 import { fetchPriceHistory, generatePlaceholderSeries, buildSparkline } from "./price-chart.ts";
 import { generateHistory, formatAmount, formatHistoryTimestamp } from "./history.ts";
 import { readableTextColor } from "./color.ts";
+import { icon } from "../ui/icons.ts";
 
 /** Accent for the primary action when a token declares no ui.theme.primaryColor (the app accent). */
 const DEFAULT_ACCENT = "#3375bb";
@@ -69,7 +70,9 @@ const renderActionGroup: WidgetRenderer<Extract<Widget, { type: "action_group" }
       btn.style.setProperty("--action-accent", accent);
       btn.style.setProperty("--action-accent-text", readableTextColor(accent));
     }
-    btn.textContent = item.label;
+    if (kind === "send") btn.append(icon("arrow-up-right", { size: 19, strokeWidth: 2.25 }));
+    if (kind === "receive") btn.append(icon("arrow-down-left", { size: 19, strokeWidth: 2.25 }));
+    btn.append(document.createTextNode(item.label));
     btn.addEventListener("click", () => onAction(item.action));
     row.append(btn);
   }
