@@ -97,3 +97,75 @@ describe("checkAddress (seed-only)", () => {
     expect(await checkAddress("T" + "y".repeat(33), { seed, now: NOW })).toEqual({ state: "unavailable" });
   });
 });
+
+import { parseProxyAnswer, proxyCheck } from "../src/send/risk-client.ts";
+
+describe("parseProxyAnswer (strict)", () => {
+  it("accepts exactly the three documented shapes", () => {
+    expect(parseProxyAnswer({ level: "clear" })).toEqual({ state: "clear" });
+    expect(parseProxyAnswer({ level: "clear", label: "Binance" })).toEqual({ state: "clear", label: "Binance" });
+    expect(parseProxyAnswer({ level: "caution" })).toEqual({ state: "caution" });
+  });
+
+  it("unknown and unexpected answers are unavailable, never trusted", () => {
+    for (const bad of [
+      { level: "unknown" },
+      { level: "safe" },
+      { level: "clear", score: 3 },
+      { level: "caution", label: "Mixer" }, // a label is never allowed on caution
+      { level: "clear", label: "" },
+      { level: "clear", label: "x".repeat(61) },
+      { level: "clear", label: 5 },
+      { label: "Binance" },
+      [],
+      null,
+      "clear",
+    ]) {
+      expect(parseProxyAnswer(bad)).toEqual({ state: "unavailable" });
+    }
+  });
+});
+
+describe("proxyCheck and checkAddress with a Worker", () => {
+  const calls: Array<{ url: string; init: RequestInit }> = [];
+  const respond = (answer: () => Response | Promise<Response>) =>
+    (async (url: string, init: RequestInit) => {
+      calls.push({ url, init });
+      return answer();
+    }) as unknown as typeof fetch;
+  beforeEach(() => {
+    calls.length = 0;
+  });
+
+  it("POSTs {network, address} to <proxy>/check and maps the answer", async () => {
+    const fetchImpl = respond(() => new Response(JSON.stringify({ level: "clear", label: "Binance" })));
+    expect(await proxyCheck(A, "https://worker.example/", fetchImpl)).toEqual({ state: "clear", label: "Binance" });
+    expect(calls[0]!.url).toBe("https://worker.example/check");
+    expect(JSON.parse(String(calls[0]!.init.body))).toEqual({ network: "TRON", address: A });
+    expect((calls[0]!.init.headers as Record<string, string>)["Content-Type"]).toBe("application/json");
+  });
+
+  it("HTTP errors, network errors and timeouts are unavailable", async () => {
+    expect(await proxyCheck(A, "https://w", respond(() => new Response("", { status: 429 })))).toEqual({ state: "unavailable" });
+    expect(await proxyCheck(A, "https://w", respond(() => { throw new Error("offline"); }))).toEqual({ state: "unavailable" });
+    expect(await proxyCheck(A, "https://w", respond(() => new Response("<html>")))).toEqual({ state: "unavailable" });
+  });
+
+  it("the seed answers first (no network); a miss goes to the Worker; no proxy means unavailable", async () => {
+    const fetchImpl = respond(() => new Response(JSON.stringify({ level: "caution" })));
+    const unknown = "T" + "z".repeat(33);
+    expect(await checkAddress(A, { seed, now: NOW, proxyUrl: "https://w", fetchImpl })).toEqual({ state: "clear", label: "Binance" });
+    expect(calls).toHaveLength(0);
+    expect(await checkAddress(unknown, { seed, now: NOW, proxyUrl: "https://w", fetchImpl })).toEqual({ state: "caution" });
+    expect(calls).toHaveLength(1);
+    expect(await checkAddress(unknown, { seed, now: NOW, proxyUrl: "", fetchImpl })).toEqual({ state: "unavailable" });
+    expect(await checkAddress(unknown, { seed, now: NOW, fetchImpl })).toEqual({ state: "unavailable" });
+    expect(calls).toHaveLength(1);
+  });
+
+  it("an expired seed entry falls through to the Worker", async () => {
+    const fetchImpl = respond(() => new Response(JSON.stringify({ level: "clear" })));
+    expect(await checkAddress(A, { seed, now: new Date("2027-06-01T00:00:00Z"), proxyUrl: "https://w", fetchImpl })).toEqual({ state: "clear" });
+    expect(calls).toHaveLength(1);
+  });
+});

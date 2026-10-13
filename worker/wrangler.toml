@@ -1,21 +1,31 @@
 # Cloudflare Worker: risk-check proxy for the Send window (docs/designs/send-window-plan.md, T9).
-# Nothing in this file is secret. The Aegis key is NOT here: it lives only as the Worker secret
-# AEGIS_API_KEY (Cloudflare dashboard > Worker > Settings > Variables and Secrets, or
-# `npx wrangler secret put AEGIS_API_KEY`). Local development reads worker/.dev.vars (gitignored).
+# Nothing in this file is secret. Secrets (set once in the Cloudflare dashboard, Worker > Settings >
+# Variables and Secrets, or with `npx wrangler secret put <NAME>`): AEGIS_API_KEY and RISK_ENABLED.
+# RISK_ENABLED is deliberately a secret, not a var: Git deploys overwrite dashboard variables but keep
+# secrets (plan E5). Live checks run only when it equals "true". Local development reads worker/.dev.vars.
 name = "canvas-wallet"
 main = "src/index.ts"
 compatibility_date = "2026-10-01"
 workers_dev = true
 
 [vars]
-# Exact browser origin allowed to call the Worker (GitHub Pages origin has no path).
+# Exact browser origins allowed to call the Worker (comma-separated; GitHub Pages origin has no path).
 ALLOWED_ORIGIN = "https://maslovsa.github.io"
 AEGIS_BASE_URL = "https://api.aegis-kyt.com"
-# RISK_ENABLED is deliberately NOT here: it is a Worker secret (plan decision E5), because Git deploys
-# overwrite dashboard variables but keep secrets. Live checks run only when the secret equals "true".
-# Abuse limits (see plan R4 / E3). Enforced once the real Worker lands (T9).
+# Abuse limits (plan R4 / E3): live Aegis calls per day for the whole demo, and per visitor per hour.
 DAILY_BUDGET = "30"
 PER_VISITOR_PER_HOUR = "10"
 
-# KV cache and the Durable Object counter are added in T9 (they need ids created in the account).
-# Free plan note: Durable Objects need the SQLite backend, i.e. `new_sqlite_classes` in a migration.
+# Verdict cache (a verdict is kept 24 h, a failed check 60 s).
+[[kv_namespaces]]
+binding = "RISK_CACHE"
+id = "6276ef3e24c642cb8e10e1915e85d747"
+
+# Atomic counters for the limits. The Free plan only offers SQLite-backed Durable Objects.
+[[durable_objects.bindings]]
+name = "COUNTER"
+class_name = "RiskCounter"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["RiskCounter"]

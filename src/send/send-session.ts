@@ -218,7 +218,7 @@ export function defaultSendDeps(): SendDeps {
   return {
     validateAddress: (address) => validateTronAddress(address),
     estimateFee: (token, recipient) => estimateFee({ type: token.isNative ? "NATIVE" : "TRC20", id: token.contract }, recipient),
-    checkRisk: async (address) => checkAddress(address, { seed: await loadSeed(), now: new Date() }),
+    checkRisk: async (address) => checkAddress(address, { seed: await loadSeed(), now: new Date(), proxyUrl: import.meta.env.VITE_RISK_PROXY_URL }),
     now: () => Date.now(),
     setTimeout: (fn, ms) => setTimeout(fn, ms),
     clearTimeout: (handle) => clearTimeout(handle as ReturnType<typeof setTimeout>),
