@@ -184,7 +184,7 @@ describe("validation messages and amount states", () => {
     await type(q("#send-address"), CLEAR);
     await type(q("#send-amount"), "500");
     expect((q("#send-amount-error") as HTMLElement).textContent).toBe("Not enough USDT");
-    expect(q(".send-reason").textContent).toBe("Not enough USDT");
+    expect(q(".send-reason").textContent).toBe(""); // already shown once, inline under the field
     expect(q<HTMLButtonElement>(".send-submit").disabled).toBe(true);
   });
 

@@ -127,6 +127,16 @@ describe("address -> risk status", () => {
     expect(c.view().address.status).toMatchObject({ text: "No risk signals found" });
   });
 
+  it("the 'checked by Aegis' caption is hidden when the check failed", async () => {
+    const { c } = setup();
+    await c.setAddress(UNKNOWN);
+    await settle();
+    expect(c.view().address.showCaption).toBe(false);
+    await c.setAddress(CLEAR_PLAIN);
+    await settle();
+    expect(c.view().address.showCaption).toBe(true);
+  });
+
   it("a thrown risk check becomes unavailable (never safe, never a crash)", async () => {
     const { c } = setup({ checkRisk: async () => { throw new Error("boom"); } });
     await c.setAddress(UNKNOWN);
@@ -298,6 +308,18 @@ describe("Send, popup, sending, sent", () => {
     c.pressSend();
     expect(c.view().popup).toBe(false);
     expect(c.view().phase).toBe("sending");
+  });
+
+  it("the reason line never repeats an error that is already shown inline", async () => {
+    const { c } = setup();
+    await c.setAddress(CLEAR_PLAIN);
+    await settle();
+    c.setAmount("500"); // over the balance
+    expect(c.view().amount.error).toBe("Not enough USDT");
+    expect(c.view().button).toMatchObject({ enabled: false, reason: null });
+    await c.setAddress(CLEAR_PLAIN.slice(0, -1) + "j"); // bad checksum
+    expect(c.view().address.error).toBe("Enter a valid Tron address");
+    expect(c.view().button.reason).toBeNull();
   });
 
   it("a disabled Send is ignored and always has a reason", async () => {
