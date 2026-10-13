@@ -43,6 +43,34 @@ describe("renderWidget", () => {
     warnSpy.mockRestore();
   });
 
+  it("Send is the primary (accent) button and Receive the secondary; other actions keep the quiet capsule", () => {
+    const t: Token = {
+      ...token,
+      ui: { theme: { primaryColor: "#26A17B" } },
+      actions: { send: { type: "send" }, receive: { type: "receive" }, mint: { type: "external_url", url: "https://example.com" } },
+    };
+    const el = renderWidget(
+      { type: "action_group", items: [{ label: "Send", action: "send" }, { label: "Receive", action: "receive" }, { label: "Mint", action: "mint" }] },
+      t,
+      () => {},
+    )!;
+    const [send, receive, mint] = [...el.querySelectorAll("button")] as HTMLButtonElement[];
+    expect(send!.classList.contains("action-primary")).toBe(true);
+    expect(send!.style.getPropertyValue("--action-accent")).toBe("#26A17B");
+    expect(send!.style.getPropertyValue("--action-accent-text")).toBe("#000000"); // chosen for contrast on that green
+    expect(receive!.classList.contains("action-secondary")).toBe(true);
+    expect(mint!.className).toBe("action-group-btn");
+    expect(mint!.style.getPropertyValue("--action-accent")).toBe("");
+  });
+
+  it("without a token accent the Send button uses the app accent", () => {
+    const t: Token = { ...token, actions: { send: { type: "send" } } };
+    const el = renderWidget({ type: "action_group", items: [{ label: "Send", action: "send" }] }, t, () => {})!;
+    const send = el.querySelector("button")!;
+    expect(send.style.getPropertyValue("--action-accent")).toBe("#3375bb");
+    expect(send.style.getPropertyValue("--action-accent-text")).toBe("#ffffff");
+  });
+
   it("fires onAction with the widget's action key when clicked", () => {
     const onAction = vi.fn();
     const el = renderWidget({ type: "banner", title: "T", action: "mint_dapp" }, token, onAction);
