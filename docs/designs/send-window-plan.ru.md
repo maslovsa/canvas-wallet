@@ -168,3 +168,8 @@ CEO-ревью (D1–D13): гибрид «seed + Worker»; сокращение 
 Выключен лишний файл `src/send/net.ts` (хватает встроенного `AbortSignal.timeout`). Устаревший TODO «автодеплой Worker в CI» удалён: деплой теперь из Git Cloudflare (ваш выбор).
 
 Состояние: план согласован целиком (CEO, инженерное ревью, дизайн), нерешённых вопросов нет. Внешнего обзора нет (Codex не установлен). Готово к реализации по трём PR: фундамент, экран Send на seed, живая проверка через Worker.
+
+## Дополнение 2026-10-13: формулировки без советов и логотип VASP
+
+- **R6a.** Мы не даём советов, поэтому формулировки только описывают данные: строка и заголовок попапа «Risk signals found for this address», текст попапа «Aegis data at the time of the check shows risk signals. This is information, not advice, and details aren't shown. The decision is yours.», кнопки Cancel и Continue, подпись «Screened with Aegis data. Information only, not advice.». Слова «recommend», «safe», «dangerous», «avoid», «should» в этом интерфейсе не используем. Это заменяет формулировку D12 («We don't recommend sending…»).
+- **R12.** Для чистого (`clear`) адреса биржи показываем имя VASP и логотип (`verdict.entity` из Aegis). Логотип принимается только как https-ссылка на `.png` с `cdn.jsdelivr.net`, проверяется и в Worker, и в клиенте. Для рискованных адресов имя и логотип не показываются никогда: Aegis может назвать биржей адрес, который одновременно помечен как подсанкционный. Если логотипа нет, рисуем кружок с первой буквой.

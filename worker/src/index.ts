@@ -1,14 +1,15 @@
 // Risk-check proxy for the Send window (plan T9). It exists because a static GitHub Pages site cannot
 // hold a secret: the Aegis key lives ONLY here, as the Worker secret AEGIS_API_KEY.
 //
-//   POST /check {"network":"TRON","address":"T..."}  ->  {"level":"clear","label"?:"..."} | {"level":"caution"} | {"level":"unknown"}
+//   POST /check {"network":"TRON","address":"T..."}  ->  {"level":"clear","label"?:"...","logo"?:"https://..."} | {"level":"caution"} | {"level":"unknown"}
 //
-// The response is exactly that: never a score, a reason, flags or the Aegis session. A label is returned
-// only with a clear result (a name like a mixer or a sanctioned person would itself reveal the reason,
-// plan E7). Anything that goes wrong becomes {"level":"unknown"} (fail closed: no live call when the
+// The response is exactly that: never a score, a reason, flags or the Aegis session. A label (the VASP's
+// name) and its logo are returned only with a clear result (a name like a mixer or a sanctioned person would
+// itself reveal the reason, plan E7; Aegis can name an exchange on an address it also marks as sanctioned). Anything that goes wrong becomes {"level":"unknown"} (fail closed: no live call when the
 // cache or the counters are unavailable). Aegis POST /v2/screen is synchronous and costs 0.1 credit per
 // call; a replay with the same Idempotency-Key within 24 h is free (docs.aegis-kyt.com/api-reference/v2-screen).
 import { validateTronAddress } from "../../src/send/tron-address.ts";
+import { sanitizeLogoUrl } from "../../src/send/entity-logo.ts";
 import { Counter, type CounterStorage } from "./counter.ts";
 
 export { Counter } from "./counter.ts";
@@ -47,6 +48,7 @@ type Level = "clear" | "caution" | "unknown";
 interface Verdict {
   level: Level;
   label?: string;
+  logo?: string;
 }
 
 const AEGIS_TIMEOUT_MS = 8000; // inside the client's 15 s ceiling (plan R10)
@@ -92,15 +94,25 @@ export function sanitizeLabel(raw: unknown): string | undefined {
   return cleaned === "" ? undefined : cleaned;
 }
 
-/** Aegis /v2/screen answer -> the three client levels (plan E6) and, for clear only, a label (plan E7). */
+/**
+ * Aegis /v2/screen answer -> the three client levels (plan E6) and, for clear only, the owner's name and logo
+ * (plan E7). The name is verdict.entity.name (a corroborated VASP), else verdict.label; the logo is only taken
+ * together with a name and only if it is an acceptable URL (sanitizeLogoUrl).
+ */
 export function mapAegisVerdict(body: unknown): Verdict {
-  const root = body as { verdict?: { risk_level?: unknown; label?: unknown }; coverage?: { data_available?: unknown } } | null;
+  const root = body as {
+    verdict?: { risk_level?: unknown; label?: unknown; entity?: { name?: unknown; logo_url?: unknown } | null };
+    coverage?: { data_available?: unknown };
+  } | null;
   const level = root?.verdict?.risk_level;
   if (level === "medium" || level === "high" || level === "critical" || level === "sanctioned") return { level: "caution" };
   const hasData = root?.coverage?.data_available === true;
   if (level === "low" || (level === "none" && hasData)) {
-    const label = sanitizeLabel(root?.verdict?.label);
-    return label ? { level: "clear", label } : { level: "clear" };
+    const entity = root?.verdict?.entity;
+    const label = sanitizeLabel(entity?.name) ?? sanitizeLabel(root?.verdict?.label);
+    if (!label) return { level: "clear" };
+    const logo = sanitizeLogoUrl(entity?.logo_url);
+    return logo ? { level: "clear", label, logo } : { level: "clear", label };
   }
   return { level: "unknown" }; // none without data, an unknown level, or a malformed answer
 }
@@ -176,7 +188,7 @@ async function handleCheck(request: Request, env: Env, cors: Record<string, stri
 
   if (env.RISK_ENABLED !== "true") return json({ level: "unknown" } satisfies Verdict, 200, cors);
 
-  const cacheKey = `v1:TRON:${address}`;
+  const cacheKey = `v2:TRON:${address}`;
   try {
     const cached = await env.RISK_CACHE.get(cacheKey);
     if (cached) return json(JSON.parse(cached) as Verdict, 200, cors);

@@ -33,6 +33,32 @@ function el<K extends keyof HTMLElementTagNameMap>(tag: K, className?: string, t
   return node;
 }
 
+/**
+ * The VASP badge next to its name: an initial-letter placeholder that is always there, with the logo laid over it
+ * once (and only if) the image loads, so a slow or broken logo never shows a broken-image icon. The <img> URL has
+ * already passed sanitizeLogoUrl (https jsDelivr .png); no referrer is sent.
+ */
+function fillOwnerBadge(badge: HTMLElement, name: string, logo: string | null): void {
+  badge.textContent = "";
+  const initial = el("span", "send-owner-initial", [...name][0]?.toUpperCase() ?? "?");
+  badge.append(initial);
+  if (!logo) return;
+  const img = document.createElement("img");
+  img.className = "send-owner-logo";
+  img.alt = "";
+  img.width = 24;
+  img.height = 24;
+  img.decoding = "async";
+  img.referrerPolicy = "no-referrer";
+  img.hidden = true;
+  img.addEventListener("load", () => {
+    img.hidden = false;
+  });
+  img.addEventListener("error", () => img.remove());
+  img.src = logo;
+  badge.append(img);
+}
+
 const ICONS = { check: "✓", alert: "⚠", help: "?", none: "" } as const;
 
 export function mountSendScreen(options: SendScreenOptions): void {
@@ -85,13 +111,16 @@ export function mountSendScreen(options: SendScreenOptions): void {
   statusIcon.setAttribute("aria-hidden", "true");
   const spinner = el("span", "send-spinner");
   spinner.setAttribute("aria-hidden", "true");
+  const ownerBadge = el("span", "send-owner");
+  ownerBadge.setAttribute("aria-hidden", "true"); // decorative: the name beside it is the text
+  ownerBadge.hidden = true;
   const statusText = el("span", "send-status-text");
   const checkAgain = el("button", "send-link", "Check again");
   checkAgain.type = "button";
-  status.append(statusIcon, spinner, statusText, checkAgain);
+  status.append(statusIcon, ownerBadge, spinner, statusText, checkAgain);
   const addrError = el("div", "send-error");
   addrError.setAttribute("role", "alert");
-  const caption = el("div", "send-caption", "Address is checked by Aegis");
+  const caption = el("div", "send-caption", "Screened with Aegis data. Information only, not advice.");
   caption.id = "send-address-caption";
   addrBlock.append(addrRow, addrField, status, addrError, caption);
 
@@ -184,7 +213,14 @@ export function mountSendScreen(options: SendScreenOptions): void {
 
     const s = view.address.status;
     status.className = "send-status" + (s ? ` ${toneClass(s.tone)}` : "");
-    statusIcon.textContent = s ? ICONS[s.icon] : "";
+    const owner = s?.owner ?? null;
+    statusIcon.textContent = s && !owner ? ICONS[s.icon] : "";
+    ownerBadge.hidden = owner === null;
+    const ownerKey = owner && s ? `${s.text}\n${owner.logo ?? ""}` : "";
+    if (ownerBadge.dataset.key !== ownerKey) {
+      ownerBadge.dataset.key = ownerKey;
+      if (owner && s) fillOwnerBadge(ownerBadge, s.text, owner.logo);
+    }
     spinner.hidden = !s?.spinner;
     statusText.textContent = s ? s.text : "";
     checkAgain.hidden = !s?.checkAgain;
@@ -219,11 +255,11 @@ export function mountSendScreen(options: SendScreenOptions): void {
         screen,
         chromeStyle: options.chromeStyle,
         tone: "caution",
-        title: "We don't recommend sending to this address",
-        body: "Based on Aegis data at the time of the check. Details aren't shown.",
+        title: "Risk signals found for this address",
+        body: "Aegis data at the time of the check shows risk signals. This is information, not advice, and details aren't shown. The decision is yours.",
         buttons: [
           { label: "Cancel", primary: true, onClick: () => controller.popupCancel() },
-          { label: "Send anyway", onClick: () => controller.popupSendAnyway() },
+          { label: "Continue", onClick: () => controller.popupSendAnyway() },
         ],
         onDismiss: () => controller.popupCancel(),
       });

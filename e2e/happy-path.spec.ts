@@ -146,13 +146,13 @@ test("Send: a risky address shows the caution line first, the popup only on Send
   await startSend(page);
   await page.locator("#send-address").fill(SEED_CAUTION);
   await page.locator("#send-amount").fill("10");
-  await expect(page.locator(".send-status-text")).toHaveText("Caution: we don't recommend sending here");
+  await expect(page.locator(".send-status-text")).toHaveText("Risk signals found for this address");
   await expect(page.locator(".phone-overlay")).toHaveCount(0);
 
   await page.locator(".send-form .send-submit").click();
   const dialog = page.locator(".phone-dialog");
-  await expect(dialog).toContainText("We don't recommend sending to this address");
-  await expect(dialog).toContainText("Based on Aegis data at the time of the check. Details aren't shown.");
+  await expect(dialog).toContainText("Risk signals found for this address");
+  await expect(dialog).toContainText("Aegis data at the time of the check shows risk signals. This is information, not advice, and details aren't shown. The decision is yours.");
   expect((await dialog.innerText()).toLowerCase()).not.toMatch(/score|level|reason|sanction|critical/);
 
   await page.keyboard.press("Escape"); // Esc = Cancel
@@ -162,7 +162,7 @@ test("Send: a risky address shows the caution line first, the popup only on Send
   await expect(page.locator("#send-address")).toBeFocused();
 
   await page.locator(".send-form .send-submit").click();
-  await page.locator(".phone-dialog button", { hasText: "Send anyway" }).click();
+  await page.locator(".phone-dialog button", { hasText: "Continue" }).click();
   await expect(page.locator(".send-sent-headline")).toHaveText("10 USDT sent");
 });
 
@@ -197,10 +197,10 @@ test("Send: the Worker says caution -> amber line, popup only on Send, nothing b
   await startSend(page);
   await page.locator("#send-address").fill(NOT_IN_SEED);
   await page.locator("#send-amount").fill("3");
-  await expect(page.locator(".send-status-text")).toHaveText("Caution: we don't recommend sending here");
+  await expect(page.locator(".send-status-text")).toHaveText("Risk signals found for this address");
   await expect(page.locator(".phone-overlay")).toHaveCount(0);
   await page.locator(".send-form .send-submit").click();
-  await expect(page.locator(".phone-dialog")).toContainText("We don't recommend sending to this address");
+  await expect(page.locator(".phone-dialog")).toContainText("Risk signals found for this address");
 });
 
 test("Send: a slow Worker shows 'Checking address…' after the spinner delay, Send waits, then the verdict arrives", async ({ page }) => {

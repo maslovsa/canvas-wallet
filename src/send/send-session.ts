@@ -30,7 +30,7 @@ export interface SendTokenInfo {
 }
 
 type AddressStatus = { kind: "empty" } | { kind: "pending" } | { kind: "invalid"; reason: Exclude<TronAddressCheck, { ok: true }>["reason"] } | { kind: "valid" };
-type RiskUi = { kind: "idle" } | { kind: "checking"; startedAt: number } | { kind: "clear"; label?: string } | { kind: "caution" } | { kind: "unavailable" };
+type RiskUi = { kind: "idle" } | { kind: "checking"; startedAt: number } | { kind: "clear"; label?: string; logo?: string } | { kind: "caution" } | { kind: "unavailable" };
 type FeeUi = { kind: "none" } | { kind: "loading"; estimate: FeeEstimate } | { kind: "ready"; estimate: FeeEstimate };
 
 export interface SendState {
@@ -69,7 +69,15 @@ export interface SendView {
   address: {
     value: string;
     error: string | null;
-    status: { tone: Tone; icon: "check" | "alert" | "help" | "none"; text: string; spinner: boolean; checkAgain: boolean } | null;
+    status: {
+      tone: Tone;
+      icon: "check" | "alert" | "help" | "none";
+      text: string;
+      spinner: boolean;
+      checkAgain: boolean;
+      /** Set when the text is the owner's (VASP's) name: the screen shows its logo, or an initial when there is none. */
+      owner: { logo: string | null } | null;
+    } | null;
     showCaption: boolean;
   };
   amount: { value: string; error: string | null; balanceText: string };
@@ -122,18 +130,18 @@ function addressView(state: SendState, nowMs: number): SendView["address"]["stat
   }
   if (risk.kind === "checking") {
     const slow = nowMs - risk.startedAt >= SPINNER_DELAY_MS; // no flicker for a sub-250 ms check (DR7)
-    return slow ? { tone: "dim", icon: "none", text: "Checking address…", spinner: true, checkAgain: false } : null;
+    return slow ? { tone: "dim", icon: "none", text: "Checking address…", spinner: true, checkAgain: false, owner: null } : null;
   }
   if (risk.kind === "clear") {
     return risk.label
-      ? { tone: "success", icon: "check", text: risk.label, spinner: false, checkAgain: false }
-      : { tone: "dim", icon: "none", text: "No risk signals found", spinner: false, checkAgain: false }; // never "Safe" (DR3)
+      ? { tone: "success", icon: "check", text: risk.label, spinner: false, checkAgain: false, owner: { logo: risk.logo ?? null } }
+      : { tone: "dim", icon: "none", text: "No risk signals found", spinner: false, checkAgain: false, owner: null }; // never "Safe" (DR3)
   }
   if (risk.kind === "caution") {
-    return { tone: "caution", icon: "alert", text: "Caution: we don't recommend sending here", spinner: false, checkAgain: false };
+    return { tone: "caution", icon: "alert", text: "Risk signals found for this address", spinner: false, checkAgain: false, owner: null };
   }
   if (risk.kind === "unavailable") {
-    return { tone: "dim", icon: "help", text: "Couldn't verify this address.", spinner: false, checkAgain: true };
+    return { tone: "dim", icon: "help", text: "Couldn't verify this address.", spinner: false, checkAgain: true, owner: null };
   }
   return null;
 }
@@ -315,7 +323,13 @@ export class SendController {
       .then((result) => {
         if (!this.guard.isCurrent(token)) return; // stale reply for an address no longer in the field
         this.state.risk =
-          result.state === "clear" ? (result.label ? { kind: "clear", label: result.label } : { kind: "clear" }) : { kind: result.state };
+          result.state === "clear"
+            ? result.label
+              ? result.logo
+                ? { kind: "clear", label: result.label, logo: result.logo }
+                : { kind: "clear", label: result.label }
+              : { kind: "clear" }
+            : { kind: result.state };
         this.emit();
       });
   }

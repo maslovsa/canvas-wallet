@@ -107,6 +107,34 @@ describe("parseProxyAnswer (strict)", () => {
     expect(parseProxyAnswer({ level: "caution" })).toEqual({ state: "caution" });
   });
 
+  const LOGO = "https://cdn.jsdelivr.net/gh/example/kyt-entity-registry@main/logos/example.png";
+
+  it("a clear answer may carry a logo, but only with a label and only an acceptable URL", () => {
+    expect(parseProxyAnswer({ level: "clear", label: "Example Exchange", logo: LOGO })).toEqual({ state: "clear", label: "Example Exchange", logo: LOGO });
+    for (const bad of [
+      { level: "clear", logo: LOGO }, // a logo without a name
+      { level: "clear", label: "Example Exchange", logo: "https://evil.example/logo.png" },
+      { level: "clear", label: "Example Exchange", logo: "javascript:alert(1)" },
+      { level: "clear", label: "Example Exchange", logo: 7 },
+      { level: "caution", logo: LOGO }, // never on caution
+      { level: "caution", label: "Example Exchange", logo: LOGO },
+    ]) {
+      expect(parseProxyAnswer(bad)).toEqual({ state: "unavailable" });
+    }
+  });
+
+  it("the seed accepts a logo only on a labelled clear entry with an acceptable URL", () => {
+    const base = { network: "TRON", address: "TMuA6YqfCeX8EhbfYEg5y7S4DqzSJireY9", checkedAt: "2026-10-13" };
+    expect(validateSeedShape({ version: 1, entries: [{ ...base, level: "clear", label: "Example Exchange", logo: LOGO }] })).toEqual([]);
+    for (const bad of [
+      { ...base, level: "clear", logo: LOGO },
+      { ...base, level: "caution", logo: LOGO },
+      { ...base, level: "clear", label: "Example Exchange", logo: "http://cdn.jsdelivr.net/x.png" },
+    ]) {
+      expect(validateSeedShape({ version: 1, entries: [bad] }).join("\n")).toContain("logo must be");
+    }
+  });
+
   it("unknown and unexpected answers are unavailable, never trusted", () => {
     for (const bad of [
       { level: "unknown" },

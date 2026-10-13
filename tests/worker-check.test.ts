@@ -126,6 +126,64 @@ describe("response contract: exactly {level, label?}", () => {
   });
 });
 
+const LOGO = "https://cdn.jsdelivr.net/gh/example/kyt-entity-registry@main/logos/example-exchange.png";
+const entity = (over: Record<string, unknown> = {}) => ({ slug: "example-exchange", name: "Example Exchange", category: "centralized_exchange", logo_url: LOGO, logo_source: "registry", ...over });
+
+describe("VASP name and logo (clear results only)", () => {
+  it("takes the name and logo from verdict.entity", async () => {
+    aegisAnswer = () => aegisBody("low", "Example Exchange hot wallet 7", true, { entity: entity() });
+    expect(await (await post(makeEnv().env, ADDRESS)).json()).toEqual({ level: "clear", label: "Example Exchange", logo: LOGO });
+  });
+
+  it("an entity without a logo still gives the name (the screen draws an initial)", async () => {
+    aegisAnswer = () => aegisBody("low", null, true, { entity: entity({ logo_url: null, logo_source: null }) });
+    expect(await (await post(makeEnv().env, ADDRESS)).json()).toEqual({ level: "clear", label: "Example Exchange" });
+  });
+
+  it("falls back to verdict.label when there is no entity, and then has no logo", async () => {
+    aegisAnswer = () => aegisBody("low", "Binance", true, { entity: null });
+    expect(await (await post(makeEnv().env, ADDRESS)).json()).toEqual({ level: "clear", label: "Binance" });
+  });
+
+  it("a logo without any name is dropped", async () => {
+    aegisAnswer = () => aegisBody("low", null, true, { entity: entity({ name: null }) });
+    expect(await (await post(makeEnv().env, ADDRESS)).json()).toEqual({ level: "clear" });
+  });
+
+  it.each([
+    ["another host", "https://evil.example/logo.png"],
+    ["plain http", "http://cdn.jsdelivr.net/logo.png"],
+    ["javascript:", "javascript:alert(1)"],
+    ["a data: URL", "data:image/png;base64,AAAA"],
+    ["credentials in the URL", "https://user:pw@cdn.jsdelivr.net/logo.png"],
+    ["a query string", "https://cdn.jsdelivr.net/logo.png?x=1"],
+    ["not a PNG", "https://cdn.jsdelivr.net/logo.svg"],
+    ["a lookalike host", "https://cdn.jsdelivr.net.evil.example/logo.png"],
+  ])("an unacceptable logo URL (%s) is dropped but the name stays", async (_why, url) => {
+    aegisAnswer = () => aegisBody("low", null, true, { entity: entity({ logo_url: url }) });
+    expect(await (await post(makeEnv().env, ADDRESS)).json()).toEqual({ level: "clear", label: "Example Exchange" });
+  });
+});
+
+// Shapes taken from live Aegis answers (2026-10-13): an OFAC SDN match, and an exchange-named address that
+// Aegis nevertheless puts at the sanctioned level through sanctions exposure. The user sees the same neutral
+// caution for all of them: no name, no logo, no category, no score.
+describe("sanctions and exposure: what leaves the Worker", () => {
+  const scenarios: Array<[string, string, Record<string, unknown>]> = [
+    ["OFAC SDN match", "sanctioned", { risk_categories: ["ofac-sdn"], sdn_match: { list: "OFAC" }, label: "Example Sanctioned Person" }],
+    ["named exchange address at sanctioned level through exposure", "sanctioned", { risk_categories: ["sanctioned", "high_risk_exchange", "sanctions_exposure", "exchange", "defi"], label: "Example Exchange", entity: entity() }],
+    ["critical: mixer", "critical", { risk_categories: ["mixer"], label: "Example Mixer" }],
+    ["high: scam", "high", { risk_categories: ["scam"], label: null }],
+    ["medium: sanctions exposure", "medium", { risk_categories: ["sanctions_exposure"], label: "Example Exchange", entity: entity() }],
+  ];
+  it.each(scenarios)("%s -> exactly {level: caution}", async (_name, level, extra) => {
+    aegisAnswer = () => aegisBody(level, null, true, extra);
+    const text = await (await post(makeEnv().env, ADDRESS)).text();
+    expect(JSON.parse(text)).toEqual({ level: "caution" });
+    expect(text).not.toMatch(/Example|logo|jsdelivr|ofac|sdn|exposure|mixer|scam|score|categor/i);
+  });
+});
+
 describe("risk level mapping (plan E6)", () => {
   const table: Array<[string, string | null, boolean, string]> = [
     ["low", null, true, "clear"],
@@ -288,7 +346,7 @@ describe("cache", () => {
     const { env, kv } = makeEnv({ PER_VISITOR_PER_HOUR: "1" });
     await post(env, ADDRESS);
     expect(await (await post(env, OTHER)).json()).toEqual({ level: "unknown" }); // visitor limit hit
-    expect(kv.store.has(`v1:TRON:${OTHER}`)).toBe(false);
+    expect(kv.store.has(`v2:TRON:${OTHER}`)).toBe(false);
     expect(await (await post(env, OTHER, { ip: "198.51.100.9" })).json()).toEqual({ level: "clear", label: "Binance" });
   });
 

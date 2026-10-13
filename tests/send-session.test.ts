@@ -94,7 +94,7 @@ describe("address -> risk status", () => {
     await c.setAddress(CLEAR_LABELED);
     await settle();
     const v = c.view();
-    expect(v.address.status).toEqual({ tone: "success", icon: "check", text: "Binance", spinner: false, checkAgain: false });
+    expect(v.address.status).toEqual({ tone: "success", icon: "check", text: "Binance", spinner: false, checkAgain: false, owner: { logo: null } });
     expect(v.address.showCaption).toBe(true);
     expect(feeCalls).toEqual([CLEAR_LABELED]);
     expect(v.fee).toEqual({ label: "Network fee (estimate)", value: "~6.4 TRX", note: null });
@@ -293,7 +293,7 @@ describe("Send, popup, sending, sent", () => {
     expect(c.state.focusAddressRequests).toBe(1);
   });
 
-  it("caution: Send anyway goes straight to Sending with no second confirmation", async () => {
+  it("caution: Continue goes straight to Sending with no second confirmation", async () => {
     const { c, clock } = await ready(RISKY);
     c.pressSend();
     c.popupSendAnyway();

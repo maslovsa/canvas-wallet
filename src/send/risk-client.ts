@@ -4,10 +4,11 @@
 //  2. the risk-check Worker (VITE_RISK_PROXY_URL), which holds the Aegis key. Without that URL the site is
 //     seed-only and every other address is "unavailable".
 // The client NEVER holds an Aegis key and never sees a score or a reason: a result is only clear, caution
-// or unavailable, and a label exists only on a clear result (plan decisions R1, E6, E7).
+// or unavailable, and a label (the VASP's name) and its logo exist only on a clear result (plan decisions R1, E6, E7).
+import { sanitizeLogoUrl } from "./entity-logo.ts";
 
 export type RiskResult =
-  | { state: "clear"; label?: string }
+  | { state: "clear"; label?: string; logo?: string }
   | { state: "caution" }
   | { state: "unavailable" };
 
@@ -17,6 +18,8 @@ export interface SeedEntry {
   level: "clear" | "caution";
   /** Owner label from Aegis; only allowed on a clear entry (a label on a risky address can reveal the reason). */
   label?: string;
+  /** Logo URL of the labelled VASP (jsDelivr PNG, see entity-logo.ts); only with a label on a clear entry. */
+  logo?: string;
   /** ISO date (YYYY-MM-DD) the entry was checked; entries older than SEED_MAX_AGE_DAYS count as a miss. */
   checkedAt: string;
 }
@@ -40,7 +43,7 @@ export function validateSeedShape(json: unknown): string[] {
     const e = raw as Record<string, unknown>;
     const where = `entries[${i}]`;
     for (const key of Object.keys(e)) {
-      if (!["network", "address", "level", "label", "checkedAt"].includes(key)) {
+      if (!["network", "address", "level", "label", "logo", "checkedAt"].includes(key)) {
         errors.push(`${where}: unexpected key "${key}"${FORBIDDEN_KEYS.includes(key) ? " (scores and reasons must never be stored)" : ""}`);
       }
     }
@@ -54,6 +57,9 @@ export function validateSeedShape(json: unknown): string[] {
       if (typeof e.label !== "string" || e.label.length === 0 || e.label.length > MAX_LABEL_LENGTH) {
         errors.push(`${where}: label must be 1-${MAX_LABEL_LENGTH} characters`);
       }
+    }
+    if (e.logo !== undefined && (e.level !== "clear" || e.label === undefined || sanitizeLogoUrl(e.logo) === undefined)) {
+      errors.push(`${where}: logo must be an acceptable https jsDelivr .png URL, and only on a clear entry that has a label`);
     }
     if (typeof e.checkedAt !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(e.checkedAt) || Number.isNaN(Date.parse(e.checkedAt))) {
       errors.push(`${where}: checkedAt must be a YYYY-MM-DD date`);
@@ -77,7 +83,9 @@ export function seedLookup(entries: SeedEntry[], address: string, now: Date): Ri
   if (!entry) return null;
   const ageDays = (now.getTime() - Date.parse(entry.checkedAt)) / DAY_MS;
   if (!(ageDays <= SEED_MAX_AGE_DAYS)) return null; // also false for NaN/future-dated garbage
-  return entry.level === "caution" ? { state: "caution" } : entry.label ? { state: "clear", label: entry.label } : { state: "clear" };
+  if (entry.level === "caution") return { state: "caution" };
+  if (!entry.label) return { state: "clear" };
+  return entry.logo ? { state: "clear", label: entry.label, logo: entry.logo } : { state: "clear", label: entry.label };
 }
 
 let seedPromise: Promise<SeedEntry[]> | undefined;
@@ -115,18 +123,23 @@ export interface RiskDeps {
 }
 
 /**
- * Parses the Worker's answer strictly: exactly {level} or {level, label}, a label only on "clear".
+ * Parses the Worker's answer strictly: exactly {level}, or {level:"clear", label?, logo?} (a logo only with a
+ * label, and only an acceptable URL). A label or logo on any other level is not trusted.
  * Anything else (extra keys, an unknown level, a label on caution) is treated as unavailable rather than trusted.
  */
 export function parseProxyAnswer(body: unknown): RiskResult {
   if (!body || typeof body !== "object" || Array.isArray(body)) return { state: "unavailable" };
   const keys = Object.keys(body);
-  const { level, label } = body as { level?: unknown; label?: unknown };
-  if (keys.some((k) => k !== "level" && k !== "label")) return { state: "unavailable" };
-  if (level === "caution" && label === undefined) return { state: "caution" };
+  const { level, label, logo } = body as { level?: unknown; label?: unknown; logo?: unknown };
+  if (keys.some((k) => k !== "level" && k !== "label" && k !== "logo")) return { state: "unavailable" };
+  if (level === "caution" && label === undefined && logo === undefined) return { state: "caution" };
   if (level === "clear") {
-    if (label === undefined) return { state: "clear" };
-    if (typeof label === "string" && label.length > 0 && label.length <= MAX_LABEL_LENGTH) return { state: "clear", label };
+    if (label === undefined && logo === undefined) return { state: "clear" };
+    if (typeof label === "string" && label.length > 0 && label.length <= MAX_LABEL_LENGTH) {
+      if (logo === undefined) return { state: "clear", label };
+      const safe = sanitizeLogoUrl(logo);
+      if (safe) return { state: "clear", label, logo: safe };
+    }
   }
   return { state: "unavailable" }; // "unknown", garbage, or a label where none is allowed
 }

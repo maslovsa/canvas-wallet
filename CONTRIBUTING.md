@@ -259,8 +259,15 @@ in-phone notice for anything else. Address risk answers come from `public/risk-s
 of demo addresses produced from Aegis `POST /v2/screen` results. An entry stores only `network`,
 `address`, `level` (`clear` or `caution`), an optional `label` (allowed on `clear` entries only, because
 an owner name on a risky address can reveal the reason) and `checkedAt`. Never store scores, reasons or
-flags: `npm run validate:fixtures` rejects them. Entries older than 90 days are ignored at runtime, so
-re-check them with Aegis before they expire. Addresses that are not in the seed show "Couldn't verify
+flags: `npm run validate:fixtures` rejects them. A `clear` entry with a label may also carry `logo` (an https `cdn.jsdelivr.net` `.png` URL, the VASP logo from Aegis `verdict.entity.logo_url`). Entries older than 90 days are ignored at runtime, so
+re-check them with Aegis before they expire. **Wording rule for risk results: no advice.** The Send screen only states what the screening data shows
+("Risk signals found for this address", "No risk signals found", "Couldn't verify this address") and says
+it is information, not advice. Do not write "recommend", "safe", "dangerous", "avoid" or "should" in this
+UI. Names and logos of a VASP appear only on clear results; a risky address never shows a name, a logo,
+a category or a score. `e2e/send-risk-examples.spec.ts` regenerates example screenshots in
+`docs/designs/send-risk-screens/`.
+
+Addresses that are not in the seed show "Couldn't verify
 this address" until the live Worker is connected.
 
 **CI gates.** Every pull request and every push to `main` runs `npm test` (a push to `main` deploys, so
