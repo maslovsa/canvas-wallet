@@ -21,6 +21,13 @@ uploaded anywhere) and, for power users, a direct `?registry=owner/repo`
 URL parameter that points the Studio at an external GitHub repo's
 `registry.json` instead (the multi-registry client — see below).
 
+**Shareable links.** The address bar mirrors what is open, so any view can be shared:
+`?list=<list id>` (the file name under `public/lists/`, e.g. `aegis-super-list`), `&network=<name>` (the
+network filter, e.g. `Tron`) and `&token=<symbol>` (the open asset, e.g. `USDT`). Names are matched
+case-insensitively; an unknown list shows a message and the gallery, an unknown network or asset falls
+back to the default. Other query parameters are preserved. Example:
+`?list=aegis-super-list&network=Tron&token=USDT`.
+
 ### Adding a token to an existing list
 
 1. Fork this repo.
@@ -234,7 +241,17 @@ fail, as a check that the validator itself hasn't silently broken.
 **Schema versions.** `1.1.0` adds the `send` action (`{"type": "send"}`, no parameters: it opens the
 built-in Send screen, and the recipient and amount are never prefilled by a registry). A registry that
 uses `send` must declare `schemaVersion` `1.1.0` or later; `npm run validate:fixtures` enforces this
-(see `fixtures/semantic-invalid/`). `1.0.0` registries stay valid.
+(see `fixtures/semantic-invalid/`). `1.2.0` adds the `receive` action (`{"type": "receive"}`, no parameters: it opens the Receive dialog
+with the network's address, a QR code and a Copy button); a registry that uses it must declare `1.2.0` or
+later. `1.0.0` registries stay valid.
+
+**Receive dialog and the demo addresses.** Tokens on Ethereum, BNB Smart Chain and Tron can opt in with a
+`receive` action. The addresses shown are random demo stubs, keyed by network name in
+`public/receive-addresses.json` (BNB Smart Chain reuses the EVM address); no private key exists for them
+and the dialog says "Demo address, not for real funds". `STUB_ETH` and `STUB_TRON` in the local `.env` hold
+the same two values for local work, but a static site cannot read `.env`, so the published copy is the JSON
+file. A network without an entry shows an in-phone "not available" notice. Keep the stubs obviously fake:
+never put a real wallet address there.
 
 **Send screen and the risk seed.** Tokens on Tron can opt in with a `send` action (and a widget that
 references it). The built-in Send screen only handles Tron (`NATIVE` and `TRC20` tokens) and shows an
@@ -242,8 +259,17 @@ in-phone notice for anything else. Address risk answers come from `public/risk-s
 of demo addresses produced from Aegis `POST /v2/screen` results. An entry stores only `network`,
 `address`, `level` (`clear` or `caution`), an optional `label` (allowed on `clear` entries only, because
 an owner name on a risky address can reveal the reason) and `checkedAt`. Never store scores, reasons or
-flags: `npm run validate:fixtures` rejects them. Entries older than 90 days are ignored at runtime, so
-re-check them with Aegis before they expire. Addresses that are not in the seed show "Couldn't verify
+flags: `npm run validate:fixtures` rejects them. A `clear` entry with a label may also carry `logo` (an https `cdn.jsdelivr.net` `.png` URL, the VASP logo from Aegis `verdict.entity.logo_url`). Entries older than 90 days are ignored at runtime, so
+re-check them with Aegis before they expire. **Alert threshold.** The risk-check Worker answers `caution` when Aegis `risk_score` is 50 or more, when the level is `sanctioned`, or on any sanctions-list match; below 50 the address is `clear`. The reason is never shown or sent to the browser.
+
+**Wording rule for risk results: no advice.** The Send screen only states what the screening data shows
+("Risk signals found for this address", "No risk signals found", "Couldn't verify this address") and says
+it is information, not advice. Do not write "recommend", "safe", "dangerous", "avoid" or "should" in this
+UI. Names and logos of a VASP appear only on clear results; a risky address never shows a name, a logo,
+a category or a score. `e2e/send-risk-examples.spec.ts` regenerates example screenshots in
+`docs/designs/send-risk-screens/`.
+
+Addresses that are not in the seed show "Couldn't verify
 this address" until the live Worker is connected.
 
 **CI gates.** Every pull request and every push to `main` runs `npm test` (a push to `main` deploys, so
@@ -267,3 +293,23 @@ A static GitHub Pages site cannot hold a secret, so address risk checks go throu
 **Site wiring.** Set the public repo variable `VITE_RISK_PROXY_URL` (GitHub: Settings > Secrets and variables > Actions > Variables) to the Worker URL; the Pages build picks it up on the next deploy. Empty or unset means a seed-only site. Kill switch: set the `RISK_ENABLED` secret to anything but `true`.
 
 **Local development.** Copy `worker/.dev.vars.example` to `worker/.dev.vars` (gitignored), fill in a key, and run `npx wrangler dev` inside `worker/`; the example also allows the Vite dev origin. Run `npx vitest run tests/worker-check.test.ts` for the Worker tests.
+
+### Free-plan budget (the Worker must stay on Cloudflare Free)
+
+Staying free means never upgrading the account to Workers Paid and keeping usage under the free quotas. Free
+plans are never billed for overage: past a quota Cloudflare just starts refusing requests until the next UTC day.
+Quotas as documented when this was written (re-check at developers.cloudflare.com/workers/platform/limits):
+100,000 Worker requests/day, KV 100,000 reads and 1,000 writes/day, SQLite Durable Objects 100,000 requests/day,
+Workers Builds 3,000 build minutes/month.
+
+| Path | Cost per request | Bound |
+| --- | --- | --- |
+| Bad origin, bad JSON, invalid address | none (rejected before KV and the Durable Object) | n/a |
+| Cached verdict | 1 KV read | 24 h cache |
+| Live check | 1-2 DO requests, 1 KV write, 1 Aegis call | `DAILY_BUDGET` = 30/day, so at most 30 KV writes (quota 1,000) |
+| Refused by a limit (flood) | 0 DO requests after the first refusal: the isolate remembers it for 60 s | per-visitor 10/h, global budget |
+| Git build of `main` | about 1 build minute (`npm test`) | quota 3,000/month; branches other than `main` do not build |
+
+Settings that keep it free: no routes or custom domains, no Logpush or other paid add-ons, `[observability]`
+off, SQLite-backed Durable Object class (`new_sqlite_classes`). Check the dashboard (Account > Billing) shows
+"Workers Free" and has no payment method before relying on this.

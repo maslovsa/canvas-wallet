@@ -12,6 +12,8 @@ import { parseAmount, maxSendable, formatUnits } from "./send-input.ts";
 
 export const SPINNER_DELAY_MS = 250;
 export const SOFT_TIMEOUT_MS = 15_000;
+/** "Check again" waits this long after the previous check started: a button must not be able to hammer the risk API. */
+export const CHECK_AGAIN_COOLDOWN_MS = 10_000;
 export const SENDING_MS = 600;
 
 export interface SendTokenInfo {
@@ -30,7 +32,7 @@ export interface SendTokenInfo {
 }
 
 type AddressStatus = { kind: "empty" } | { kind: "pending" } | { kind: "invalid"; reason: Exclude<TronAddressCheck, { ok: true }>["reason"] } | { kind: "valid" };
-type RiskUi = { kind: "idle" } | { kind: "checking"; startedAt: number } | { kind: "clear"; label?: string } | { kind: "caution" } | { kind: "unavailable" };
+type RiskUi = { kind: "idle" } | { kind: "checking"; startedAt: number } | { kind: "clear"; label?: string; logo?: string } | { kind: "caution" } | { kind: "unavailable" };
 type FeeUi = { kind: "none" } | { kind: "loading"; estimate: FeeEstimate } | { kind: "ready"; estimate: FeeEstimate };
 
 export interface SendState {
@@ -43,6 +45,8 @@ export interface SendState {
   popupOpen: boolean;
   /** Counter the screen watches: each increment means "put the cursor back in the address field". */
   focusAddressRequests: number;
+  /** When the last risk check started (ms); drives the Check again cooldown. */
+  lastCheckAt: number | null;
   sent: { amountText: string; address: string; feeText: string } | null;
 }
 
@@ -56,6 +60,7 @@ export function initialState(): SendState {
     phase: "form",
     popupOpen: false,
     focusAddressRequests: 0,
+    lastCheckAt: null,
     sent: null,
   };
 }
@@ -69,8 +74,17 @@ export interface SendView {
   address: {
     value: string;
     error: string | null;
-    status: { tone: Tone; icon: "check" | "alert" | "help" | "none"; text: string; spinner: boolean; checkAgain: boolean } | null;
-    showCaption: boolean;
+    status: {
+      tone: Tone;
+      icon: "check" | "alert" | "help" | "none";
+      text: string;
+      spinner: boolean;
+      checkAgain: boolean;
+      /** Seconds until Check again can be pressed (0 = ready); the button is disabled meanwhile. */
+      checkAgainWaitSec: number;
+      /** Set when the text is the owner's (VASP's) name: the screen shows its logo, or an initial when there is none. */
+      owner: { logo: string | null } | null;
+    } | null;
   };
   amount: { value: string; error: string | null; balanceText: string };
   fee: { label: string; value: string; note: string | null };
@@ -110,6 +124,12 @@ function amountIssue(state: SendState, token: SendTokenInfo): { error: string | 
   return { error: null, units: parsed.units, empty: false };
 }
 
+function cooldownSec(state: SendState, nowMs: number): number {
+  if (state.lastCheckAt === null) return 0;
+  const left = state.lastCheckAt + CHECK_AGAIN_COOLDOWN_MS - nowMs;
+  return left > 0 ? Math.ceil(left / 1000) : 0;
+}
+
 function addressView(state: SendState, nowMs: number): SendView["address"]["status"] {
   const { risk } = state;
   switch (state.addressStatus.kind) {
@@ -122,18 +142,18 @@ function addressView(state: SendState, nowMs: number): SendView["address"]["stat
   }
   if (risk.kind === "checking") {
     const slow = nowMs - risk.startedAt >= SPINNER_DELAY_MS; // no flicker for a sub-250 ms check (DR7)
-    return slow ? { tone: "dim", icon: "none", text: "Checking address…", spinner: true, checkAgain: false } : null;
+    return slow ? { tone: "dim", icon: "none", text: "Checking address…", spinner: true, checkAgain: false, checkAgainWaitSec: 0, owner: null } : null;
   }
   if (risk.kind === "clear") {
     return risk.label
-      ? { tone: "success", icon: "check", text: risk.label, spinner: false, checkAgain: false }
-      : { tone: "dim", icon: "none", text: "No risk signals found", spinner: false, checkAgain: false }; // never "Safe" (DR3)
+      ? { tone: "success", icon: "check", text: risk.label, spinner: false, checkAgain: false, checkAgainWaitSec: 0, owner: { logo: risk.logo ?? null } }
+      : { tone: "dim", icon: "none", text: "No risk signals found", spinner: false, checkAgain: false, checkAgainWaitSec: 0, owner: null }; // never "Safe" (DR3)
   }
   if (risk.kind === "caution") {
-    return { tone: "caution", icon: "alert", text: "Caution: we don't recommend sending here", spinner: false, checkAgain: false };
+    return { tone: "caution", icon: "alert", text: "Risk signals found for this address", spinner: false, checkAgain: false, checkAgainWaitSec: 0, owner: null };
   }
   if (risk.kind === "unavailable") {
-    return { tone: "dim", icon: "help", text: "Couldn't verify this address.", spinner: false, checkAgain: true };
+    return { tone: "dim", icon: "help", text: "Couldn't verify this address.", spinner: false, checkAgain: true, checkAgainWaitSec: cooldownSec(state, nowMs), owner: null };
   }
   return null;
 }
@@ -177,8 +197,6 @@ export function deriveSendView(state: SendState, token: SendTokenInfo, nowMs: nu
       value: state.address,
       error: addressError(state),
       status: addressView(state, nowMs),
-      // "Address is checked by Aegis" under "Couldn't verify this address" would contradict itself.
-      showCaption: addrOk && state.risk.kind !== "unavailable",
     },
     amount: { value: state.amountText, error: amount.error, balanceText: `Balance ${formatDisplay(token.balanceUnits, token.decimals)} ${token.symbol}` },
     fee: feeLine,
@@ -291,6 +309,7 @@ export class SendController {
 
   private runChecks(token: symbol, address: string): void {
     const startedAt = this.deps.now();
+    this.state.lastCheckAt = startedAt;
     this.state.risk = { kind: "checking", startedAt };
     if (this.state.fee.kind === "none") {
       // Show a typical figure immediately; the live estimate replaces it when TronGrid answers.
@@ -307,6 +326,7 @@ export class SendController {
       if (this.guard.isCurrent(token) && this.state.risk.kind === "checking") {
         this.state.risk = { kind: "unavailable" }; // 15 s ceiling (R10): visibly "couldn't verify", never silently enabled
         this.emit();
+        this.tickCooldown();
       }
     }, SOFT_TIMEOUT_MS);
     void this.deps
@@ -315,14 +335,31 @@ export class SendController {
       .then((result) => {
         if (!this.guard.isCurrent(token)) return; // stale reply for an address no longer in the field
         this.state.risk =
-          result.state === "clear" ? (result.label ? { kind: "clear", label: result.label } : { kind: "clear" }) : { kind: result.state };
+          result.state === "clear"
+            ? result.label
+              ? result.logo
+                ? { kind: "clear", label: result.label, logo: result.logo }
+                : { kind: "clear", label: result.label }
+              : { kind: "clear" }
+            : { kind: result.state };
         this.emit();
+        this.tickCooldown();
       });
+  }
+
+  /** While Check again is cooling down, re-render once a second so its countdown moves and it re-enables on time. */
+  private tickCooldown(): void {
+    if (this.state.risk.kind !== "unavailable" || cooldownSec(this.state, this.deps.now()) === 0) return;
+    this.later(() => {
+      this.emit();
+      this.tickCooldown();
+    }, 1000);
   }
 
   /** "Check again" after a failed check: same address, same guard rules. */
   checkAgain(): void {
     if (this.state.addressStatus.kind !== "valid" || this.state.risk.kind === "checking") return;
+    if (cooldownSec(this.state, this.deps.now()) > 0) return; // throttled: presses inside the cooldown do nothing
     const token = this.guard.begin();
     this.clearTimers();
     this.runChecks(token, this.state.address);

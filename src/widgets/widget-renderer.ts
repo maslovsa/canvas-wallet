@@ -2,6 +2,10 @@ import type { Widget, Token } from "../types.ts";
 import { loadIcon } from "../icon/icon-loader.ts";
 import { fetchPriceHistory, generatePlaceholderSeries, buildSparkline } from "./price-chart.ts";
 import { generateHistory, formatAmount, formatHistoryTimestamp } from "./history.ts";
+import { readableTextColor } from "./color.ts";
+
+/** Accent for the primary action when a token declares no ui.theme.primaryColor (the app accent). */
+const DEFAULT_ACCENT = "#3375bb";
 
 // type -> render-function lookup table (CEO review Section 1 recommendation)
 // instead of if/else branching. Adding a 5th widget type means adding one
@@ -42,7 +46,7 @@ const renderBanner: WidgetRenderer<Extract<Widget, { type: "banner" }>> = (widge
   return el;
 };
 
-const renderActionGroup: WidgetRenderer<Extract<Widget, { type: "action_group" }>> = (widget, _token, onAction) => {
+const renderActionGroup: WidgetRenderer<Extract<Widget, { type: "action_group" }>> = (widget, token, onAction) => {
   const el = document.createElement("div");
   el.className = "widget widget-action-group";
   if (widget.title) {
@@ -53,9 +57,18 @@ const renderActionGroup: WidgetRenderer<Extract<Widget, { type: "action_group" }
   }
   const row = document.createElement("div");
   row.className = "action-group-row";
+  // The wallet's own actions stand out: Send is the primary action (tall, filled with the token's accent),
+  // Receive its secondary (same height, accent outline). Everything else keeps the quiet capsule style.
+  const accent = token.ui?.theme?.primaryColor ?? DEFAULT_ACCENT;
   for (const item of widget.items) {
     const btn = document.createElement("button");
     btn.className = "action-group-btn";
+    const kind = token.actions?.[item.action]?.type;
+    if (kind === "send" || kind === "receive") {
+      btn.classList.add(kind === "send" ? "action-primary" : "action-secondary");
+      btn.style.setProperty("--action-accent", accent);
+      btn.style.setProperty("--action-accent-text", readableTextColor(accent));
+    }
     btn.textContent = item.label;
     btn.addEventListener("click", () => onAction(item.action));
     row.append(btn);

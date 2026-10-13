@@ -1,0 +1,24 @@
+{
+  "schemaVersion": "1.1.0",
+  "networks": [
+    {
+      "name": "Tron",
+      "tokens": [
+        {
+          "name": "Tether USD (TRC-20)",
+          "symbol": "USDT",
+          "type": "TRC20",
+          "id": "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t",
+          "decimals": 6,
+          "status": "active",
+          "actions": {
+            "receive": { "type": "receive" }
+          },
+          "widgets": [
+            { "type": "action_group", "items": [{ "label": "Receive", "action": "receive" }] }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -146,13 +146,13 @@ test("Send: a risky address shows the caution line first, the popup only on Send
   await startSend(page);
   await page.locator("#send-address").fill(SEED_CAUTION);
   await page.locator("#send-amount").fill("10");
-  await expect(page.locator(".send-status-text")).toHaveText("Caution: we don't recommend sending here");
+  await expect(page.locator(".send-status-text")).toHaveText("Risk signals found for this address");
   await expect(page.locator(".phone-overlay")).toHaveCount(0);
 
   await page.locator(".send-form .send-submit").click();
   const dialog = page.locator(".phone-dialog");
-  await expect(dialog).toContainText("We don't recommend sending to this address");
-  await expect(dialog).toContainText("Based on Aegis data at the time of the check. Details aren't shown.");
+  await expect(dialog).toContainText("Risk signals found for this address");
+  await expect(dialog).toContainText("Aegis data at the time of the check shows risk signals. This is information, not advice, and details aren't shown. The decision is yours.");
   expect((await dialog.innerText()).toLowerCase()).not.toMatch(/score|level|reason|sanction|critical/);
 
   await page.keyboard.press("Escape"); // Esc = Cancel
@@ -162,7 +162,7 @@ test("Send: a risky address shows the caution line first, the popup only on Send
   await expect(page.locator("#send-address")).toBeFocused();
 
   await page.locator(".send-form .send-submit").click();
-  await page.locator(".phone-dialog button", { hasText: "Send anyway" }).click();
+  await page.locator(".phone-dialog button", { hasText: "Continue" }).click();
   await expect(page.locator(".send-sent-headline")).toHaveText("10 USDT sent");
 });
 
@@ -197,10 +197,10 @@ test("Send: the Worker says caution -> amber line, popup only on Send, nothing b
   await startSend(page);
   await page.locator("#send-address").fill(NOT_IN_SEED);
   await page.locator("#send-amount").fill("3");
-  await expect(page.locator(".send-status-text")).toHaveText("Caution: we don't recommend sending here");
+  await expect(page.locator(".send-status-text")).toHaveText("Risk signals found for this address");
   await expect(page.locator(".phone-overlay")).toHaveCount(0);
   await page.locator(".send-form .send-submit").click();
-  await expect(page.locator(".phone-dialog")).toContainText("We don't recommend sending to this address");
+  await expect(page.locator(".phone-dialog")).toContainText("Risk signals found for this address");
 });
 
 test("Send: a slow Worker shows 'Checking address…' after the spinner delay, Send waits, then the verdict arrives", async ({ page }) => {
@@ -221,13 +221,22 @@ test("Send: a Worker answer with extra fields is not trusted", async ({ page }) 
   await expect(page.locator(".send-status-text")).toHaveText("Couldn't verify this address.");
 });
 
-test("Send: Check again asks the Worker again and can recover", async ({ page }) => {
+test("Send: Check again is throttled (10 s), then asks the Worker again and can recover", async ({ page }) => {
+  await page.clock.install();
   let n = 0;
   const asked = await mockWorker(page, () => (++n === 1 ? { status: 503 } : { body: { level: "clear" } }));
   await startSend(page);
   await page.locator("#send-address").fill(NOT_IN_SEED);
   await expect(page.locator(".send-status-text")).toHaveText("Couldn't verify this address.");
-  await page.locator(".send-status .send-link").click();
+  const again = page.locator(".send-status .send-link");
+  await expect(again).toBeDisabled();
+  await expect(again).toHaveText(/Check again \(\d+s\)/);
+  await again.click({ force: true }); // a disabled button ignores presses
+  expect(asked).toHaveLength(1);
+  await page.clock.fastForward(11_000);
+  await expect(again).toBeEnabled();
+  await expect(again).toHaveText("Check again");
+  await again.click();
   await expect(page.locator(".send-status-text")).toHaveText("No risk signals found");
   expect(asked).toHaveLength(2);
 });
@@ -272,4 +281,97 @@ test("Send on a non-Tron token shows the in-phone notice, not a browser alert", 
   await page.locator(".phone-dialog button", { hasText: "OK" }).click();
   await expect(page.locator(".phone-overlay")).toHaveCount(0);
   expect(dialogSeen).toBe(false);
+});
+
+// ---- Shareable URL state: ?list=<id>&network=<name>&token=<symbol>
+test("a deep link opens the list, the network filter and the asset", async ({ page }) => {
+  await page.goto("/?list=aegis-super-list&network=Tron&token=USDT");
+  await expect(page.locator(".card-header-name")).toContainText("(USDT)");
+  await expect(page.locator(".card-header-meta-item").first()).toContainText("Tron");
+  expect(new URL(page.url()).search).toBe("?list=aegis-super-list&network=Tron&token=USDT");
+});
+
+test("a link with only a list and a network opens the phone's list screen with that filter", async ({ page }) => {
+  await page.goto("/?list=aegis-super-list&network=tron");
+  await expect(page.locator(".phone-network-chip.active")).toContainText("Tron");
+  await expect(page.locator(".card-header-name")).toHaveCount(0);
+  // the registry's own spelling is written back
+  expect(new URL(page.url()).search).toBe("?list=aegis-super-list&network=Tron");
+});
+
+test("the URL follows the list, the network filter and the open asset", async ({ page }) => {
+  await page.goto("/");
+  expect(new URL(page.url()).search).toBe("");
+  await page.getByText("Aegis Super List").click();
+  await expect.poll(() => new URL(page.url()).search).toBe("?list=aegis-super-list&network=Ethereum");
+  await page.locator(".phone-network-chip", { hasText: "Tron" }).click();
+  await expect.poll(() => new URL(page.url()).search).toBe("?list=aegis-super-list&network=Tron");
+  await page.locator(".phone-token-row", { hasText: "Tether USD" }).first().click();
+  await expect.poll(() => new URL(page.url()).search).toBe("?list=aegis-super-list&network=Tron&token=USDT");
+  await page.locator(".card-back-btn").click(); // in-phone Back to the token list
+  await expect.poll(() => new URL(page.url()).search).toBe("?list=aegis-super-list&network=Tron");
+  await page.locator("#back-to-gallery").click();
+  await expect.poll(() => new URL(page.url()).search).toBe("");
+});
+
+test("an unknown list shows a message and the gallery, and unknown network/asset names fall back", async ({ page }) => {
+  await page.goto("/?list=does-not-exist");
+  await expect(page.locator("#status-banner")).toContainText("was not found");
+  await expect(page.getByText("Aegis Super List")).toBeVisible();
+  await page.goto("/?list=aegis-super-list&network=Nowhere&token=NOPE");
+  await expect(page.locator(".phone-network-chip.active")).toBeVisible();
+  await expect(page.locator(".card-header-name")).toHaveCount(0);
+});
+
+test("other query parameters survive and a deep link keeps working after Send is opened and closed", async ({ page }) => {
+  await page.goto("/?utm=1&list=aegis-super-list&network=Tron&token=USDT");
+  await page.locator(".phone-screen .action-group-btn", { hasText: "Send" }).click();
+  await expect(page.locator(".send-nav-title")).toHaveText("Send USDT");
+  expect(new URL(page.url()).searchParams.get("token")).toBe("USDT"); // Send is part of the asset view
+  expect(new URL(page.url()).searchParams.get("utm")).toBe("1");
+});
+
+// ---- Receive: an in-phone dialog with the network's demo address, a QR code and a Copy button
+test("Receive on Tron USDT shows the Tron demo address, a QR code, and Copy confirms; the URL does not change", async ({ page, context }) => {
+  await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+  await page.goto("/?list=aegis-super-list&network=Tron&token=USDT");
+  const before = page.url();
+  await page.locator(".phone-screen .action-group-btn", { hasText: "Receive" }).click();
+  const dialog = page.locator(".phone-dialog");
+  await expect(dialog.locator(".phone-dialog-title")).toHaveText("Receive USDT");
+  await expect(dialog.locator(".phone-dialog-body")).toHaveText("Network: Tron");
+  await expect(dialog.locator(".receive-qr")).toBeVisible();
+  const address = (await dialog.locator(".receive-address").textContent())!;
+  expect(address).toMatch(/^T[1-9A-HJ-NP-Za-km-z]{33}$/);
+  await dialog.getByRole("button", { name: "Copy address" }).click();
+  await expect(dialog.locator(".receive-status")).toHaveText("Address copied");
+  expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(address);
+  await page.keyboard.press("Escape");
+  await expect(page.locator(".phone-dialog")).toHaveCount(0);
+  expect(page.url()).toBe(before);
+});
+
+test("Receive on an Ethereum token and on a BSC token shows the shared EVM address; no browser alert", async ({ page }) => {
+  let alerted = false;
+  page.on("dialog", (d) => { alerted = true; void d.dismiss(); });
+  await page.goto("/?list=aegis-super-list&network=Ethereum&token=ETH");
+  await page.locator(".phone-screen .action-group-btn", { hasText: "Receive" }).click();
+  const eth = (await page.locator(".receive-address").textContent())!;
+  expect(eth).toMatch(/^0x[0-9a-fA-F]{40}$/);
+  await expect(page.locator(".phone-dialog-body")).toHaveText("Network: Ethereum");
+  await page.getByRole("button", { name: "Close" }).click();
+
+  await page.goto("/?list=aegis-super-list&network=BSC&token=USDT");
+  await page.locator(".phone-screen .action-group-btn", { hasText: "Receive" }).click();
+  await expect(page.locator(".phone-dialog-body")).toHaveText("Network: BNB Smart Chain");
+  await expect(page.locator(".receive-address")).toHaveText(eth);
+  expect(alerted).toBe(false);
+});
+
+test("the Send button is the tall accent one and Receive sits beside it", async ({ page }) => {
+  await page.goto("/?list=aegis-super-list&network=Tron&token=USDT");
+  const send = page.locator(".phone-screen .action-group-btn.action-primary", { hasText: "Send" });
+  const receive = page.locator(".phone-screen .action-group-btn.action-secondary", { hasText: "Receive" });
+  expect((await send.boundingBox())!.height).toBeGreaterThanOrEqual(48);
+  expect((await receive.boundingBox())!.height).toBeGreaterThanOrEqual(48);
 });

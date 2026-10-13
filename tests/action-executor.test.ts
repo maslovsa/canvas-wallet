@@ -14,6 +14,7 @@ const token: Token = {
     move: { type: "deeplink", url: "wallet://swap?from={symbol}" },
     stake: { type: "wallet_connect", dappUrl: "https://stake.example.com" },
     send_money: { type: "send" },
+    receive_money: { type: "receive" },
   },
 };
 
@@ -48,6 +49,12 @@ describe("resolveAction", () => {
   it("send resolves to a URL-less result that never needs the third-party interstitial", () => {
     const result = resolveAction("send_money", token, undefined);
     expect(result).toEqual({ type: "send", requiresInterstitial: false });
+    expect(result).not.toHaveProperty("targetUrl");
+  });
+
+  it("receive resolves to a URL-less result with no interstitial", () => {
+    const result = resolveAction("receive_money", token, undefined);
+    expect(result).toEqual({ type: "receive", requiresInterstitial: false });
     expect(result).not.toHaveProperty("targetUrl");
   });
 
@@ -104,6 +111,11 @@ describe("demoAlertMessage", () => {
     const message = demoAlertMessage(resolveAction("send_money", token, undefined)!, token);
     expect(message).toBe("Action: send\nOpens the Send screen for TWT. (Simulated — nothing is sent.)");
     expect(message).not.toContain("third-party dApp");
+  });
+
+  it("receive message names the symbol and says it is a demo address", () => {
+    const message = demoAlertMessage(resolveAction("receive_money", token, undefined)!, token);
+    expect(message).toBe("Action: receive\nShows the receiving address and QR code for TWT. (Simulated — demo address.)");
   });
 
   it("omits the interstitial warning for deeplinks", () => {

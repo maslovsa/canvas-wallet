@@ -1,14 +1,15 @@
 // Risk-check proxy for the Send window (plan T9). It exists because a static GitHub Pages site cannot
 // hold a secret: the Aegis key lives ONLY here, as the Worker secret AEGIS_API_KEY.
 //
-//   POST /check {"network":"TRON","address":"T..."}  ->  {"level":"clear","label"?:"..."} | {"level":"caution"} | {"level":"unknown"}
+//   POST /check {"network":"TRON","address":"T..."}  ->  {"level":"clear","label"?:"...","logo"?:"https://..."} | {"level":"caution"} | {"level":"unknown"}
 //
-// The response is exactly that: never a score, a reason, flags or the Aegis session. A label is returned
-// only with a clear result (a name like a mixer or a sanctioned person would itself reveal the reason,
-// plan E7). Anything that goes wrong becomes {"level":"unknown"} (fail closed: no live call when the
+// The response is exactly that: never a score, a reason, flags or the Aegis session. A label (the VASP's
+// name) and its logo are returned only with a clear result (a name like a mixer or a sanctioned person would
+// itself reveal the reason, plan E7; Aegis can name an exchange on an address it also marks as sanctioned). Anything that goes wrong becomes {"level":"unknown"} (fail closed: no live call when the
 // cache or the counters are unavailable). Aegis POST /v2/screen is synchronous and costs 0.1 credit per
 // call; a replay with the same Idempotency-Key within 24 h is free (docs.aegis-kyt.com/api-reference/v2-screen).
 import { validateTronAddress } from "../../src/send/tron-address.ts";
+import { sanitizeLogoUrl } from "../../src/send/entity-logo.ts";
 import { Counter, type CounterStorage } from "./counter.ts";
 
 export { Counter } from "./counter.ts";
@@ -47,6 +48,7 @@ type Level = "clear" | "caution" | "unknown";
 interface Verdict {
   level: Level;
   label?: string;
+  logo?: string;
 }
 
 const AEGIS_TIMEOUT_MS = 8000; // inside the client's 15 s ceiling (plan R10)
@@ -92,15 +94,43 @@ export function sanitizeLabel(raw: unknown): string | undefined {
   return cleaned === "" ? undefined : cleaned;
 }
 
-/** Aegis /v2/screen answer -> the three client levels (plan E6) and, for clear only, a label (plan E7). */
+/** Aegis risk_score (0-100) at or above which the client shows the risk line and the confirmation alert. */
+export const RISK_ALERT_SCORE = 50;
+
+/**
+ * Aegis /v2/screen answer -> the three client levels (plan E6) and, for clear only, the owner's name and logo
+ * (plan E7). Caution when the risk score is 50 or more, or the level is `sanctioned` / there is a sanctions-list
+ * match (always, whatever the score); without a numeric score the level decides (medium and above). The reason
+ * (categories, label, score) never leaves the Worker. The name is verdict.entity.name (a corroborated VASP), else
+ * verdict.label; the logo is only taken together with a name and only if it is an acceptable URL.
+ */
 export function mapAegisVerdict(body: unknown): Verdict {
-  const root = body as { verdict?: { risk_level?: unknown; label?: unknown }; coverage?: { data_available?: unknown } } | null;
-  const level = root?.verdict?.risk_level;
-  if (level === "medium" || level === "high" || level === "critical" || level === "sanctioned") return { level: "caution" };
+  const root = body as {
+    verdict?: {
+      risk_level?: unknown;
+      risk_score?: unknown;
+      label?: unknown;
+      sdn_match?: unknown;
+      entity?: { name?: unknown; logo_url?: unknown } | null;
+    };
+    coverage?: { data_available?: unknown };
+  } | null;
+  const verdict = root?.verdict;
+  const level = verdict?.risk_level;
+  const score = typeof verdict?.risk_score === "number" && Number.isFinite(verdict.risk_score) ? verdict.risk_score : null;
+  if (level === "sanctioned" || (verdict?.sdn_match !== undefined && verdict.sdn_match !== null)) return { level: "caution" };
+  if (score !== null && score >= RISK_ALERT_SCORE) return { level: "caution" };
   const hasData = root?.coverage?.data_available === true;
-  if (level === "low" || (level === "none" && hasData)) {
-    const label = sanitizeLabel(root?.verdict?.label);
-    return label ? { level: "clear", label } : { level: "clear" };
+  const known = level === "none" || level === "low" || level === "medium" || level === "high" || level === "critical";
+  const belowThreshold = score !== null && known && (level === "low" || hasData);
+  // No numeric score: the level decides (medium and above are caution, as before).
+  if (score === null && (level === "medium" || level === "high" || level === "critical")) return { level: "caution" };
+  if (belowThreshold || (score === null && (level === "low" || (level === "none" && hasData)))) {
+    const entity = verdict?.entity;
+    const label = sanitizeLabel(entity?.name) ?? sanitizeLabel(verdict?.label);
+    if (!label) return { level: "clear" };
+    const logo = sanitizeLogoUrl(entity?.logo_url);
+    return logo ? { level: "clear", label, logo } : { level: "clear", label };
   }
   return { level: "unknown" }; // none without data, an unknown level, or a malformed answer
 }
@@ -124,6 +154,23 @@ async function counters(env: Env): Promise<{ take: (key: string, limit: number, 
   };
 }
 
+/** Per-isolate memory of refusals (keyed by the Durable Object namespace binding, so each deployment/test env has its own). */
+const REFUSAL_MEMORY_MS = 60_000;
+const MAX_REMEMBERED_REFUSALS = 1000;
+const refusals = new WeakMap<object, Map<string, number>>();
+
+function isBlocked(env: Env, key: string, now: number): boolean {
+  const until = refusals.get(env.COUNTER)?.get(key);
+  return until !== undefined && now < until;
+}
+
+function block(env: Env, key: string, now: number): void {
+  let map = refusals.get(env.COUNTER);
+  if (!map) refusals.set(env.COUNTER, (map = new Map()));
+  if (map.size >= MAX_REMEMBERED_REFUSALS) map.clear(); // bounded memory
+  map.set(key, now + REFUSAL_MEMORY_MS);
+}
+
 /** What to remember about a result: a real Aegis answer for 24 h, an Aegis failure for 60 s, and nothing when WE declined to call (limits, budget, configuration). */
 type CachePolicy = "definitive" | "brief" | "none";
 
@@ -133,13 +180,25 @@ async function liveCheck(address: string, request: Request, env: Env): Promise<{
   if (!Number.isFinite(dailyBudget) || !Number.isFinite(perVisitor) || !env.AEGIS_API_KEY) return { verdict: { level: "unknown" }, cache: "none" };
 
   const now = Date.now();
+  const visitor = await sha256Hex(request.headers.get("CF-Connecting-IP") ?? "unknown");
+  // Free-plan guard: once the budget or this visitor's limit has refused a call, this isolate remembers it for a
+  // minute and answers without touching the Durable Object, so a flood of refused requests costs no DO requests.
+  if (isBlocked(env, "budget", now) || isBlocked(env, `visitor:${visitor}`, now)) return { verdict: { level: "unknown" }, cache: "none" };
   const c = await counters(env); // any counter failure throws and is caught by the caller: fail closed
   // Read the global budget first; it is only written when a call is really made, so a flood of rejected
   // requests does not burn the Durable Object's free daily writes.
-  if ((await c.peek("budget", DAY_MS)) >= dailyBudget) return { verdict: { level: "unknown" }, cache: "none" };
-  const visitor = await sha256Hex(request.headers.get("CF-Connecting-IP") ?? "unknown");
-  if (!(await c.take(`visitor:${visitor}`, perVisitor, HOUR_MS))) return { verdict: { level: "unknown" }, cache: "none" };
-  if (!(await c.take("budget", dailyBudget, DAY_MS))) return { verdict: { level: "unknown" }, cache: "none" };
+  if ((await c.peek("budget", DAY_MS)) >= dailyBudget) {
+    block(env, "budget", now);
+    return { verdict: { level: "unknown" }, cache: "none" };
+  }
+  if (!(await c.take(`visitor:${visitor}`, perVisitor, HOUR_MS))) {
+    block(env, `visitor:${visitor}`, now);
+    return { verdict: { level: "unknown" }, cache: "none" };
+  }
+  if (!(await c.take("budget", dailyBudget, DAY_MS))) {
+    block(env, "budget", now);
+    return { verdict: { level: "unknown" }, cache: "none" };
+  }
 
   const day = new Date(now).toISOString().slice(0, 10);
   const idempotencyKey = await sha256Hex(`TRON:${address}:${day}`); // 64 hex chars, the documented maximum
@@ -176,7 +235,7 @@ async function handleCheck(request: Request, env: Env, cors: Record<string, stri
 
   if (env.RISK_ENABLED !== "true") return json({ level: "unknown" } satisfies Verdict, 200, cors);
 
-  const cacheKey = `v1:TRON:${address}`;
+  const cacheKey = `v2:TRON:${address}`;
   try {
     const cached = await env.RISK_CACHE.get(cacheKey);
     if (cached) return json(JSON.parse(cached) as Verdict, 200, cors);

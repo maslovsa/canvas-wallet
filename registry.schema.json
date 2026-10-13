@@ -9,7 +9,7 @@
   "properties": {
     "schemaVersion": {
       "type": "string",
-      "description": "Version of this schema the registry was authored against, semver-shaped (e.g. \"1.0.0\"; \"1.1.0\" adds the `send` action — a registry that uses it MUST declare 1.1.0 or later, enforced by scripts/validate-fixtures.ts). Intentionally NOT constrained to a fixed enum here — a future schema revision must remain syntactically valid so a client can read the field and make its own compatibility decision (see src/registry-client/schema-version-gate.ts). A client that doesn't recognize this version MUST refuse to render/edit rather than guess.",
+      "description": "Version of this schema the registry was authored against, semver-shaped (e.g. \"1.0.0\"; \"1.1.0\" adds the `send` action and \"1.2.0\" the `receive` action — a registry that uses one MUST declare that version or later, enforced by scripts/validate-fixtures.ts). Intentionally NOT constrained to a fixed enum here — a future schema revision must remain syntactically valid so a client can read the field and make its own compatibility decision (see src/registry-client/schema-version-gate.ts). A client that doesn't recognize this version MUST refuse to render/edit rather than guess.",
       "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
     },
     "networks": {
@@ -166,7 +166,8 @@
         { "$ref": "#/definitions/actionExternalUrl" },
         { "$ref": "#/definitions/actionDeeplink" },
         { "$ref": "#/definitions/actionWalletConnect" },
-        { "$ref": "#/definitions/actionSend" }
+        { "$ref": "#/definitions/actionSend" },
+        { "$ref": "#/definitions/actionReceive" }
       ]
     },
     "actionExternalUrl": {
@@ -208,6 +209,15 @@
       "description": "Opens the built-in Send screen (schemaVersion 1.1.0 and later). Deliberately takes NO parameters: the recipient, amount and network are chosen on the screen, so a registry can never prefill a destination address or a link (closed vocabulary, plan decision D7).",
       "properties": {
         "type": { "const": "send" }
+      }
+    },
+    "actionReceive": {
+      "type": "object",
+      "required": ["type"],
+      "additionalProperties": false,
+      "description": "Opens the built-in Receive dialog: the wallet's own address for the token's network, a QR code and a Copy button (schemaVersion 1.2.0 and later). Takes NO parameters, so a registry can never supply the address that is shown (closed vocabulary, same reasoning as `send`).",
+      "properties": {
+        "type": { "const": "receive" }
       }
     },
     "widget": {

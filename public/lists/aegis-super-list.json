@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "1.1.0",
+  "schemaVersion": "1.2.0",
   "networks": [
     {
       "name": "Ethereum",
@@ -34,6 +34,15 @@
           },
           "widgets": [
             {
+              "type": "action_group",
+              "items": [
+                {
+                  "label": "Receive",
+                  "action": "receive"
+                }
+              ]
+            },
+            {
               "type": "key_value",
               "title": "Network",
               "items": [
@@ -51,7 +60,12 @@
             {
               "type": "history"
             }
-          ]
+          ],
+          "actions": {
+            "receive": {
+              "type": "receive"
+            }
+          }
         },
         {
           "name": "Wrapped Ether",
@@ -142,9 +156,21 @@
               "type": "external_url",
               "url": "https://app.example.com/redeem?token=USDT",
               "openIn": "in_app_browser"
+            },
+            "receive": {
+              "type": "receive"
             }
           },
           "widgets": [
+            {
+              "type": "action_group",
+              "items": [
+                {
+                  "label": "Receive",
+                  "action": "receive"
+                }
+              ]
+            },
             {
               "type": "banner",
               "title": "Mint & Redeem",
@@ -1431,9 +1457,21 @@
               "type": "external_url",
               "url": "https://app.example.com/redeem?token=USDT",
               "openIn": "in_app_browser"
+            },
+            "receive": {
+              "type": "receive"
             }
           },
           "widgets": [
+            {
+              "type": "action_group",
+              "items": [
+                {
+                  "label": "Receive",
+                  "action": "receive"
+                }
+              ]
+            },
             {
               "type": "banner",
               "title": "Mint & Redeem",
@@ -2408,6 +2446,10 @@
                 {
                   "label": "Send",
                   "action": "send"
+                },
+                {
+                  "label": "Receive",
+                  "action": "receive"
                 }
               ]
             },
@@ -2423,6 +2465,9 @@
           "actions": {
             "send": {
               "type": "send"
+            },
+            "receive": {
+              "type": "receive"
             }
           }
         },
@@ -2471,6 +2516,9 @@
             },
             "send": {
               "type": "send"
+            },
+            "receive": {
+              "type": "receive"
             }
           },
           "widgets": [
@@ -2480,6 +2528,10 @@
                 {
                   "label": "Send",
                   "action": "send"
+                },
+                {
+                  "label": "Receive",
+                  "action": "receive"
                 }
               ]
             },

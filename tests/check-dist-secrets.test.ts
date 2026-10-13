@@ -69,4 +69,8 @@ describe("loadEnvValues", () => {
     expect(loadEnvValues(join(dir, ".env"))).toEqual(["this-is-a-long-secret-value"]);
     expect(loadEnvValues(join(dir, "missing.env"))).toEqual([]);
   });
+  it("skips STUB_* keys: they are public demo values published on purpose", () => {
+    const dir = tempDist({ ".env": "STUB_TRON=TC9kD9YUpyHYQDfeoq1P12S8J3ZhNrYF3h\nSECRET_TOKEN=this-is-a-long-secret-value\n" });
+    expect(loadEnvValues(join(dir, ".env"))).toEqual(["this-is-a-long-secret-value"]);
+  });
 });

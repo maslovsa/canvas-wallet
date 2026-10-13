@@ -1,0 +1,8 @@
+{
+  "_note": "Demo receive addresses for the phone simulator's Receive dialog. Random values, no private key exists for them. Not for real funds. Source of truth for local work is STUB_ETH / STUB_TRON in .env; a static site cannot read .env, so the same values are published here.",
+  "networks": {
+    "Ethereum": "0x4d0587856845526585F98232010371F88B3ee784",
+    "BNB Smart Chain": "0x4d0587856845526585F98232010371F88B3ee784",
+    "Tron": "TC9kD9YUpyHYQDfeoq1P12S8J3ZhNrYF3h"
+  }
+}

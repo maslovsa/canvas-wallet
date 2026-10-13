@@ -5,12 +5,13 @@ import { StaleFetchGuard } from "./registry-client/stale-fetch-guard.ts";
 import { checkGovernance, governanceWarning } from "./registry-client/governance-check.ts";
 import { loadManifest } from "./registry-client/manifest.ts";
 import { renderSidebar } from "./ui/sidebar.ts";
-import { renderPhoneFrame, setPhoneNavScreen, type ChromeStyle, type ChromeTheme } from "./ui/phone-frame.ts";
+import { renderPhoneFrame, setPhoneNavScreen, getPhoneNavScreen, type ChromeStyle, type ChromeTheme } from "./ui/phone-frame.ts";
 import { renderGalleryCards, type GalleryEntry } from "./ui/gallery.ts";
 import { Editor } from "./ui/editor.ts";
 import { buildDeployPlan } from "./deploy-flow/build-deploy-url.ts";
 import { encodeSharePayload } from "./share-link/encode.ts";
 import { decodeShareFragment, ShareLinkDecodeError } from "./share-link/decode.ts";
+import { parseStudioQuery, buildStudioQuery, findByName, type StudioUrlState } from "./share-link/studio-url.ts";
 import { parseRegistry, RegistryParseError, RegistrySchemaError } from "./schema-validator.ts";
 import { loadNetworkRegistry, findNetworkInfo, type NetworkInfo } from "./networks/network-registry.ts";
 
@@ -56,6 +57,23 @@ function setView(view: ViewMode): void {
   state.view = view;
   el("gallery-view").hidden = view !== "gallery";
   el("studio-view").hidden = view !== "studio";
+  syncUrl();
+}
+
+/**
+ * Mirrors the open list, the network filter and (when an asset card is open in the phone) the asset into the
+ * query string, so any view can be shared as a link. Only bundled lists are shareable this way: an uploaded
+ * file or a share-link preview has no public address. Unrelated query parameters are left alone.
+ */
+function syncUrl(): void {
+  const next: StudioUrlState = {};
+  if (state.view === "studio" && state.source?.kind === "bundled" && !state.isPreviewOnly) {
+    next.list = state.source.listId;
+    if (state.selectedNetwork) next.network = state.selectedNetwork;
+    if (getPhoneNavScreen() !== "list" && state.selectedToken) next.token = state.selectedToken.symbol;
+  }
+  const search = buildStudioQuery(location.search, next);
+  if (search !== location.search) history.replaceState(null, "", `${location.pathname}${search}${location.hash}`);
 }
 
 // ---------------------------------------------------------------------------
@@ -151,6 +169,7 @@ function renderAll(): void {
     listDescription: listDisplayDescription(),
     onSelectNetwork: (network) => selectNetwork(network),
     onSelectToken: (token) => selectToken(token, { confirmDiscard: true }),
+    onScreenChange: syncUrl,
   });
 
   renderRegistrySourceBanner();
@@ -292,7 +311,7 @@ function selectNetwork(network: string): void {
   renderAll();
 }
 
-async function loadSource(source: RegistrySource, listMeta: ListMeta | undefined): Promise<void> {
+async function loadSource(source: RegistrySource, listMeta: ListMeta | undefined, restore?: StudioUrlState): Promise<void> {
   const guardToken = staleFetchGuard.begin();
   const statusEl = el("status-banner");
   statusEl.textContent = source.kind === "bundled" ? "" : "Loading registry…";
@@ -305,13 +324,16 @@ async function loadSource(source: RegistrySource, listMeta: ListMeta | undefined
     state.source = source;
     state.listMeta = listMeta;
     state.registry = registry;
-    state.selectedNetwork = registry.networks[0]?.name ?? "";
-    state.selectedToken = registry.networks[0]?.tokens[0];
+    // A link may name a network and an asset (?network=Tron&token=USDT); unknown names fall back to the defaults.
+    const network = findByName(registry.networks, restore?.network, (n) => n.name) ?? registry.networks[0];
+    const restoredToken = findByName(network?.tokens ?? [], restore?.token, (t) => t.symbol);
+    state.selectedNetwork = network?.name ?? "";
+    state.selectedToken = restoredToken ?? network?.tokens[0];
     state.isPreviewOnly = false;
     statusEl.textContent = "";
     if (state.selectedToken) editor.loadToken(state.selectedToken);
     else editor.clear();
-    setPhoneNavScreen("list");
+    setPhoneNavScreen(restoredToken ? "detail" : "list");
     renderAll();
 
     if (source.kind === "github") {
@@ -356,6 +378,7 @@ async function init(): Promise<void> {
         listDescription: listDisplayDescription(),
         onSelectNetwork: (network) => selectNetwork(network),
         onSelectToken: (t) => selectToken(t, { confirmDiscard: true }),
+        onScreenChange: syncUrl,
       });
     },
   });
@@ -406,6 +429,15 @@ async function init(): Promise<void> {
   }
 
   await loadGallery();
+  const urlState = parseStudioQuery(location.search);
+  if (urlState.list) {
+    const entry = state.galleryEntries.find((e) => e.meta.id === urlState.list);
+    if (entry) {
+      await loadSource({ kind: "bundled", listId: entry.meta.id }, entry.meta, urlState);
+      return;
+    }
+    el("status-banner").textContent = `The list "${urlState.list}" was not found. Pick one from the gallery.`;
+  }
   setView("gallery");
 }
 
