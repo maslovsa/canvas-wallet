@@ -21,6 +21,13 @@ uploaded anywhere) and, for power users, a direct `?registry=owner/repo`
 URL parameter that points the Studio at an external GitHub repo's
 `registry.json` instead (the multi-registry client — see below).
 
+**Shareable links.** The address bar mirrors what is open, so any view can be shared:
+`?list=<list id>` (the file name under `public/lists/`, e.g. `aegis-super-list`), `&network=<name>` (the
+network filter, e.g. `Tron`) and `&token=<symbol>` (the open asset, e.g. `USDT`). Names are matched
+case-insensitively; an unknown list shows a message and the gallery, an unknown network or asset falls
+back to the default. Other query parameters are preserved. Example:
+`?list=aegis-super-list&network=Tron&token=USDT`.
+
 ### Adding a token to an existing list
 
 1. Fork this repo.
@@ -234,7 +241,17 @@ fail, as a check that the validator itself hasn't silently broken.
 **Schema versions.** `1.1.0` adds the `send` action (`{"type": "send"}`, no parameters: it opens the
 built-in Send screen, and the recipient and amount are never prefilled by a registry). A registry that
 uses `send` must declare `schemaVersion` `1.1.0` or later; `npm run validate:fixtures` enforces this
-(see `fixtures/semantic-invalid/`). `1.0.0` registries stay valid.
+(see `fixtures/semantic-invalid/`). `1.2.0` adds the `receive` action (`{"type": "receive"}`, no parameters: it opens the Receive dialog
+with the network's address, a QR code and a Copy button); a registry that uses it must declare `1.2.0` or
+later. `1.0.0` registries stay valid.
+
+**Receive dialog and the demo addresses.** Tokens on Ethereum, BNB Smart Chain and Tron can opt in with a
+`receive` action. The addresses shown are random demo stubs, keyed by network name in
+`public/receive-addresses.json` (BNB Smart Chain reuses the EVM address); no private key exists for them
+and the dialog says "Demo address, not for real funds". `STUB_ETH` and `STUB_TRON` in the local `.env` hold
+the same two values for local work, but a static site cannot read `.env`, so the published copy is the JSON
+file. A network without an entry shows an in-phone "not available" notice. Keep the stubs obviously fake:
+never put a real wallet address there.
 
 **Send screen and the risk seed.** Tokens on Tron can opt in with a `send` action (and a widget that
 references it). The built-in Send screen only handles Tron (`NATIVE` and `TRC20` tokens) and shows an

@@ -47,12 +47,16 @@ export function scanDir(dir: string, secretValues: string[] = []): Finding[] {
   return findings;
 }
 
-/** Values of KEY=VALUE lines in a local .env (gitignored; absent in CI). Used only to compare, never printed. */
+/**
+ * Values of KEY=VALUE lines in a local .env (gitignored; absent in CI). Used only to compare, never printed.
+ * STUB_* keys are skipped: they hold public demo values (the Receive dialog's fake addresses) that are
+ * published on purpose in public/receive-addresses.json.
+ */
 export function loadEnvValues(envPath: string): string[] {
   if (!existsSync(envPath)) return [];
   return readFileSync(envPath, "utf-8")
     .split("\n")
-    .filter((line) => /^[A-Za-z_][A-Za-z0-9_]*=/.test(line))
+    .filter((line) => /^[A-Za-z_][A-Za-z0-9_]*=/.test(line) && !line.startsWith("STUB_"))
     .map((line) => line.slice(line.indexOf("=") + 1).trim())
     .filter((value) => value.length >= 12);
 }

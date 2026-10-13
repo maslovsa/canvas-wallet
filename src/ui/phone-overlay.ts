@@ -1,14 +1,15 @@
 // A modal dialog that lives INSIDE the phone (a child of .phone-frame), not on the page: the scrim is
 // clipped to the screen's rounded corners, focus is trapped inside the phone, and everything else on
 // the site (editor, sidebar) stays usable (plan decision DR10). Used for the caution popup, the Send
-// refusal notice, and nothing else. Text is always set with textContent (never innerHTML).
+// refusal notice and the Receive address dialog. Text is always set with textContent (never innerHTML).
 import type { ChromeStyle } from "./phone-frame.ts";
 
 export interface OverlayButton {
   label: string;
   /** The filled button; also the one focused first for a safety dialog, so make it the SAFE choice (Cancel). */
   primary?: boolean;
-  onClick: () => void;
+  /** Receives the button itself so a handler can give feedback on it (e.g. "Copied") without closing the dialog. */
+  onClick: (button: HTMLButtonElement) => void;
 }
 
 export interface OverlayOptions {
@@ -18,6 +19,8 @@ export interface OverlayOptions {
   chromeStyle: ChromeStyle;
   title: string;
   body?: string;
+  /** Extra content under the body (e.g. the Receive QR code). Built by the caller with DOM APIs, never innerHTML. */
+  content?: HTMLElement;
   /** "caution" shows a warning icon; "info" shows none. */
   tone: "caution" | "info";
   buttons: OverlayButton[];
@@ -63,6 +66,7 @@ export function openOverlay(options: OverlayOptions): OpenOverlay {
     body.textContent = options.body;
     dialog.append(body);
   }
+  if (options.content) dialog.append(options.content);
 
   const row = document.createElement("div");
   row.className = "phone-dialog-buttons";
@@ -72,7 +76,7 @@ export function openOverlay(options: OverlayOptions): OpenOverlay {
     el.type = "button";
     el.className = "phone-dialog-btn" + (b.primary ? " primary" : "");
     el.textContent = b.label;
-    el.addEventListener("click", b.onClick);
+    el.addEventListener("click", () => b.onClick(el));
     row.append(el);
     buttonEls.push(el);
   }

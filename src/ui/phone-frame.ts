@@ -11,6 +11,8 @@ import { prepareSend } from "../send/send-token.ts";
 import { getSendController, resetSendSession } from "../send/send-session.ts";
 import { mountSendScreen, unmountSendScreen } from "./send-screen.ts";
 import { openOverlay } from "./phone-overlay.ts";
+import { openReceiveDialog } from "./receive-dialog.ts";
+import { loadReceiveAddresses, receiveAddressFor, REFUSAL_NO_RECEIVE_ADDRESS } from "../receive/receive-address.ts";
 
 export type ChromeStyle = "ios" | "android";
 export type ChromeTheme = "light" | "dark";
@@ -96,6 +98,18 @@ export function renderPhoneFrame(container: HTMLElement, token: Token | undefine
       });
     });
   } else if (screenMode === "detail" && token) {
+    // Explicit in-phone notice instead of a browser alert() that would open outside the phone (DR12).
+    const showNotice = (message: string): void => {
+      const notice = openOverlay({
+        frame: container,
+        screen,
+        chromeStyle: options.chromeStyle,
+        tone: "info",
+        title: message,
+        buttons: [{ label: "OK", primary: true, onClick: () => notice.close() }],
+        onDismiss: () => notice.close(),
+      });
+    };
     renderDetailScreen(
       screen,
       token,
@@ -107,20 +121,20 @@ export function renderPhoneFrame(container: HTMLElement, token: Token | undefine
       async () => {
         const prepared = await prepareSend(token, options.networkInfo?.canonicalName);
         if (!prepared.ok) {
-          // Explicit in-phone refusal instead of a browser alert() that would open outside the phone (DR12).
-          const notice = openOverlay({
-            frame: container,
-            screen,
-            chromeStyle: options.chromeStyle,
-            tone: "info",
-            title: prepared.message,
-            buttons: [{ label: "OK", primary: true, onClick: () => notice.close() }],
-            onDismiss: () => notice.close(),
-          });
+          showNotice(prepared.message);
           return;
         }
         screenMode = "send";
         renderPhoneFrame(container, token, options);
+      },
+      async () => {
+        const networkName = options.networkInfo?.canonicalName;
+        const address = receiveAddressFor(await loadReceiveAddresses(), networkName);
+        if (!address || !networkName) {
+          showNotice(REFUSAL_NO_RECEIVE_ADDRESS);
+          return;
+        }
+        openReceiveDialog({ frame: container, screen, chromeStyle: options.chromeStyle, token, networkName, address });
       },
     );
   } else {
@@ -254,6 +268,7 @@ function renderDetailScreen(
   options: PhoneFrameOptions,
   onBack: () => void,
   onSend: () => void,
+  onReceive: () => void,
 ): void {
   const header = document.createElement("div");
   header.className = "card-header";
@@ -352,6 +367,10 @@ function renderDetailScreen(
       if (!result) return;
       if (result.type === "send") {
         onSend();
+        return;
+      }
+      if (result.type === "receive") {
+        onReceive();
         return;
       }
       window.alert(demoAlertMessage(result, token));

@@ -321,3 +321,48 @@ test("other query parameters survive and a deep link keeps working after Send is
   expect(new URL(page.url()).searchParams.get("token")).toBe("USDT"); // Send is part of the asset view
   expect(new URL(page.url()).searchParams.get("utm")).toBe("1");
 });
+
+// ---- Receive: an in-phone dialog with the network's demo address, a QR code and a Copy button
+test("Receive on Tron USDT shows the Tron demo address, a QR code, and Copy confirms; the URL does not change", async ({ page, context }) => {
+  await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+  await page.goto("/?list=aegis-super-list&network=Tron&token=USDT");
+  const before = page.url();
+  await page.locator(".phone-screen .action-group-btn", { hasText: "Receive" }).click();
+  const dialog = page.locator(".phone-dialog");
+  await expect(dialog.locator(".phone-dialog-title")).toHaveText("Receive USDT");
+  await expect(dialog.locator(".phone-dialog-body")).toHaveText("Network: Tron");
+  await expect(dialog.locator(".receive-qr")).toBeVisible();
+  const address = (await dialog.locator(".receive-address").textContent())!;
+  expect(address).toMatch(/^T[1-9A-HJ-NP-Za-km-z]{33}$/);
+  await dialog.getByRole("button", { name: "Copy address" }).click();
+  await expect(dialog.locator(".receive-status")).toHaveText("Address copied");
+  expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(address);
+  await page.keyboard.press("Escape");
+  await expect(page.locator(".phone-dialog")).toHaveCount(0);
+  expect(page.url()).toBe(before);
+});
+
+test("Receive on an Ethereum token and on a BSC token shows the shared EVM address; no browser alert", async ({ page }) => {
+  let alerted = false;
+  page.on("dialog", (d) => { alerted = true; void d.dismiss(); });
+  await page.goto("/?list=aegis-super-list&network=Ethereum&token=ETH");
+  await page.locator(".phone-screen .action-group-btn", { hasText: "Receive" }).click();
+  const eth = (await page.locator(".receive-address").textContent())!;
+  expect(eth).toMatch(/^0x[0-9a-fA-F]{40}$/);
+  await expect(page.locator(".phone-dialog-body")).toHaveText("Network: Ethereum");
+  await page.getByRole("button", { name: "Close" }).click();
+
+  await page.goto("/?list=aegis-super-list&network=BSC&token=USDT");
+  await page.locator(".phone-screen .action-group-btn", { hasText: "Receive" }).click();
+  await expect(page.locator(".phone-dialog-body")).toHaveText("Network: BNB Smart Chain");
+  await expect(page.locator(".receive-address")).toHaveText(eth);
+  expect(alerted).toBe(false);
+});
+
+test("the Send button is the tall accent one and Receive sits beside it", async ({ page }) => {
+  await page.goto("/?list=aegis-super-list&network=Tron&token=USDT");
+  const send = page.locator(".phone-screen .action-group-btn.action-primary", { hasText: "Send" });
+  const receive = page.locator(".phone-screen .action-group-btn.action-secondary", { hasText: "Receive" });
+  expect((await send.boundingBox())!.height).toBeGreaterThanOrEqual(48);
+  expect((await receive.boundingBox())!.height).toBeGreaterThanOrEqual(48);
+});

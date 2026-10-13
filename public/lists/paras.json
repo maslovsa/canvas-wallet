@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "1.1.0",
+  "schemaVersion": "1.2.0",
   "networks": [
     {
       "name": "Ethereum",
@@ -1104,6 +1104,9 @@
             },
             "send": {
               "type": "send"
+            },
+            "receive": {
+              "type": "receive"
             }
           },
           "widgets": [
@@ -1113,6 +1116,10 @@
                 {
                   "label": "Send",
                   "action": "send"
+                },
+                {
+                  "label": "Receive",
+                  "action": "receive"
                 }
               ]
             },

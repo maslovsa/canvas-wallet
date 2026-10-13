@@ -793,6 +793,16 @@ body {
 .action-group-btn.action-secondary:hover {
   background: rgba(127, 127, 127, 0.12);
 }
+/* A group with Receive alone (no Send on that network) makes it the primary action. */
+.action-group-row > .action-group-btn.action-secondary:only-child {
+  background: var(--action-accent, #3375bb);
+  color: var(--action-accent-text, #ffffff);
+  box-shadow: none;
+}
+.action-group-row > .action-group-btn.action-secondary:only-child:hover {
+  background: var(--action-accent, #3375bb);
+  filter: brightness(1.08);
+}
 
 .key-value-row {
   display: flex;
@@ -1298,6 +1308,45 @@ body {
   background: var(--send-primary-bg);
   color: var(--send-primary-text);
   font-weight: 600;
+}
+/* Receive dialog: QR on a white tile (scanners need black on white in any theme), address, copy feedback. */
+.receive-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 14px;
+}
+.receive-qr-frame {
+  width: 176px;
+  height: 176px;
+  padding: 6px;
+  border-radius: 12px;
+  background: #fff;
+}
+.receive-qr {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.receive-address {
+  max-width: 100%;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+  user-select: all;
+}
+.receive-note {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--phone-dim);
+}
+.receive-status {
+  min-height: 16px;
+  font-size: 12px;
+  color: var(--send-accent);
 }
 .phone-overlay.chrome-android .phone-dialog {
   max-width: 340px;
