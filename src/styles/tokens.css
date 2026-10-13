@@ -1,0 +1,105 @@
+/* Design tokens. The studio chrome (gallery, toolbar, sidebar, editor) is a dark, neutral, low-chrome developer
+   tool; the phone has its own palette (see style.css) because it renders a wallet, not the tool. Type is Inter
+   (self-hosted via @fontsource, no external requests) for the UI and JetBrains Mono for code and addresses. */
+:root {
+  color-scheme: dark;
+
+  --font-ui: "Inter Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono Variable", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  /* Surfaces: four steps of the same neutral, so depth comes from lightness and hairlines, not from color. */
+  --bg: #08090b;
+  --surface-1: #0e1013;
+  --surface-2: #13161a;
+  --surface-3: #191d22;
+  --surface-hover: #1b1f25;
+  --panel-bg: var(--surface-1);
+
+  --hairline: rgba(255, 255, 255, 0.06);
+  --border: rgba(255, 255, 255, 0.09);
+  --border-strong: rgba(255, 255, 255, 0.16);
+
+  --text: #eceef1;
+  --text-2: #a3aab3;
+  --text-dim: #8b929b;
+  --text-3: #636a74;
+
+  /* One cool accent for the chrome. --accent (below) stays the wallet blue used inside the phone. */
+  --studio-accent: #5a92ff;
+  --studio-accent-soft: rgba(90, 146, 255, 0.14);
+  --studio-accent-line: rgba(90, 146, 255, 0.45);
+  --accent: #3375bb;
+  --danger: #e5484d;
+  --warning: #d9a441;
+  --success: #3fb950;
+
+  --r-xs: 6px;
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 16px;
+  --r-xl: 22px;
+  --r-pill: 999px;
+
+  --shadow-pop: 0 16px 40px rgba(0, 0, 0, 0.55), 0 0 0 1px var(--border);
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --t-fast: 140ms;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* An author display rule must never reveal an element marked hidden. */
+[hidden] {
+  display: none !important;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  font-family: var(--font-ui);
+  font-size: 14px;
+  line-height: 1.5;
+  font-feature-settings: "cv11", "ss03"; /* Inter: single-storey a, round quotes: friendlier on a dark UI */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background:
+    radial-gradient(900px 420px at 50% -120px, rgba(90, 146, 255, 0.1), transparent 70%),
+    var(--bg);
+  color: var(--text);
+}
+
+button,
+input,
+textarea {
+  font-family: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--studio-accent);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: var(--studio-accent-soft);
+}
+
+/* Slim, quiet scrollbars. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.14) transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

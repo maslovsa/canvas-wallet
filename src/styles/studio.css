@@ -1,0 +1,694 @@
+/* Studio chrome: status banner, gallery, top bar, three-column grid, sidebar, editor, device dock, menu, toast,
+   and phone mode (the bare phone interface). */
+
+/* ---- shared controls -------------------------------------------------------------------------------- */
+.icon {
+  flex: none;
+  display: block;
+}
+
+.btn,
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  cursor: pointer;
+  transition: background var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
+}
+.btn:hover,
+.icon-btn:hover {
+  background: var(--surface-hover);
+  border-color: var(--border-strong);
+}
+.btn:active,
+.icon-btn:active {
+  transform: translateY(0.5px);
+}
+.icon-btn:not(:has(.icon-btn-label)) {
+  width: 36px;
+  padding: 0;
+}
+.icon-btn:disabled,
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.icon-btn.is-ghost,
+.btn.is-ghost {
+  background: transparent;
+  border-color: transparent;
+  color: var(--text-2);
+}
+.icon-btn.is-ghost:hover,
+.btn.is-ghost:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+/* Segmented control: a pill with a sliding-looking selected segment (no JS, just the selected state). */
+.segmented {
+  display: inline-flex;
+  padding: 3px;
+  gap: 2px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--surface-1);
+}
+.segmented-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 36px;
+  height: 30px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--text-2);
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
+}
+.segmented-btn:hover {
+  color: var(--text);
+}
+.segmented-btn[aria-checked="true"] {
+  background: var(--surface-3);
+  color: var(--text);
+  box-shadow: 0 0 0 1px var(--border), 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+/* ---- status banner ---------------------------------------------------------------------------------- */
+.status-banner {
+  margin: 12px auto 0;
+  max-width: 720px;
+  padding: 10px 14px;
+  border: 1px solid rgba(217, 164, 65, 0.35);
+  border-radius: var(--r-md);
+  background: rgba(217, 164, 65, 0.08);
+  font-size: 13px;
+  color: #e8c27a;
+}
+.status-banner:empty {
+  display: none;
+}
+
+/* ---- gallery ---------------------------------------------------------------------------------------- */
+.gallery-view {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 72px 24px 64px;
+}
+.gallery-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin-bottom: 44px;
+}
+.brand-mark {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin-bottom: 20px;
+  border-radius: 13px;
+  background: linear-gradient(160deg, #7aa8ff, #3d6fe0);
+  color: #fff;
+  box-shadow: 0 8px 24px rgba(61, 111, 224, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+.gallery-header h1 {
+  margin: 0;
+  font-size: 34px;
+  font-weight: 650;
+  letter-spacing: -0.035em;
+  line-height: 1.1;
+}
+.gallery-header p {
+  margin: 12px 0 0;
+  max-width: 460px;
+  color: var(--text-2);
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+.gallery-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+}
+.gallery-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 196px;
+  padding: 20px;
+  text-align: left;
+  color: inherit;
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  background: linear-gradient(180deg, var(--surface-2), var(--surface-1));
+  cursor: pointer;
+  transition: border-color var(--t-fast) var(--ease), transform var(--t-fast) var(--ease), box-shadow var(--t-fast) var(--ease);
+}
+.gallery-card:hover {
+  border-color: var(--studio-accent-line);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+}
+.gallery-card-error {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.gallery-card-networks {
+  display: flex;
+  align-items: center;
+  height: 28px;
+}
+.gallery-card-networks .network-logo,
+.gallery-card-networks .logo-badge-fallback {
+  width: 28px;
+  height: 28px;
+  margin-left: -8px;
+  border: 2px solid var(--surface-2);
+  font-size: 12px;
+}
+.gallery-card-networks > :first-child {
+  margin-left: 0;
+}
+.gallery-card-open {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  color: var(--text-3);
+  transition: color var(--t-fast) var(--ease), transform var(--t-fast) var(--ease);
+}
+.gallery-card:hover .gallery-card-open {
+  color: var(--studio-accent);
+  transform: translate(2px, -2px);
+}
+.gallery-card-title {
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  line-height: 1.3;
+}
+.gallery-card-desc {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  color: var(--text-2);
+  font-size: 13.5px;
+  line-height: 1.55;
+}
+.gallery-card-stats {
+  display: flex;
+  gap: 6px;
+  margin-top: auto;
+}
+.chip {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 9px;
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-pill);
+  background: var(--surface-3);
+  color: var(--text-2);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.gallery-upload {
+  display: flex;
+  justify-content: center;
+  margin-top: 28px;
+}
+.upload-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 16px;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--r-md);
+  color: var(--text-2);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color var(--t-fast) var(--ease), color var(--t-fast) var(--ease), background var(--t-fast) var(--ease);
+}
+.upload-btn:hover,
+.upload-btn:focus-within {
+  border-color: var(--studio-accent-line);
+  color: var(--text);
+  background: var(--studio-accent-soft);
+}
+
+/* ---- top bar ---------------------------------------------------------------------------------------- */
+.studio-view {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+}
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 56px;
+  padding: 0 16px;
+  flex: none;
+}
+.topbar-sep {
+  color: var(--text-3);
+  display: flex;
+}
+.registry-source-banner {
+  display: inline-flex;
+  align-items: center;
+  max-width: 46ch;
+  padding: 0 10px;
+  height: 28px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  border-radius: var(--r-pill);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+}
+.registry-source-banner:empty {
+  display: none;
+}
+.registry-source-banner.viewing-remote {
+  background: var(--surface-3);
+  color: var(--text-2);
+}
+.registry-source-banner.preview-only {
+  background: rgba(217, 164, 65, 0.16);
+  color: #f0cd86;
+  font-weight: 600;
+}
+.topbar-actions {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+}
+
+/* ---- three-column grid ------------------------------------------------------------------------------ */
+.app-grid {
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr) 400px;
+  gap: 16px;
+  flex: 1;
+  min-height: 0;
+  padding: 0 16px 16px;
+}
+.sidebar,
+.editor-panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 16px;
+  overflow-y: auto;
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-lg);
+  background: var(--surface-1);
+}
+.sidebar h3,
+.editor-panel h3,
+.panel-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 10px;
+  color: var(--text-3);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.sidebar h3:not(:first-child) {
+  margin-top: 20px;
+}
+
+.network-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.network-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 30px;
+  padding: 0 11px 0 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: var(--text-2);
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background var(--t-fast) var(--ease), color var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease);
+}
+.network-tab:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+.network-tab.active {
+  border-color: var(--studio-accent-line);
+  background: var(--studio-accent-soft);
+  color: #cfe0ff;
+}
+
+.token-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.token-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 10px;
+  border-radius: var(--r-sm);
+  color: var(--text-2);
+  font-size: 13px;
+  cursor: pointer;
+  transition: background var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
+}
+.token-row span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.token-row:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+.token-row.active {
+  background: var(--studio-accent-soft);
+  color: var(--text);
+  box-shadow: inset 2px 0 0 var(--studio-accent);
+}
+.sidebar-empty-state {
+  padding: 12px 0;
+  color: var(--text-dim);
+  font-size: 13px;
+}
+.add-token-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 36px;
+  margin-top: 14px;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--r-sm);
+  background: transparent;
+  color: var(--text-2);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.add-token-btn:hover {
+  border-color: var(--studio-accent-line);
+  color: var(--text);
+  background: var(--studio-accent-soft);
+}
+
+/* ---- editor ----------------------------------------------------------------------------------------- */
+.json-editor {
+  flex: 1;
+  min-height: 280px;
+  padding: 12px 14px;
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-md);
+  background: #0a0b0d;
+  color: #d6dbe1;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.65;
+  tab-size: 2;
+  resize: none;
+}
+.json-editor:focus {
+  outline: none;
+  border-color: var(--studio-accent-line);
+  box-shadow: 0 0 0 3px var(--studio-accent-soft);
+}
+.editor-diagnostics {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--text-dim);
+}
+.editor-diagnostics.has-errors {
+  color: #ff8a8e;
+}
+.trust-score-panel {
+  margin-top: 14px;
+  font-size: 12.5px;
+}
+.trust-score-title {
+  margin-bottom: 8px;
+  color: var(--text-3);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.trust-score-finding {
+  margin-bottom: 6px;
+  padding: 8px 10px 8px 12px;
+  border-radius: var(--r-sm);
+  border-left: 2px solid transparent;
+  line-height: 1.5;
+}
+.trust-score-warning {
+  background: rgba(229, 72, 77, 0.08);
+  border-left-color: rgba(229, 72, 77, 0.7);
+  color: #f2b8ba;
+}
+.trust-score-info {
+  background: rgba(90, 146, 255, 0.07);
+  border-left-color: rgba(90, 146, 255, 0.55);
+  color: #b9cff5;
+}
+
+/* ---- simulator column + device dock ----------------------------------------------------------------- */
+.simulator-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+  min-height: 0;
+}
+.phone-stage {
+  display: grid;
+  place-items: center;
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+/* The phone is 480 x 996 px; JS sets --phone-zoom so the whole device always fits the stage. */
+.phone-stage .phone-frame {
+  zoom: var(--phone-zoom, 1);
+}
+.device-dock {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  background: rgba(19, 22, 26, 0.82);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+.dock-sep {
+  width: 1px;
+  height: 22px;
+  background: var(--border);
+}
+
+/* ---- popover menu + toast --------------------------------------------------------------------------- */
+.menu {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  right: 0;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 270px;
+  padding: 6px;
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+  box-shadow: var(--shadow-pop);
+}
+.menu-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: var(--r-sm);
+  background: transparent;
+  color: var(--text);
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+}
+.menu-item .icon {
+  margin-top: 2px;
+  color: var(--text-2);
+}
+.menu-item:hover:not(:disabled),
+.menu-item:focus-visible {
+  background: var(--surface-hover);
+  outline: none;
+}
+.menu-item:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.menu-item-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.menu-item-hint {
+  color: var(--text-dim);
+  font-size: 12px;
+}
+.toast-region {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  z-index: 100;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+.toast {
+  padding: 10px 16px;
+  border-radius: var(--r-pill);
+  background: #f2f4f7;
+  color: #0b0d10;
+  font-size: 13px;
+  font-weight: 500;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+  animation: toast-in 180ms var(--ease);
+}
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+/* ---- small screens that still show the studio (a tablet) -------------------------------------------- */
+@media (max-width: 1180px) {
+  .app-grid {
+    grid-template-columns: 240px minmax(0, 1fr);
+  }
+  .editor-panel {
+    display: none;
+  }
+}
+
+/* ---- phone mode: only the phone ---------------------------------------------------------------------- */
+html[data-mode="phone"][data-view="studio"] body {
+  overflow: hidden;
+  background: #000;
+}
+html[data-mode="phone"][data-view="studio"] .topbar,
+html[data-mode="phone"][data-view="studio"] .sidebar,
+html[data-mode="phone"][data-view="studio"] .editor-panel,
+html[data-mode="phone"][data-view="studio"] .device-dock,
+html[data-mode="phone"][data-view="studio"] #status-banner {
+  display: none;
+}
+html[data-mode="phone"][data-view="studio"] .studio-view {
+  height: 100dvh;
+}
+html[data-mode="phone"][data-view="studio"] .app-grid {
+  display: block;
+  padding: 0;
+}
+html[data-mode="phone"][data-view="studio"] .simulator-column {
+  height: 100dvh;
+  gap: 0;
+}
+html[data-mode="phone"][data-view="studio"][data-fullscreen="false"] body {
+  background:
+    radial-gradient(900px 420px at 50% -120px, rgba(90, 146, 255, 0.1), transparent 70%),
+    var(--bg);
+}
+html[data-mode="phone"][data-view="studio"][data-fullscreen="false"] .simulator-column {
+  padding: 16px;
+}
+/* A real phone: the interface fills the screen, no bezel, no faux notch or home bar. */
+html[data-fullscreen="true"][data-view="studio"] .phone-stage {
+  display: block;
+  overflow: visible;
+}
+html[data-fullscreen="true"][data-view="studio"] .phone-stage .phone-frame {
+  zoom: 1;
+}
+html[data-fullscreen="true"][data-view="studio"] .phone-frame {
+  width: 100vw;
+  height: 100dvh;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  --safe-top: max(env(safe-area-inset-top, 0px), 10px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+html[data-fullscreen="true"][data-view="studio"] .phone-frame::before,
+html[data-fullscreen="true"][data-view="studio"] .phone-frame::after,
+html[data-fullscreen="true"][data-view="studio"] .phone-notch,
+html[data-fullscreen="true"][data-view="studio"] .phone-home-indicator {
+  display: none;
+}
+html[data-fullscreen="true"][data-view="studio"] .phone-screen,
+html[data-fullscreen="true"][data-view="studio"] .phone-frame.chrome-android .phone-screen {
+  border-radius: 0;
+}
+html[data-fullscreen="true"][data-view="studio"] .phone-overlay,
+html[data-fullscreen="true"][data-view="studio"] .phone-overlay.chrome-android {
+  inset: 0;
+  border-radius: 0;
+}
+
+/* The gallery on a phone: one column, tighter padding. */
+@media (max-width: 640px) {
+  .gallery-view {
+    padding: 40px 16px 48px;
+  }
+  .gallery-header h1 {
+    font-size: 28px;
+  }
+  .gallery-cards {
+    grid-template-columns: 1fr;
+  }
+}

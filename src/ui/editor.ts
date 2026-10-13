@@ -1,3 +1,4 @@
+import { icon } from "./icons.ts";
 import type { Token } from "../types.ts";
 import { parseToken, RegistryParseError, RegistrySchemaError } from "../schema-validator.ts";
 import { computeTrustScore } from "../trust-score/index.ts";
@@ -22,7 +23,7 @@ export class Editor {
     container.className = "editor-panel";
 
     const header = document.createElement("h3");
-    header.textContent = "Editor";
+    header.append(icon("file-json", { size: 14 }), document.createTextNode("Token JSON"));
     container.append(header);
 
     this.textarea = document.createElement("textarea");

@@ -1,5 +1,6 @@
 import type { Registry, Token } from "../types.ts";
 import { createLogoBadge } from "./logo-badge.ts";
+import { icon } from "./icons.ts";
 import { findNetworkInfo, type NetworkInfo } from "../networks/network-registry.ts";
 
 // Virtualized above ~200 tokens per network (CEO review Section 7 finding).
@@ -69,7 +70,7 @@ export function renderSidebar(
 
   const addBtn = document.createElement("button");
   addBtn.className = "add-token-btn";
-  addBtn.textContent = "+ Add / Create token";
+  addBtn.append(icon("plus", { size: 15 }), document.createTextNode("Add / Create token"));
   addBtn.addEventListener("click", callbacks.onAddToken);
   container.append(addBtn);
 }

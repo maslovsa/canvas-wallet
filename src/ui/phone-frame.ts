@@ -11,6 +11,7 @@ import { prepareSend } from "../send/send-token.ts";
 import { getSendController, resetSendSession } from "../send/send-session.ts";
 import { mountSendScreen, unmountSendScreen } from "./send-screen.ts";
 import { openOverlay } from "./phone-overlay.ts";
+import { icon } from "./icons.ts";
 import { openReceiveDialog } from "./receive-dialog.ts";
 import { loadReceiveAddresses, receiveAddressFor, REFUSAL_NO_RECEIVE_ADDRESS } from "../receive/receive-address.ts";
 
@@ -33,6 +34,8 @@ export interface PhoneFrameOptions {
   onSelectToken: (token: Token) => void;
   /** Called after every render, so the caller can mirror the phone's screen (list / token) into the URL. */
   onScreenChange?: () => void;
+  /** Phone mode only: a small "‹ label" control above the list title that leaves the phone view (e.g. back to the gallery). */
+  onExit?: { label: string; run: () => void };
 }
 
 // The phone simulates a real two-screen wallet flow: a "list" (network
@@ -147,6 +150,15 @@ function renderListScreen(screen: HTMLElement, options: PhoneFrameOptions): void
   const header = document.createElement("div");
   header.className = "phone-list-header";
 
+  if (options.onExit) {
+    const exit = document.createElement("button");
+    exit.type = "button";
+    exit.className = "phone-list-exit";
+    exit.append(icon("chevron-left", { size: 18, strokeWidth: 2.25 }), document.createTextNode(options.onExit.label));
+    const run = options.onExit.run;
+    exit.addEventListener("click", run);
+    header.append(exit);
+  }
   const title = document.createElement("div");
   title.className = "phone-list-title";
   title.textContent = options.listName;
@@ -258,7 +270,7 @@ function applyHeaderBackground(header: HTMLElement, token: Token, chromeTheme: C
 
   if (chromeTheme === "light") {
     header.style.backgroundColor = "#fff";
-    bgLayer.style.opacity = "0.6"; // -40%, adapting the visual for a light background.
+    bgLayer.style.opacity = "0.94"; // a hair lighter on a light screen; the art stays rich so the white title keeps its contrast
   }
 }
 
