@@ -12,6 +12,7 @@ import { getSendController, resetSendSession } from "../send/send-session.ts";
 import { mountSendScreen, unmountSendScreen } from "./send-screen.ts";
 import { openOverlay } from "./phone-overlay.ts";
 import { icon } from "./icons.ts";
+import { makeActivatable } from "./a11y.ts";
 import { openReceiveDialog } from "./receive-dialog.ts";
 import { loadReceiveAddresses, receiveAddressFor, REFUSAL_NO_RECEIVE_ADDRESS } from "../receive/receive-address.ts";
 
@@ -231,7 +232,7 @@ function renderTokenListRow(token: Token, onSelect: (token: Token) => void): HTM
   balanceEl.append(amountEl, usdEl);
   row.append(balanceEl);
 
-  row.addEventListener("click", () => onSelect(token));
+  makeActivatable(row, () => onSelect(token));
   return row;
 }
 
