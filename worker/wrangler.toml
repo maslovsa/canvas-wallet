@@ -2,7 +2,7 @@
 # Nothing in this file is secret. The Aegis key is NOT here: it lives only as the Worker secret
 # AEGIS_API_KEY (Cloudflare dashboard > Worker > Settings > Variables and Secrets, or
 # `npx wrangler secret put AEGIS_API_KEY`). Local development reads worker/.dev.vars (gitignored).
-name = "canvas-wallet-risk"
+name = "canvas-wallet"
 main = "src/index.ts"
 compatibility_date = "2026-10-01"
 workers_dev = true
