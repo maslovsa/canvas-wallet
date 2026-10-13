@@ -104,6 +104,12 @@ export function mountSendScreen(options: SendScreenOptions): void {
   addrInput.placeholder = "Tron address (starts with T)"; // a hint only: the visible "To" label stays
   addrInput.setAttribute("aria-describedby", "send-address-status");
   addrField.append(addrInput);
+  const identityRow = el("div", "send-identity");
+  identityRow.hidden = true;
+  const identityBadge = el("span", "send-owner");
+  identityBadge.setAttribute("aria-hidden", "true");
+  const identityName = el("span", "send-identity-name");
+  identityRow.append(identityBadge, identityName);
   const status = el("div", "send-status");
   status.id = "send-address-status";
   status.setAttribute("aria-live", "polite");
@@ -120,7 +126,7 @@ export function mountSendScreen(options: SendScreenOptions): void {
   status.append(statusIcon, ownerBadge, spinner, statusText, checkAgain);
   const addrError = el("div", "send-error");
   addrError.setAttribute("role", "alert");
-  addrBlock.append(addrRow, addrField, status, addrError);
+  addrBlock.append(addrRow, addrField, identityRow, status, addrError);
 
   // --- amount
   const amountBlock = el("div", "send-block");
@@ -211,6 +217,15 @@ export function mountSendScreen(options: SendScreenOptions): void {
 
     const s = view.address.status;
     status.className = "send-status" + (s ? ` ${toneClass(s.tone)}` : "");
+    // A risky address that is a known VASP: its name and logo, above the risk line.
+    const identity = s?.identity ?? null;
+    identityRow.hidden = identity === null;
+    const identityKey = identity ? `${identity.name}\n${identity.logo ?? ""}` : "";
+    if (identityBadge.dataset.key !== identityKey) {
+      identityBadge.dataset.key = identityKey;
+      if (identity) fillOwnerBadge(identityBadge, identity.name, identity.logo);
+    }
+    identityName.textContent = identity ? identity.name : "";
     const owner = s?.owner ?? null;
     statusIcon.textContent = s && !owner ? ICONS[s.icon] : "";
     ownerBadge.hidden = owner === null;

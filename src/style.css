@@ -1136,6 +1136,17 @@ body {
   font-size: 13px;
   color: var(--phone-dim);
 }
+.send-identity {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 24px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.send-identity[hidden] {
+  display: none;
+}
 .send-owner {
   position: relative;
   flex: none;

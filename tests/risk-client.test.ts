@@ -116,11 +116,18 @@ describe("parseProxyAnswer (strict)", () => {
       { level: "clear", label: "Example Exchange", logo: "https://evil.example/logo.png" },
       { level: "clear", label: "Example Exchange", logo: "javascript:alert(1)" },
       { level: "clear", label: "Example Exchange", logo: 7 },
-      { level: "caution", logo: LOGO }, // never on caution
-      { level: "caution", label: "Example Exchange", logo: LOGO },
+      { level: "caution", logo: LOGO }, // a logo without a name, on caution too
+      { level: "caution", label: "Example Exchange", logo: "http://cdn.jsdelivr.net/x.png" },
+      { level: "unknown", label: "Example Exchange" }, // identity only on clear and caution
     ]) {
       expect(parseProxyAnswer(bad)).toEqual({ state: "unavailable" });
     }
+  });
+
+  it("a caution answer may carry a VASP name and logo (plan R14)", () => {
+    expect(parseProxyAnswer({ level: "caution", label: "Example Exchange", logo: LOGO })).toEqual({ state: "caution", label: "Example Exchange", logo: LOGO });
+    expect(parseProxyAnswer({ level: "caution", label: "Example Exchange" })).toEqual({ state: "caution", label: "Example Exchange" });
+    expect(parseProxyAnswer({ level: "caution" })).toEqual({ state: "caution" });
   });
 
   it("the seed accepts a logo only on a labelled clear entry with an acceptable URL", () => {
@@ -140,7 +147,6 @@ describe("parseProxyAnswer (strict)", () => {
       { level: "unknown" },
       { level: "safe" },
       { level: "clear", score: 3 },
-      { level: "caution", label: "Mixer" }, // a label is never allowed on caution
       { level: "clear", label: "" },
       { level: "clear", label: "x".repeat(61) },
       { level: "clear", label: 5 },

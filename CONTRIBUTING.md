@@ -265,8 +265,9 @@ re-check them with Aegis before they expire. **Alert threshold.** The risk-check
 **Wording rule for risk results: no advice.** The Send screen only states what the screening data shows
 ("Risk signals found for this address", "No risk signals found", "Couldn't verify this address") and says
 it is information, not advice. Do not write "recommend", "safe", "dangerous", "avoid" or "should" in this
-UI. Names and logos of a VASP appear only on clear results; a risky address never shows a name, a logo,
-a category or a score. `e2e/send-risk-examples.spec.ts` regenerates example screenshots in
+UI. A VASP's name and logo appear on clear results and, for a risky address, only when Aegis has a corroborated VASP
+(`verdict.entity`), above the risk line; a risky address never shows a raw `verdict.label` (it can be a sanctioned
+person), a category or a score. `e2e/send-risk-examples.spec.ts` regenerates example screenshots in
 `docs/designs/send-risk-screens/`.
 
 Addresses that are not in the seed show "Couldn't verify

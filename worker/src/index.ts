@@ -1,12 +1,12 @@
 // Risk-check proxy for the Send window (plan T9). It exists because a static GitHub Pages site cannot
 // hold a secret: the Aegis key lives ONLY here, as the Worker secret AEGIS_API_KEY.
 //
-//   POST /check {"network":"TRON","address":"T..."}  ->  {"level":"clear","label"?:"...","logo"?:"https://..."} | {"level":"caution"} | {"level":"unknown"}
+//   POST /check {"network":"TRON","address":"T..."}  ->  {"level":"clear"|"caution","label"?:"...","logo"?:"https://..."} | {"level":"unknown"}
 //
-// The response is exactly that: never a score, a reason, flags or the Aegis session. A label (the VASP's
-// name) and its logo are returned only with a clear result (a name like a mixer or a sanctioned person would
-// itself reveal the reason, plan E7; Aegis can name an exchange on an address it also marks as sanctioned). Anything that goes wrong becomes {"level":"unknown"} (fail closed: no live call when the
-// cache or the counters are unavailable). Aegis POST /v2/screen is synchronous and costs 0.1 credit per
+// The response is exactly that: never a score, a reason, flags or the Aegis session. A VASP's name and logo may
+// accompany a clear or a caution result (plan R14: on caution only a corroborated VASP identity, never a raw
+// label that could name a sanctioned person). Anything that goes wrong becomes {"level":"unknown"} (fail closed:
+// no live call when the cache or the counters are unavailable). Aegis POST /v2/screen is synchronous and costs 0.1 credit per
 // call; a replay with the same Idempotency-Key within 24 h is free (docs.aegis-kyt.com/api-reference/v2-screen).
 import { validateTronAddress } from "../../src/send/tron-address.ts";
 import { sanitizeLogoUrl } from "../../src/send/entity-logo.ts";
@@ -98,11 +98,13 @@ export function sanitizeLabel(raw: unknown): string | undefined {
 export const RISK_ALERT_SCORE = 50;
 
 /**
- * Aegis /v2/screen answer -> the three client levels (plan E6) and, for clear only, the owner's name and logo
- * (plan E7). Caution when the risk score is 50 or more, or the level is `sanctioned` / there is a sanctions-list
- * match (always, whatever the score); without a numeric score the level decides (medium and above). The reason
- * (categories, label, score) never leaves the Worker. The name is verdict.entity.name (a corroborated VASP), else
- * verdict.label; the logo is only taken together with a name and only if it is an acceptable URL.
+ * Aegis /v2/screen answer -> the three client levels (plan E6). Caution when the risk score is 50 or more, or the
+ * level is `sanctioned` / there is a sanctions-list match (always, whatever the score); without a numeric score the
+ * level decides (medium and above). The reason (categories, score, sanctions match) never leaves the Worker.
+ *
+ * Identity (plan R14): a clear result carries the owner's name (verdict.entity.name, else verdict.label) and logo.
+ * A caution result carries ONLY the corroborated VASP identity (verdict.entity.name and its logo): never
+ * verdict.label, which on a risky address can be a sanctioned person's name or a risk annotation.
  */
 export function mapAegisVerdict(body: unknown): Verdict {
   const root = body as {
@@ -118,19 +120,23 @@ export function mapAegisVerdict(body: unknown): Verdict {
   const verdict = root?.verdict;
   const level = verdict?.risk_level;
   const score = typeof verdict?.risk_score === "number" && Number.isFinite(verdict.risk_score) ? verdict.risk_score : null;
-  if (level === "sanctioned" || (verdict?.sdn_match !== undefined && verdict.sdn_match !== null)) return { level: "caution" };
-  if (score !== null && score >= RISK_ALERT_SCORE) return { level: "caution" };
+  const entity = verdict?.entity;
+  const withIdentity = (base: "clear" | "caution", name: string | undefined): Verdict => {
+    if (!name) return { level: base };
+    const logo = sanitizeLogoUrl(entity?.logo_url);
+    return logo ? { level: base, label: name, logo } : { level: base, label: name };
+  };
+  const caution = (): Verdict => withIdentity("caution", sanitizeLabel(entity?.name));
+
+  if (level === "sanctioned" || (verdict?.sdn_match !== undefined && verdict.sdn_match !== null)) return caution();
+  if (score !== null && score >= RISK_ALERT_SCORE) return caution();
   const hasData = root?.coverage?.data_available === true;
   const known = level === "none" || level === "low" || level === "medium" || level === "high" || level === "critical";
   const belowThreshold = score !== null && known && (level === "low" || hasData);
   // No numeric score: the level decides (medium and above are caution, as before).
-  if (score === null && (level === "medium" || level === "high" || level === "critical")) return { level: "caution" };
+  if (score === null && (level === "medium" || level === "high" || level === "critical")) return caution();
   if (belowThreshold || (score === null && (level === "low" || (level === "none" && hasData)))) {
-    const entity = verdict?.entity;
-    const label = sanitizeLabel(entity?.name) ?? sanitizeLabel(verdict?.label);
-    if (!label) return { level: "clear" };
-    const logo = sanitizeLogoUrl(entity?.logo_url);
-    return logo ? { level: "clear", label, logo } : { level: "clear", label };
+    return withIdentity("clear", sanitizeLabel(entity?.name) ?? sanitizeLabel(verdict?.label));
   }
   return { level: "unknown" }; // none without data, an unknown level, or a malformed answer
 }
@@ -235,7 +241,7 @@ async function handleCheck(request: Request, env: Env, cors: Record<string, stri
 
   if (env.RISK_ENABLED !== "true") return json({ level: "unknown" } satisfies Verdict, 200, cors);
 
-  const cacheKey = `v2:TRON:${address}`;
+  const cacheKey = `v3:TRON:${address}`;
   try {
     const cached = await env.RISK_CACHE.get(cacheKey);
     if (cached) return json(JSON.parse(cached) as Verdict, 200, cors);
