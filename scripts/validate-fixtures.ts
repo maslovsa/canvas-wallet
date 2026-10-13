@@ -4,6 +4,10 @@
 // source, never two independently maintained validator implementations
 // (CEO review Section 5 finding).
 //
+// Also enforces, for every VALID file, that a registry using the `send` action declares
+// schemaVersion 1.1.0 or later, and that fixtures/semantic-invalid/*.json (schema-valid
+// but declaring too old a version) are rejected by that rule (plan decision D11).
+//
 // Validates:
 //  1. Every public/lists/*.json (except manifest.json, which isn't a
 //     Registry — it's the Gallery's list-of-lists index) — the repo's REAL,
@@ -32,6 +36,7 @@ import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { ICON_DOMAIN_ALLOWLIST } from "../src/icon/domain-allowlist.ts";
 import { createAjv } from "../src/schema/create-validator.ts";
+import { declaresAtLeast, requiredSchemaVersion } from "../src/registry-client/schema-version-gate.ts";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, "..");
@@ -108,6 +113,9 @@ function validateFile(path: string, expectValid: boolean): void {
   );
 
   if (expectValid && valid) {
+    const required = requiredSchemaVersion(data);
+    const declared = (data as { schemaVersion: string }).schemaVersion;
+    log(declaresAtLeast(declared, required), `${path} schemaVersion`, `declares ${declared}, needs at least ${required}`);
     for (const url of [...collectIconUrls(data), ...collectBackgroundImageUrls(data)]) {
       let hostname: string;
       try {
@@ -136,6 +144,15 @@ function validateDir(dir: string, expectValid: boolean, exclude: Set<string> = n
 validateDir(join(ROOT, "public", "lists"), true, new Set(["manifest.json"]));
 validateDir(join(ROOT, "fixtures", "valid"), true);
 validateDir(join(ROOT, "fixtures", "adversarial"), false);
+
+// Schema-valid registries that use `send` but declare 1.0.0: ajv accepts them, the version rule must not.
+for (const file of readdirSync(join(ROOT, "fixtures", "semantic-invalid")).filter((f) => f.endsWith(".json"))) {
+  const path = join(ROOT, "fixtures", "semantic-invalid", file);
+  const data = JSON.parse(readFileSync(path, "utf-8")) as { schemaVersion: string };
+  const schemaOk = validate(data) === true;
+  const versionOk = declaresAtLeast(data.schemaVersion, requiredSchemaVersion(data));
+  log(schemaOk && !versionOk, path, schemaOk ? (versionOk ? "version rule did NOT reject it" : "rejected by the version rule, as intended") : "must be schema-valid");
+}
 
 const canaryPath = join(ROOT, "fixtures", "canary-bad.json");
 try {

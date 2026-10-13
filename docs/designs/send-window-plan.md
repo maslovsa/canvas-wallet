@@ -259,7 +259,7 @@ PLAN_REALITY check not run: gstack upgraded to v1.91.93.0 mid-run and Step 0 had
 ## Implementation Tasks
 Synthesized from this review's findings. Each task derives from a specific finding above. Run with Claude Code or Codex; checkbox as you ship. Time assumption: human ~8-10 days total; CC+gstack ~5 hours (scaffolding ~100x, tests ~50x, features ~30x, architecture ~5x).
 
-- [ ] **T1 (P1, human: ~3h / CC: ~15min)** - schema - add `send` action (type only, additionalProperties false), regenerate types, accept schema 1.0.0 and 1.1.0 in the gate
+- [ ] **T1 (P1, human: ~3h / CC: ~15min)** - schema - add `send` action (type only, additionalProperties false), regenerate types, accept schema 1.0.0 and 1.1.0 in the gate  (PR1 DONE: schema `send` action, gate accepts 1.0.0/1.1.0, version rule in validate-fixtures, fixtures, ActionResult union + send handler; REMAINING for PR2: opt-in `send` entries and schemaVersion 1.1.0 in the Tron lists)
   - Surfaced by: Section 1 (R3), Section 3 (R8), Section 10 (R9)
   - Files: registry.schema.json, src/generated/registry-schema.d.ts, src/registry-client/schema-version-gate.ts, public/lists/*.json (opt-in: add `send` only to Tron tokens; no list contains it today), fixtures/valid/send-action.json, fixtures/adversarial/send-action-extra-props.json, tests/schema-version-gate.test.ts, tests/schema-validator.test.ts
   - Verify: `npm test` and `npm run validate:fixtures` (1.2.0 refused, extra property rejected)
@@ -267,11 +267,11 @@ Synthesized from this review's findings. Each task derives from a specific findi
   - Surfaced by: Section 1 (R3), Section 2 (UnsupportedNetwork), Section 4
   - Files: e2e/happy-path.spec.ts, src/widgets/action-executor.ts (ActionResult becomes a discriminated union; `send` has no targetUrl), src/ui/phone-frame.ts (click handler branches on the result; Tron detection via canonicalName; src/main.ts only if the build needs it), tests/action-executor.test.ts
   - Verify: FIRST (before touching phone-frame.ts or action-executor.ts) add the E10 characterization tests: exact result-shape rows in tests/action-executor.test.ts, plus two Playwright tests in e2e/happy-path.spec.ts (click an existing action widget and assert the demo alert text; list -> detail -> Back); they must pass before and after. Then: unit tests that `send` opens the screen, back returns to detail, non-Tron shows the in-phone notice
-- [ ] **T3 (P1, human: ~4h / CC: ~20min)** - send - Tron address validator (WebCrypto double-SHA256, Base58, 0x41) with CryptoUnavailable blocking; one pure module shared with the Worker (E9)
+- [x] **T3 (P1, human: ~4h / CC: ~20min)** - send - Tron address validator (WebCrypto double-SHA256, Base58, 0x41) with CryptoUnavailable blocking; one pure module shared with the Worker (E9)  (DONE in PR1: src/send/tron-address.ts + tests/tron-address.test.ts)
   - Surfaced by: Section 2, Section 6
   - Files: src/send/tron-address.ts, tests/tron-address.test.ts
   - Verify: tests for real USDT contract address, flipped checksum, lengths 33/35, O/0/I/l, whitespace, no crypto.subtle
-- [ ] **T4 (P1, human: ~3h / CC: ~15min)** - send - BigInt decimal amount parsing, Max minus fee, decimals 0 to 255
+- [x] **T4 (P1, human: ~3h / CC: ~15min)** - send - BigInt decimal amount parsing, Max minus fee, decimals 0 to 255  (DONE in PR1: src/send/send-input.ts holds the amount code; the validator stays in tron-address.ts so the Worker can import it alone, E9 refines D2's merged file)
   - Surfaced by: Section 5, Section 4
   - Files: src/send/amount.ts, tests/amount.test.ts
   - Verify: tests for "10.5" @6, "-1", "abc", "1e3", too many decimals, Max on native TRX vs TRC20
@@ -295,7 +295,7 @@ Synthesized from this review's findings. Each task derives from a specific findi
   - Surfaced by: Sections 1, 2, 3, 6, 8; R1, R2, R4
   - Files: worker/src/index.ts, worker/wrangler.toml (drop the RISK_ENABLED var, E5), tests/worker-check.test.ts
   - Verify: injected-env tests (exact-keys contract, limits, budget under simulated concurrency, KV-down closed, none without data to unknown, caution never carries a label (E7), RISK_ENABLED secret missing or not "true" means seed-only (E5), OPTIONS preflight and exact-origin CORS, expired handle); one manual live smoke with the capped demo key
-- [ ] **T10 (P1, human: ~3h / CC: ~15min)** - build guard - dist secret check run after the build in deploy.yml and locally; patterns include Aegis keys (`aeg_...`) and Cloudflare API token prefixes (`cfut_`, `cfat_`; verify the prefix of the token in use)
+- [x] **T10 (P1, human: ~3h / CC: ~15min)** - build guard - dist secret check run after the build in deploy.yml and locally; patterns include Aegis keys (`aeg_...`) and Cloudflare API token prefixes (`cfut_`, `cfat_`; verify the prefix of the token in use)  (DONE in PR1: scripts/check-dist-secrets.ts, npm run check:dist, deploy.yml step)
   - Surfaced by: Section 6 (R11), Section 3 (T1), F10
   - Files: scripts/check-dist-secrets.ts, tests/check-dist-secrets.test.ts, .github/workflows/deploy.yml
   - Verify: unit test fails on a planted fake key in a temp dist, passes on the real build
@@ -311,7 +311,7 @@ Synthesized from this review's findings. Each task derives from a specific findi
   - Surfaced by: Sections 2, 6, 7; E2, E3
   - Files: worker/README.md content goes to CONTRIBUTING.md (D2 smaller arrangement); T11 also adds worker/.dev.vars to .gitignore
   - Verify: written answers appended to the CONTRIBUTING.md runbook
-- [ ] **T14 (P1, human: ~1h / CC: ~10min)** - CI - E1: add an `npm test` step before `npm run build` in the deploy.yml build job; remove the `paths:` filter from the pull_request trigger in validate-registry.yml
+- [x] **T14 (P1, human: ~1h / CC: ~10min)** - CI - E1: add an `npm test` step before `npm run build` in the deploy.yml build job; remove the `paths:` filter from the pull_request trigger in validate-registry.yml  (DONE in PR1: npm test before the build in deploy.yml; paths filter removed from validate-registry.yml)
   - Surfaced by: Scope Challenge finding 1 (E1)
   - Files: .github/workflows/deploy.yml, .github/workflows/validate-registry.yml
   - Verify: a deliberately failing test on a throwaway branch fails both the PR run and a main-push run before deploy

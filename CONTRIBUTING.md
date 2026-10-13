@@ -231,6 +231,15 @@ never hand-edit that generated file. If you change the schema, add both a
 never touch `fixtures/canary-bad.json` — it exists specifically to always
 fail, as a check that the validator itself hasn't silently broken.
 
+**Schema versions.** `1.1.0` adds the `send` action (`{"type": "send"}`, no parameters: it opens the
+built-in Send screen, and the recipient and amount are never prefilled by a registry). A registry that
+uses `send` must declare `schemaVersion` `1.1.0` or later; `npm run validate:fixtures` enforces this
+(see `fixtures/semantic-invalid/`). `1.0.0` registries stay valid.
+
+**CI gates.** Every pull request and every push to `main` runs `npm test` (a push to `main` deploys, so
+the tests run before the build). After the build, `npm run check:dist` fails the deploy if `dist/`
+contains secret-shaped text: this repository is public and the built site is world-readable.
+
 ## Risk-check Worker (Send window)
 
 A static GitHub Pages site cannot hold a secret, so address risk checks go through a small Cloudflare Worker in `worker/` that holds the Aegis key. Design and limits: `docs/designs/send-window-plan.md`.

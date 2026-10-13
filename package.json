@@ -25,7 +25,8 @@
     "test:e2e": "playwright test",
     "gen:schema-types": "json2ts registry.schema.json -o src/generated/registry-schema.d.ts",
     "validate:fixtures": "tsx scripts/validate-fixtures.ts",
-    "verify:token": "tsx scripts/verify-token.ts"
+    "verify:token": "tsx scripts/verify-token.ts",
+    "check:dist": "tsx scripts/check-dist-secrets.ts"
   },
   "devDependencies": {
     "@playwright/test": "^1.47.0",
