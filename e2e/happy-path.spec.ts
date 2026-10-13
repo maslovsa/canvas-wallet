@@ -273,3 +273,51 @@ test("Send on a non-Tron token shows the in-phone notice, not a browser alert", 
   await expect(page.locator(".phone-overlay")).toHaveCount(0);
   expect(dialogSeen).toBe(false);
 });
+
+// ---- Shareable URL state: ?list=<id>&network=<name>&token=<symbol>
+test("a deep link opens the list, the network filter and the asset", async ({ page }) => {
+  await page.goto("/?list=aegis-super-list&network=Tron&token=USDT");
+  await expect(page.locator(".card-header-name")).toContainText("(USDT)");
+  await expect(page.locator(".card-header-meta-item").first()).toContainText("Tron");
+  expect(new URL(page.url()).search).toBe("?list=aegis-super-list&network=Tron&token=USDT");
+});
+
+test("a link with only a list and a network opens the phone's list screen with that filter", async ({ page }) => {
+  await page.goto("/?list=aegis-super-list&network=tron");
+  await expect(page.locator(".phone-network-chip.active")).toContainText("Tron");
+  await expect(page.locator(".card-header-name")).toHaveCount(0);
+  // the registry's own spelling is written back
+  expect(new URL(page.url()).search).toBe("?list=aegis-super-list&network=Tron");
+});
+
+test("the URL follows the list, the network filter and the open asset", async ({ page }) => {
+  await page.goto("/");
+  expect(new URL(page.url()).search).toBe("");
+  await page.getByText("Aegis Super List").click();
+  await expect.poll(() => new URL(page.url()).search).toBe("?list=aegis-super-list&network=Ethereum");
+  await page.locator(".phone-network-chip", { hasText: "Tron" }).click();
+  await expect.poll(() => new URL(page.url()).search).toBe("?list=aegis-super-list&network=Tron");
+  await page.locator(".phone-token-row", { hasText: "Tether USD" }).first().click();
+  await expect.poll(() => new URL(page.url()).search).toBe("?list=aegis-super-list&network=Tron&token=USDT");
+  await page.locator(".card-back-btn").click(); // in-phone Back to the token list
+  await expect.poll(() => new URL(page.url()).search).toBe("?list=aegis-super-list&network=Tron");
+  await page.locator("#back-to-gallery").click();
+  await expect.poll(() => new URL(page.url()).search).toBe("");
+});
+
+test("an unknown list shows a message and the gallery, and unknown network/asset names fall back", async ({ page }) => {
+  await page.goto("/?list=does-not-exist");
+  await expect(page.locator("#status-banner")).toContainText("was not found");
+  await expect(page.getByText("Aegis Super List")).toBeVisible();
+  await page.goto("/?list=aegis-super-list&network=Nowhere&token=NOPE");
+  await expect(page.locator(".phone-network-chip.active")).toBeVisible();
+  await expect(page.locator(".card-header-name")).toHaveCount(0);
+});
+
+test("other query parameters survive and a deep link keeps working after Send is opened and closed", async ({ page }) => {
+  await page.goto("/?utm=1&list=aegis-super-list&network=Tron&token=USDT");
+  await page.locator(".phone-screen .action-group-btn", { hasText: "Send" }).click();
+  await expect(page.locator(".send-nav-title")).toHaveText("Send USDT");
+  expect(new URL(page.url()).searchParams.get("token")).toBe("USDT"); // Send is part of the asset view
+  expect(new URL(page.url()).searchParams.get("utm")).toBe("1");
+});

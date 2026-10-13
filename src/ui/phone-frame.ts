@@ -29,6 +29,8 @@ export interface PhoneFrameOptions {
   listDescription: string;
   onSelectNetwork: (network: string) => void;
   onSelectToken: (token: Token) => void;
+  /** Called after every render, so the caller can mirror the phone's screen (list / token) into the URL. */
+  onScreenChange?: () => void;
 }
 
 // The phone simulates a real two-screen wallet flow: a "list" (network
@@ -43,6 +45,10 @@ export interface PhoneFrameOptions {
 // button is the one transition that's purely local (doesn't touch app
 // state), so it mutates `screen` directly and re-renders itself.
 let screenMode: "list" | "detail" | "send" = "list";
+
+export function getPhoneNavScreen(): "list" | "detail" | "send" {
+  return screenMode;
+}
 
 export function setPhoneNavScreen(mode: "list" | "detail"): void {
   screenMode = mode;
@@ -120,6 +126,7 @@ export function renderPhoneFrame(container: HTMLElement, token: Token | undefine
   } else {
     renderListScreen(screen, options);
   }
+  options.onScreenChange?.();
 }
 
 function renderListScreen(screen: HTMLElement, options: PhoneFrameOptions): void {
