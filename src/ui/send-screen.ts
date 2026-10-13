@@ -75,6 +75,7 @@ export function mountSendScreen(options: SendScreenOptions): void {
   addrInput.setAttribute("autocorrect", "off");
   addrInput.setAttribute("autocomplete", "off");
   addrInput.spellcheck = false;
+  addrInput.placeholder = "Tron address (starts with T)"; // a hint only: the visible "To" label stays
   addrInput.setAttribute("aria-describedby", "send-address-status send-address-caption");
   addrField.append(addrInput);
   const status = el("div", "send-status");
