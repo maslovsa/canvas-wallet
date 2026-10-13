@@ -89,3 +89,112 @@ test("phone navigation: token list -> token detail -> Back returns to the list",
   await expect(page.locator(".phone-list-title")).toBeVisible();
   await expect(page.locator(".card-header-name")).toHaveCount(0);
 });
+
+// ---- Send window (plan T12). The Worker is not part of this PR: addresses are answered by the bundled
+// risk seed (public/risk-seed.json); anything else is "Couldn't verify".
+const SEED_CLEAR_LABELED = "TMuA6YqfCeX8EhbfYEg5y7S4DqzSJireY9"; // Binance, clear
+const SEED_CAUTION = "THJUJFyTnrBWb1ijWav7qfRBrjUuKgP49Z"; // risky
+const NOT_IN_SEED = "TLa2f6VPqDgRE67v1736s7bJ8Ray5wYjU7";
+
+async function openTronUsdt(page: Page): Promise<void> {
+  await page.goto("/");
+  await page.getByText("Aegis Super List").click();
+  await page.locator(".phone-network-chip", { hasText: "Tron" }).click();
+  await page.locator(".phone-token-row", { hasText: "Tether USD" }).first().click();
+  await expect(page.locator(".card-header-name")).toContainText("(USDT)");
+}
+
+async function startSend(page: Page): Promise<void> {
+  await openTronUsdt(page);
+  await page.locator(".phone-screen .action-group-btn", { hasText: "Send" }).click();
+  await expect(page.locator(".send-nav-title")).toHaveText("Send USDT");
+}
+
+test("Send: a clean labeled address -> amount -> Send -> Sent (simulated) -> Done returns to the token", async ({ page }) => {
+  await startSend(page);
+  await expect(page.locator(".send-form .send-submit")).toBeDisabled();
+  await page.locator("#send-address").fill(SEED_CLEAR_LABELED);
+  await expect(page.locator(".send-status-text")).toHaveText("Binance");
+  await page.locator("#send-amount").fill("25.5");
+  await expect(page.locator(".send-fee-value")).toContainText("TRX");
+  await page.locator(".send-form .send-submit").click();
+  await expect(page.locator(".send-sent-headline")).toHaveText("25.5 USDT sent");
+  await expect(page.locator(".send-sent-pill")).toHaveText("Simulated — no transaction was sent");
+  await page.locator(".send-sent .send-submit").click();
+  await expect(page.locator(".card-header-name")).toContainText("(USDT)");
+});
+
+test("Send: a risky address shows the caution line first, the popup only on Send, with no score or reason", async ({ page }) => {
+  await startSend(page);
+  await page.locator("#send-address").fill(SEED_CAUTION);
+  await page.locator("#send-amount").fill("10");
+  await expect(page.locator(".send-status-text")).toHaveText("Caution: we don't recommend sending here");
+  await expect(page.locator(".phone-overlay")).toHaveCount(0);
+
+  await page.locator(".send-form .send-submit").click();
+  const dialog = page.locator(".phone-dialog");
+  await expect(dialog).toContainText("We don't recommend sending to this address");
+  await expect(dialog).toContainText("Based on Aegis data at the time of the check. Details aren't shown.");
+  expect((await dialog.innerText()).toLowerCase()).not.toMatch(/score|level|reason|sanction|critical/);
+
+  await page.keyboard.press("Escape"); // Esc = Cancel
+  await expect(page.locator(".phone-overlay")).toHaveCount(0);
+  await expect(page.locator("#send-address")).toHaveValue(SEED_CAUTION);
+  await expect(page.locator("#send-amount")).toHaveValue("10");
+  await expect(page.locator("#send-address")).toBeFocused();
+
+  await page.locator(".send-form .send-submit").click();
+  await page.locator(".phone-dialog button", { hasText: "Send anyway" }).click();
+  await expect(page.locator(".send-sent-headline")).toHaveText("10 USDT sent");
+});
+
+test("Send: an address that is not in the seed is 'Couldn't verify', never safe, and Send is still allowed", async ({ page }) => {
+  await startSend(page);
+  await page.locator("#send-address").fill(NOT_IN_SEED);
+  await page.locator("#send-amount").fill("1");
+  await expect(page.locator(".send-status-text")).toHaveText("Couldn't verify this address.");
+  await expect(page.locator(".send-status .send-link")).toBeVisible();
+  await expect(page.locator(".send-form .send-submit")).toBeEnabled();
+});
+
+test("Send: Back returns to the token and the form starts fresh next time", async ({ page }) => {
+  await startSend(page);
+  await page.locator("#send-address").fill(SEED_CLEAR_LABELED);
+  await page.locator(".send-back").click();
+  await expect(page.locator(".card-header-name")).toContainText("(USDT)");
+  await page.locator(".phone-screen .action-group-btn", { hasText: "Send" }).click();
+  await expect(page.locator("#send-address")).toHaveValue("");
+});
+
+test("Send: an invalid address is rejected inline and the page never leaves the phone (no browser alert)", async ({ page }) => {
+  let dialogSeen = false;
+  page.on("dialog", async (d) => {
+    dialogSeen = true;
+    await d.dismiss();
+  });
+  await startSend(page);
+  await page.locator("#send-address").fill(SEED_CLEAR_LABELED.slice(0, -1) + "j");
+  await expect(page.locator(".send-error").first()).toHaveText("Enter a valid Tron address");
+  expect(dialogSeen).toBe(false);
+});
+
+test("Send on a non-Tron token shows the in-phone notice, not a browser alert", async ({ page }) => {
+  let dialogSeen = false;
+  page.on("dialog", async (d) => {
+    dialogSeen = true;
+    await d.dismiss();
+  });
+  await openShowcase(page); // showcase list: USDY is an Ethereum token
+  await page.getByText("USDY — USDT Yield").click();
+  const editor = page.locator(".json-editor");
+  const json = await editor.inputValue();
+  const withSend = json
+    .replace('"actions": {', '"actions": {\n    "send": { "type": "send" },')
+    .replace('"widgets": [', '"widgets": [\n    { "type": "action_group", "items": [{ "label": "Send", "action": "send" }] },');
+  await editor.fill(withSend);
+  await page.locator(".phone-screen .action-group-btn", { hasText: "Send" }).click();
+  await expect(page.locator(".phone-dialog")).toContainText("Send is available for Tron tokens only");
+  await page.locator(".phone-dialog button", { hasText: "OK" }).click();
+  await expect(page.locator(".phone-overlay")).toHaveCount(0);
+  expect(dialogSeen).toBe(false);
+});

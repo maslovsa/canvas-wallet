@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "1.0.0",
+  "schemaVersion": "1.1.0",
   "networks": [
     {
       "name": "Ethereum",
@@ -1101,9 +1101,21 @@
               "type": "external_url",
               "url": "https://app.example.com/redeem?token=USDT",
               "openIn": "in_app_browser"
+            },
+            "send": {
+              "type": "send"
             }
           },
           "widgets": [
+            {
+              "type": "action_group",
+              "items": [
+                {
+                  "label": "Send",
+                  "action": "send"
+                }
+              ]
+            },
             {
               "type": "banner",
               "title": "Mint & Redeem",
