@@ -336,7 +336,7 @@
   align-items: center;
   gap: 8px;
   margin: 0 0 10px;
-  color: var(--text-3);
+  color: var(--text-dim);
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.08em;
@@ -466,7 +466,7 @@
 }
 .trust-score-title {
   margin-bottom: 8px;
-  color: var(--text-3);
+  color: var(--text-dim);
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.08em;
@@ -655,7 +655,8 @@ html[data-fullscreen="true"][data-view="studio"] .phone-stage .phone-frame {
   zoom: 1;
 }
 html[data-fullscreen="true"][data-view="studio"] .phone-frame {
-  width: 100vw;
+  width: min(100vw, 600px); /* a tablet gets a centred phone-width column, not stretched cards */
+  margin: 0 auto;
   height: 100dvh;
   padding: 0;
   border-radius: 0;

@@ -6,7 +6,7 @@
   --ph-card: #ffffff;
   --ph-line: rgba(60, 60, 67, 0.13);
   --ph-fill: rgba(120, 120, 128, 0.12);
-  --phone-dim: rgba(60, 60, 67, 0.62);
+  --phone-dim: rgba(60, 60, 67, 0.74);
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter Variable", "Segoe UI", system-ui, sans-serif;
   background: var(--ph-bg);
   color: #111214;
@@ -171,7 +171,7 @@
   padding: 4px 8px 4px 2px;
   border: 0;
   background: transparent;
-  color: var(--accent);
+  color: var(--send-accent, #2a66ab);
   font: inherit;
   font-size: 17px;
   cursor: pointer;
@@ -528,6 +528,12 @@
 }
 .phone-frame.theme-dark .price-chart-price {
   color: #f2f3f5;
+}
+.price-chart-price:only-child {
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--phone-dim);
 }
 .price-chart-change {
   font-size: 14px;

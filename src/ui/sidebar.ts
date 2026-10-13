@@ -73,6 +73,9 @@ export function renderSidebar(
   addBtn.append(icon("plus", { size: 15 }), document.createTextNode("Add / Create token"));
   addBtn.addEventListener("click", callbacks.onAddToken);
   container.append(addBtn);
+
+  // A long list re-renders scrolled to the top: keep the selected token in view.
+  container.querySelector(".token-row.active")?.scrollIntoView?.({ block: "nearest" });
 }
 
 function renderTokenRow(token: Token, active: boolean, onSelect: (token: Token) => void): HTMLElement {

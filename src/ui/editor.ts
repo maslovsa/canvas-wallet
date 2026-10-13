@@ -28,6 +28,7 @@ export class Editor {
 
     this.textarea = document.createElement("textarea");
     this.textarea.className = "json-editor";
+    this.textarea.setAttribute("aria-label", "Token JSON");
     this.textarea.spellcheck = false;
     container.append(this.textarea);
 

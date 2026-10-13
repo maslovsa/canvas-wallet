@@ -106,6 +106,10 @@ describe("renderWidget", () => {
       expect(el?.querySelector(".price-chart-caption")).not.toBeNull();
     });
     expect(el?.querySelector(".price-chart-svg")).not.toBeNull();
+    // a sample series has no real price or change: neither is invented
+    expect(el?.querySelector(".price-chart-price")?.textContent).toBe("Price unavailable");
+    expect(el?.querySelector(".price-chart-change")).toBeNull();
+    expect(el?.querySelector(".price-chart-caption")?.textContent).toContain("not real prices");
     vi.unstubAllGlobals();
   });
 

@@ -29,6 +29,7 @@
     "check:dist": "tsx scripts/check-dist-secrets.ts"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
     "@playwright/test": "^1.47.0",
     "@types/punycode": "^2.1.4",
     "ajv": "^8.17.1",

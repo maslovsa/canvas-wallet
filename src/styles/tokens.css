@@ -22,7 +22,7 @@
   --text: #eceef1;
   --text-2: #a3aab3;
   --text-dim: #8b929b;
-  --text-3: #636a74;
+  --text-3: #7a818b;
 
   /* One cool accent for the chrome. --accent (below) stays the wallet blue used inside the phone. */
   --studio-accent: #5a92ff;
@@ -87,6 +87,18 @@ textarea {
 
 ::selection {
   background: var(--studio-accent-soft);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 /* Slim, quiet scrollbars. */
