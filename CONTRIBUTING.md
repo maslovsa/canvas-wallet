@@ -236,6 +236,16 @@ built-in Send screen, and the recipient and amount are never prefilled by a regi
 uses `send` must declare `schemaVersion` `1.1.0` or later; `npm run validate:fixtures` enforces this
 (see `fixtures/semantic-invalid/`). `1.0.0` registries stay valid.
 
+**Send screen and the risk seed.** Tokens on Tron can opt in with a `send` action (and a widget that
+references it). The built-in Send screen only handles Tron (`NATIVE` and `TRC20` tokens) and shows an
+in-phone notice for anything else. Address risk answers come from `public/risk-seed.json`, a small list
+of demo addresses produced from Aegis `POST /v2/screen` results. An entry stores only `network`,
+`address`, `level` (`clear` or `caution`), an optional `label` (allowed on `clear` entries only, because
+an owner name on a risky address can reveal the reason) and `checkedAt`. Never store scores, reasons or
+flags: `npm run validate:fixtures` rejects them. Entries older than 90 days are ignored at runtime, so
+re-check them with Aegis before they expire. Addresses that are not in the seed show "Couldn't verify
+this address" until the live Worker is connected.
+
 **CI gates.** Every pull request and every push to `main` runs `npm test` (a push to `main` deploys, so
 the tests run before the build). After the build, `npm run check:dist` fails the deploy if `dist/`
 contains secret-shaped text: this repository is public and the built site is world-readable.

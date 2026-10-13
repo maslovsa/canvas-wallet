@@ -259,11 +259,11 @@ PLAN_REALITY check not run: gstack upgraded to v1.91.93.0 mid-run and Step 0 had
 ## Implementation Tasks
 Synthesized from this review's findings. Each task derives from a specific finding above. Run with Claude Code or Codex; checkbox as you ship. Time assumption: human ~8-10 days total; CC+gstack ~5 hours (scaffolding ~100x, tests ~50x, features ~30x, architecture ~5x).
 
-- [ ] **T1 (P1, human: ~3h / CC: ~15min)** - schema - add `send` action (type only, additionalProperties false), regenerate types, accept schema 1.0.0 and 1.1.0 in the gate  (PR1 DONE: schema `send` action, gate accepts 1.0.0/1.1.0, version rule in validate-fixtures, fixtures, ActionResult union + send handler; REMAINING for PR2: opt-in `send` entries and schemaVersion 1.1.0 in the Tron lists)
+- [ ] **T1 (P1, human: ~3h / CC: ~15min)** - schema - add `send` action (type only, additionalProperties false), regenerate types, accept schema 1.0.0 and 1.1.0 in the gate  (DONE: PR1 schema, gate, version rule, fixtures, ActionResult union; PR2 opt-in `send` on Tron TRX/USDT in aegis-super-list.json and USDT in paras.json, both lists now schemaVersion 1.1.0)
   - Surfaced by: Section 1 (R3), Section 3 (R8), Section 10 (R9)
   - Files: registry.schema.json, src/generated/registry-schema.d.ts, src/registry-client/schema-version-gate.ts, public/lists/*.json (opt-in: add `send` only to Tron tokens; no list contains it today), fixtures/valid/send-action.json, fixtures/adversarial/send-action-extra-props.json, tests/schema-version-gate.test.ts, tests/schema-validator.test.ts
   - Verify: `npm test` and `npm run validate:fixtures` (1.2.0 refused, extra property rejected)
-- [ ] **T2 (P1, human: ~3h / CC: ~15min)** - actions - `send` handler and phone wiring: opens the Send screen, third `screenMode`, refuses non-Tron tokens with the in-phone notice (DR12), not `alert()`
+- [x] **T2 (P1, human: ~3h / CC: ~15min)** - actions - `send` handler and phone wiring: opens the Send screen, third `screenMode`, refuses non-Tron tokens with the in-phone notice (DR12), not `alert()`  (DONE in PR2: send handler wiring, third screenMode, in-phone refusal notice)
   - Surfaced by: Section 1 (R3), Section 2 (UnsupportedNetwork), Section 4
   - Files: e2e/happy-path.spec.ts, src/widgets/action-executor.ts (ActionResult becomes a discriminated union; `send` has no targetUrl), src/ui/phone-frame.ts (click handler branches on the result; Tron detection via canonicalName; src/main.ts only if the build needs it), tests/action-executor.test.ts
   - Verify: FIRST (before touching phone-frame.ts or action-executor.ts) add the E10 characterization tests: exact result-shape rows in tests/action-executor.test.ts, plus two Playwright tests in e2e/happy-path.spec.ts (click an existing action widget and assert the demo alert text; list -> detail -> Back); they must pass before and after. Then: unit tests that `send` opens the screen, back returns to detail, non-Tron shows the in-phone notice
@@ -275,19 +275,19 @@ Synthesized from this review's findings. Each task derives from a specific findi
   - Surfaced by: Section 5, Section 4
   - Files: src/send/amount.ts, tests/amount.test.ts
   - Verify: tests for "10.5" @6, "-1", "abc", "1e3", too many decimals, Max on native TRX vs TRC20
-- [ ] **T5 (P1, human: ~1d / CC: ~30min)** - send - TronGrid fee estimator with labeled fallback (chain params cached per session, constant-call energy from a token-holding reference sender, 65k/130k constants when none, +1 TRX for inactive TRX recipient). Probe 2026-10-13: an unfunded sender reverts, so the estimate never uses the user's own address; fetch timeouts use the native `AbortSignal.timeout(ms)` inline (no src/send/net.ts, retracted in the 2026-10-13 re-review)
+- [x] **T5 (P1, human: ~1d / CC: ~30min)** - send - TronGrid fee estimator with labeled fallback (chain params cached per session, constant-call energy from a token-holding reference sender, 65k/130k constants when none, +1 TRX for inactive TRX recipient). Probe 2026-10-13: an unfunded sender reverts, so the estimate never uses the user's own address; fetch timeouts use the native `AbortSignal.timeout(ms)` inline (no src/send/net.ts, retracted in the 2026-10-13 re-review)  (DONE in PR2: src/send/tron-fee.ts; recipient state from a free balanceOf/getaccount call, no sender wallet needed)
   - Surfaced by: Section 2, Section 7; F7
   - Files: src/send/tron-fee.ts, tests/tron-fee.test.ts
   - Verify: mocked-fetch tests incl. 429, missing getEnergyFee, fresh recipient 130k energy; one manual run against real TronGrid
-- [ ] **T6 (P1, human: ~1d / CC: ~40min)** - send - risk client: seed lookup (90-day runtime expiry), Worker call, seq+address stale guard, four states, 15 s soft timeout
+- [ ] **T6 (P1, human: ~1d / CC: ~40min)** - send - risk client: seed lookup (90-day runtime expiry), Worker call, seq+address stale guard, four states, 15 s soft timeout  (PR2 DONE: seed lookup with 90-day expiry, BASE_URL-prefixed seed fetch, public/risk-seed.json built from real Aegis /v2/screen results, validate-fixtures checks; REMAINING for PR3: the Worker call and its states)
   - Surfaced by: Section 1 (R1), Section 4 (R10), Section 6
   - Files: src/send/risk-client.ts, public/risk-seed.json, scripts/validate-fixtures.ts, tests/risk-client.test.ts
   - Verify: seed fetch uses import.meta.env.BASE_URL (test with a sub-path base); client calls POST /check once (A1: Aegis /v2/screen is synchronous), 15 s stays as the upper bound; tests for both completion orders with controlled release points, unknown level, Worker 429/5xx/timeout, seed expiry with injected now
-- [ ] **T7 (P1, human: ~1d / CC: ~30min)** - send - session state in module scope (keyed by network + token.id) plus pure `deriveSendView`, submit guard, abort on back
+- [x] **T7 (P1, human: ~1d / CC: ~30min)** - send - session state in module scope (keyed by network + token.id) plus pure `deriveSendView`, submit guard, abort on back  (DONE in PR2: src/send/send-session.ts, module-scope session keyed by network + token)
   - Surfaced by: Section 4 (CRITICAL GAP: phone-frame.ts:48 clears the container on every render), Section 5
   - Files: src/send/send-session.ts, tests/send-session.test.ts
   - Verify: tests for state x Send-enabled matrix, edit-after-verdict reset, fake-timer soft timeout, re-render preserving values
-- [ ] **T8 (P1, human: ~3d / CC: ~90min)** - ui - Send screen, caution popup, Sent view and refusal notice built to the Design review decisions DR1-DR14 (hierarchy and wireframe, state table, `--send-*` tokens for both themes, popup inside `.phone-frame` with iOS and Android skins, accessibility acceptance criteria DR11, popup copy per D12). The popup opens only on Send (DR2); no `alert()`
+- [x] **T8 (P1, human: ~3d / CC: ~90min)** - ui - Send screen, caution popup, Sent view and refusal notice built to the Design review decisions DR1-DR14 (hierarchy and wireframe, state table, `--send-*` tokens for both themes, popup inside `.phone-frame` with iOS and Android skins, accessibility acceptance criteria DR11, popup copy per D12). The popup opens only on Send (DR2); no `alert()`  (DONE in PR2: src/ui/send-screen.ts, src/ui/phone-overlay.ts, --send-* tokens in style.css; /design-review of the built screen still to run)
   - Surfaced by: Section 11, Section 3 (T4, T7), R5, R6
   - Files: src/ui/send-screen.ts, src/style.css, tests/send-screen.test.ts
   - Verify: DOM tests (popup text has wording + source line and no score/level/reason/flag strings; double-click submits once; Esc cancels; popup does not open on paste or on a verdict, only on Send; status line text per DR3/DR4; amount/fee states per DR5; Cancel keeps values; Sent view shows the Simulated pill); contrast check of every `--send-*` pair at 4.5:1 in both themes; manual check in both themes and iOS/Android chrome; run `/design-review` on the built screen
@@ -303,7 +303,7 @@ Synthesized from this review's findings. Each task derives from a specific findi
   - Surfaced by: Section 9, Section 8, Section 10, Stale Diagram Audit
   - Files: .github/workflows/deploy.yml, CONTRIBUTING.md, README.md, src/ui/phone-frame.ts
   - Verify: a clean build with the variable empty produces a seed-only site; documented deploy steps followed once
-- [ ] **T12 (P2, human: ~3h / CC: ~20min)** - e2e - Playwright flow with a route-mocked Worker: caution popup shows no score/reason; Worker down shows unavailable and Send allowed after 15 s
+- [x] **T12 (P2, human: ~3h / CC: ~20min)** - e2e - Playwright flow with a route-mocked Worker: caution popup shows no score/reason; Worker down shows unavailable and Send allowed after 15 s  (DONE in PR2: six Send flows in e2e/happy-path.spec.ts, seed-backed; the route-mocked Worker flow comes with PR3)
   - Surfaced by: Section 6, R5, R10
   - Files: e2e/send-flow.spec.ts
   - Verify: `npx playwright test e2e/send-flow.spec.ts`

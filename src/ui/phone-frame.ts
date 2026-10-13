@@ -7,6 +7,10 @@ import { generateBalance } from "./fake-balance.ts";
 import { loadIcon } from "../icon/icon-loader.ts";
 import { findNetworkInfo, type NetworkInfo } from "../networks/network-registry.ts";
 import { countryFlagAssetUrl, countryFlagEmoji } from "../country/country-flag.ts";
+import { prepareSend } from "../send/send-token.ts";
+import { getSendController, resetSendSession } from "../send/send-session.ts";
+import { mountSendScreen, unmountSendScreen } from "./send-screen.ts";
+import { openOverlay } from "./phone-overlay.ts";
 
 export type ChromeStyle = "ios" | "android";
 export type ChromeTheme = "light" | "dark";
@@ -38,13 +42,15 @@ export interface PhoneFrameOptions {
 // content without changing which screen is showing. The in-phone back
 // button is the one transition that's purely local (doesn't touch app
 // state), so it mutates `screen` directly and re-renders itself.
-let screenMode: "list" | "detail" = "list";
+let screenMode: "list" | "detail" | "send" = "list";
 
 export function setPhoneNavScreen(mode: "list" | "detail"): void {
   screenMode = mode;
+  resetSendSession(); // main.ts only ever moves to list/detail; leaving Send always starts the next one fresh
 }
 
 export function renderPhoneFrame(container: HTMLElement, token: Token | undefined, options: PhoneFrameOptions): void {
+  unmountSendScreen(); // drop the live Send subscription/dialog before the DOM is wiped; the session itself survives
   container.innerHTML = "";
   container.className = `phone-frame chrome-${options.chromeStyle} theme-${options.chromeTheme}`;
 
@@ -59,11 +65,58 @@ export function renderPhoneFrame(container: HTMLElement, token: Token | undefine
   // extend all the way to the true top of the screen.
   container.append(notchElement());
 
-  if (screenMode === "detail" && token) {
-    renderDetailScreen(screen, token, options, () => {
-      screenMode = "list";
-      renderPhoneFrame(container, token, options);
+  if (screenMode === "send" && token) {
+    // The session lives in send-session.ts (module scope); this only rebuilds the DOM from it.
+    prepareSend(token, options.networkInfo?.canonicalName).then((prepared) => {
+      if (screenMode !== "send" || !container.isConnected) return;
+      if (!prepared.ok) {
+        screenMode = "detail"; // the token cannot be sent (e.g. edited in the editor while on this screen)
+        renderPhoneFrame(container, token, options);
+        return;
+      }
+      const leave = () => {
+        screenMode = "detail";
+        resetSendSession();
+        renderPhoneFrame(container, token, options);
+      };
+      mountSendScreen({
+        frame: container,
+        screen,
+        chromeStyle: options.chromeStyle,
+        controller: getSendController(prepared.info),
+        networkLabel: options.networkInfo?.canonicalName ?? options.networkName,
+        onBack: leave,
+        onDone: leave,
+      });
     });
+  } else if (screenMode === "detail" && token) {
+    renderDetailScreen(
+      screen,
+      token,
+      options,
+      () => {
+        screenMode = "list";
+        renderPhoneFrame(container, token, options);
+      },
+      async () => {
+        const prepared = await prepareSend(token, options.networkInfo?.canonicalName);
+        if (!prepared.ok) {
+          // Explicit in-phone refusal instead of a browser alert() that would open outside the phone (DR12).
+          const notice = openOverlay({
+            frame: container,
+            screen,
+            chromeStyle: options.chromeStyle,
+            tone: "info",
+            title: prepared.message,
+            buttons: [{ label: "OK", primary: true, onClick: () => notice.close() }],
+            onDismiss: () => notice.close(),
+          });
+          return;
+        }
+        screenMode = "send";
+        renderPhoneFrame(container, token, options);
+      },
+    );
   } else {
     renderListScreen(screen, options);
   }
@@ -188,7 +241,13 @@ function applyHeaderBackground(header: HTMLElement, token: Token, chromeTheme: C
   }
 }
 
-function renderDetailScreen(screen: HTMLElement, token: Token, options: PhoneFrameOptions, onBack: () => void): void {
+function renderDetailScreen(
+  screen: HTMLElement,
+  token: Token,
+  options: PhoneFrameOptions,
+  onBack: () => void,
+  onSend: () => void,
+): void {
   const header = document.createElement("div");
   header.className = "card-header";
   applyHeaderBackground(header, token, options.chromeTheme);
@@ -283,9 +342,12 @@ function renderDetailScreen(screen: HTMLElement, token: Token, options: PhoneFra
   for (const widget of token.widgets ?? []) {
     const el = renderWidget(widget, token, (actionKey) => {
       const result = resolveAction(actionKey, token, undefined);
-      if (result) {
-        window.alert(demoAlertMessage(result, token));
+      if (!result) return;
+      if (result.type === "send") {
+        onSend();
+        return;
       }
+      window.alert(demoAlertMessage(result, token));
     });
     if (el) body.append(el);
   }

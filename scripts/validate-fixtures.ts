@@ -32,11 +32,14 @@
 //     URLs) where arbitrary domains are expected and correct, so a blanket
 //     key-name match on "url" would wrongly flag those.
 import { readdirSync, readFileSync } from "node:fs";
+import { webcrypto } from "node:crypto";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { ICON_DOMAIN_ALLOWLIST } from "../src/icon/domain-allowlist.ts";
 import { createAjv } from "../src/schema/create-validator.ts";
 import { declaresAtLeast, requiredSchemaVersion } from "../src/registry-client/schema-version-gate.ts";
+import { validateSeedShape, parseSeed, seedLookup, SEED_MAX_AGE_DAYS } from "../src/send/risk-client.ts";
+import { validateTronAddress } from "../src/send/tron-address.ts";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, "..");
@@ -160,6 +163,24 @@ try {
   validateFile(canaryPath, false);
 } catch {
   log(false, canaryPath, "canary fixture is missing — the CI-gate-silently-broke check requires it to exist");
+}
+
+// Send-window risk seed (public/risk-seed.json): strict shape (no scores or reasons, no label on a
+// caution entry), every address passes the Base58Check validator, and a stale seed is flagged.
+{
+  const seedPath = join(ROOT, "public", "risk-seed.json");
+  const seedJson = JSON.parse(readFileSync(seedPath, "utf-8"));
+  const shapeErrors = validateSeedShape(seedJson);
+  log(shapeErrors.length === 0, seedPath, shapeErrors.length === 0 ? "seed shape valid" : shapeErrors.join("; "));
+  for (const entry of parseSeed(seedJson)) {
+    const check = await validateTronAddress(entry.address, webcrypto.subtle as SubtleCrypto);
+    log(check.ok, `${seedPath} ${entry.address}`, check.ok ? "valid Tron address" : `invalid (${check.reason})`);
+  }
+  const entries = parseSeed(seedJson);
+  const stale = entries.filter((e) => seedLookup([e], e.address, new Date()) === null);
+  if (stale.length > 0) {
+    console.warn(`[WARN] ${stale.length} seed entr${stale.length === 1 ? "y is" : "ies are"} older than ${SEED_MAX_AGE_DAYS} days and ignored at runtime — re-check them with Aegis.`);
+  }
 }
 
 if (failed) {
