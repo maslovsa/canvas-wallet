@@ -47,7 +47,7 @@ export interface Env {
   COUNTER: DurableObjectNamespace;
 }
 
-type Level = "clear" | "caution" | "unknown";
+type Level = "clear" | "caution" | "contract" | "unknown";
 interface Verdict {
   level: Level;
   label?: string;
@@ -136,6 +136,7 @@ export function mapAegisVerdict(body: unknown): Verdict {
       sdn_match?: unknown;
       entity?: { name?: unknown; logo_url?: unknown } | null;
       labels?: unknown;
+      smart_contract?: { token_contract?: unknown } | null;
     };
     coverage?: { data_available?: unknown };
   } | null;
@@ -156,6 +157,14 @@ export function mapAegisVerdict(body: unknown): Verdict {
   if (score !== null && score >= RISK_ALERT_SCORE) return caution();
   const hasData = root?.coverage?.data_available === true;
   const known = level === "none" || level === "low" || level === "medium" || level === "high" || level === "critical";
+  // A token's own smart contract (Aegis verdict.smart_contract.token_contract): funds sent to it are lost, so the client
+  // shows its own warning. This is a fact about the kind of address, not a risk reason; the issuer's name and logo ride along.
+  if (known && verdict?.smart_contract?.token_contract === true) {
+    const name = sanitizeLabel(entity?.name) ?? sanitizeLabel(verdict?.label) ?? curatedVaspName(verdict?.labels);
+    if (!name) return { level: "contract" };
+    const logo = sanitizeLogoUrl(entity?.logo_url) ?? sanitizeLogoUrl(logoForEntityName(name));
+    return logo ? { level: "contract", label: name, logo } : { level: "contract", label: name };
+  }
   const belowThreshold = score !== null && known && (level === "low" || hasData);
   // No numeric score: the level decides (medium and above are caution, as before).
   if (score === null && (level === "medium" || level === "high" || level === "critical")) return caution();
@@ -271,7 +280,7 @@ async function handleCheck(request: Request, env: Env, cors: Record<string, stri
 
   if (env.RISK_ENABLED !== "true") return json({ level: "unknown" } satisfies Verdict, 200, cors);
 
-  const cacheKey = `v5:TRON:${address}`;
+  const cacheKey = `v6:TRON:${address}`;
   try {
     const cached = await env.RISK_CACHE.get(cacheKey);
     if (cached) return json(JSON.parse(cached) as Verdict, 200, cors);

@@ -142,6 +142,7 @@ test("every Tron address in the address book gets a real answer, matching the ri
     const expected = seed.get(entry.address)!;
     expect(text, `${entry.comment} (${entry.address})`).not.toBe("Couldn't verify this address.");
     if (expected.level === "caution") expect(text).toBe("Risk signals found for this address");
+    else if (expected.level === "contract") expect(text).toBe("Token contract: funds sent here are lost");
     else expect(text).toBe(expected.label ?? "No risk signals found");
     table.push(`${String(i + 1).padStart(2)}. ${entry.comment.padEnd(30)} ${entry.address.slice(0, 8)}…  ->  ${text}`);
     if (outDir) await page.locator("#phone-frame").screenshot({ path: `${outDir}/${String(i + 1).padStart(2, "0")}.png` });
@@ -197,6 +198,8 @@ test("when the check cannot complete the status shows an emoji badge the size of
   await expect(page.locator(".send-status-text")).toHaveText("Couldn't verify this address.");
   const emoji = page.locator(".send-status .send-owner-emoji");
   await expect(emoji).toHaveText("❓");
+  // the card scales in: measure after the entrance animation has settled
+  await page.waitForFunction(() => document.getAnimations().every((a) => a.playState !== "running"));
   const box = (await emoji.boundingBox())!; // 24 px: the size of an owner logo
   expect([Math.round(box.width), Math.round(box.height)]).toEqual([24, 24]);
   await expect(page.locator(".send-status-icon")).toHaveText(""); // no "?" glyph any more
@@ -335,4 +338,24 @@ test("TNaRAoLU… (HTX): the name HTX, its logo, and the risk line", async ({ pa
   await expect(page.locator(".send-identity-name")).toHaveText("HTX");
   await expect(page.locator(".send-identity .send-owner-logo")).toHaveAttribute("src", /htx-com-huobi-com\.png$/);
   await expect(page.locator(".send-status-text")).toHaveText("Risk signals found for this address");
+});
+
+// ---- token smart contracts: a stronger warning than a risk line
+test("a token's own smart contract shows the contract card and a contract popup on Send", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 1200 });
+  await openSend(page);
+  await page.locator("#send-address").fill("TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t"); // USDT contract: from the seed, no Worker call
+  await expect(page.locator(".send-status-text")).toHaveText("Token contract: funds sent here are lost");
+  await expect(page.locator(".send-status.send-v-contract")).toHaveCount(1);
+  await expect(page.locator(".send-identity-name")).toHaveText("Tether");
+  await page.locator("#send-amount").fill("5");
+  await page.getByRole("button", { name: "Send", exact: true }).click();
+  const dialog = page.locator(".phone-dialog");
+  await expect(dialog).toContainText("This is a token smart contract");
+  await expect(dialog).toContainText("Funds sent here are lost");
+  await page.waitForFunction(() => document.getAnimations().every((a) => a.playState !== "running"));
+  await page.locator("#phone-frame").screenshot({ path: `${SHOTS}/token-contract-popup.png` });
+  await dialog.getByRole("button", { name: "Cancel" }).click();
+  await expect(dialog).toHaveCount(0);
+  await expect(page.locator(".send-status-text")).toHaveText("Token contract: funds sent here are lost");
 });

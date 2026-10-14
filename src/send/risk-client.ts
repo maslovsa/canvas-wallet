@@ -11,12 +11,14 @@ import { sanitizeLogoUrl } from "./entity-logo.ts";
 export type RiskResult =
   | { state: "clear"; label?: string; logo?: string }
   | { state: "caution"; label?: string; logo?: string }
+  /** The address is a token's own smart contract (funds sent to it are lost); label/logo are the issuer's. */
+  | { state: "contract"; label?: string; logo?: string }
   | { state: "unavailable" };
 
 export interface SeedEntry {
   network: "TRON";
   address: string;
-  level: "clear" | "caution";
+  level: "clear" | "caution" | "contract";
   /** Owner label from Aegis; only allowed on a clear entry (a label on a risky address can reveal the reason). */
   /** The VASP's name from Aegis `verdict.entity` (never the raw `verdict.label`, which can name a sanctioned person). */
   label?: string;
@@ -53,7 +55,7 @@ export function validateSeedShape(json: unknown): string[] {
     if (typeof e.address !== "string" || e.address.length !== 34) errors.push(`${where}: address must be a 34-character string`);
     else if (seen.has(e.address)) errors.push(`${where}: duplicate address`);
     else seen.add(e.address);
-    if (e.level !== "clear" && e.level !== "caution") errors.push(`${where}: level must be "clear" or "caution"`);
+    if (e.level !== "clear" && e.level !== "caution" && e.level !== "contract") errors.push(`${where}: level must be "clear", "caution" or "contract"`);
     if (e.label !== undefined) {
       if (typeof e.label !== "string" || e.label.length === 0 || e.label.length > MAX_LABEL_LENGTH) {
         errors.push(`${where}: label must be 1-${MAX_LABEL_LENGTH} characters`);
@@ -124,7 +126,7 @@ export interface RiskDeps {
 }
 
 /**
- * Parses the Worker's answer strictly: {level:"clear"|"caution", label?, logo?} (a logo only with a label, and
+ * Parses the Worker's answer strictly: {level:"clear"|"caution"|"contract", label?, logo?} (a logo only with a label, and
  * only an acceptable URL). A label or logo on any other level is not trusted.
  * Anything else (extra keys, an unknown level, a label on caution) is treated as unavailable rather than trusted.
  */
@@ -133,7 +135,7 @@ export function parseProxyAnswer(body: unknown): RiskResult {
   const keys = Object.keys(body);
   const { level, label, logo } = body as { level?: unknown; label?: unknown; logo?: unknown };
   if (keys.some((k) => k !== "level" && k !== "label" && k !== "logo")) return { state: "unavailable" };
-  if (level === "clear" || level === "caution") {
+  if (level === "clear" || level === "caution" || level === "contract") {
     const state = level;
     if (label === undefined && logo === undefined) return { state };
     if (typeof label === "string" && label.length > 0 && label.length <= MAX_LABEL_LENGTH) {

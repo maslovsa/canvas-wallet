@@ -32,7 +32,7 @@ export interface SendTokenInfo {
 }
 
 type AddressStatus = { kind: "empty" } | { kind: "pending" } | { kind: "invalid"; reason: Exclude<TronAddressCheck, { ok: true }>["reason"] } | { kind: "valid" };
-type RiskUi = { kind: "idle" } | { kind: "checking"; startedAt: number } | { kind: "clear"; label?: string; logo?: string } | { kind: "caution"; label?: string; logo?: string } | { kind: "unavailable" };
+type RiskUi = { kind: "idle" } | { kind: "checking"; startedAt: number } | { kind: "clear"; label?: string; logo?: string } | { kind: "caution"; label?: string; logo?: string } | { kind: "contract"; label?: string; logo?: string } | { kind: "unavailable" };
 type FeeUi = { kind: "none" } | { kind: "loading"; estimate: FeeEstimate } | { kind: "ready"; estimate: FeeEstimate };
 
 export interface SendState {
@@ -88,6 +88,8 @@ export interface SendView {
       emoji: string | null;
       /** On a risky address that is a known VASP: its name and logo are shown on a row above the risk line. */
       identity: { name: string; logo: string | null } | null;
+      /** The address is a token's own smart contract: a stronger look than a risk line. */
+      contract?: boolean;
     } | null;
   };
   amount: { value: string; error: string | null; balanceText: string };
@@ -95,6 +97,8 @@ export interface SendView {
   button: { label: string; enabled: boolean; reason: string | null };
   backEnabled: boolean;
   popup: boolean;
+  /** Which dialog the popup is: the risk one, or the token-contract one. */
+  popupKind: "caution" | "contract";
   sent: { headline: string; address: string; feeLine: string; pill: string } | null;
   phase: SendState["phase"];
 }
@@ -169,6 +173,20 @@ function addressView(state: SendState, nowMs: number): SendView["address"]["stat
       identity: risk.label ? { name: risk.label, logo: risk.logo ?? null } : null,
     };
   }
+  if (risk.kind === "contract") {
+    return {
+      tone: "caution",
+      icon: "alert",
+      text: "Token contract: funds sent here are lost",
+      spinner: false,
+      checkAgain: false,
+      checkAgainWaitSec: 0,
+      owner: null,
+      emoji: null,
+      identity: risk.label ? { name: risk.label, logo: risk.logo ?? null } : null,
+      contract: true,
+    };
+  }
   if (risk.kind === "unavailable") {
     return { tone: "dim", icon: "none", text: "Couldn't verify this address.", spinner: false, checkAgain: true, checkAgainWaitSec: cooldownSec(state, nowMs), owner: null, emoji: UNVERIFIED_EMOJI, identity: null };
   }
@@ -222,6 +240,7 @@ export function deriveSendView(state: SendState, token: SendTokenInfo, nowMs: nu
     button: { label: state.phase === "sending" ? "Sending…" : "Send", enabled, reason: enabled || state.phase !== "form" || reason === amount.error || reason === addressError(state) ? null : reason },
     backEnabled: state.phase !== "sending",
     popup: state.popupOpen,
+    popupKind: state.risk.kind === "contract" ? "contract" : "caution",
     sent: state.sent
       ? {
           headline: `${state.sent.amountText} ${token.symbol} sent`,
@@ -352,7 +371,7 @@ export class SendController {
       .then((result) => {
         if (!this.guard.isCurrent(token)) return; // stale reply for an address no longer in the field
         this.state.risk =
-          result.state === "clear" || result.state === "caution"
+          result.state === "clear" || result.state === "caution" || result.state === "contract"
             ? result.label
               ? result.logo
                 ? { kind: result.state, label: result.label, logo: result.logo }
@@ -395,7 +414,7 @@ export class SendController {
 
   pressSend(): void {
     if (!this.view().button.enabled) return;
-    if (this.state.risk.kind === "caution") {
+    if (this.state.risk.kind === "caution" || this.state.risk.kind === "contract") {
       this.state.popupOpen = true; // the popup opens on Send only, never on a verdict (DR2)
       this.emit();
       return;

@@ -3,6 +3,7 @@
 import { entriesForNetwork, loadAddressBook, shortAddress, type AddressBookEntry, type BookNetwork } from "../send/address-book.ts";
 import { openSheet, type OpenSheet } from "./phone-sheet.ts";
 import type { ChromeStyle } from "./phone-frame.ts";
+import { createAvatar } from "./avatar.ts";
 
 export interface AddressBookSheetOptions {
   frame: HTMLElement;
@@ -34,11 +35,7 @@ export async function openAddressBookSheet(options: AddressBookSheetOptions): Pr
     row.type = "button";
     row.className = "book-row";
     row.setAttribute("aria-label", `${entry.comment}, ${entry.address}`);
-    const avatar = document.createElement("span");
-    avatar.className = "book-avatar";
-    avatar.setAttribute("aria-hidden", "true");
-    avatar.textContent = [...entry.comment][0]?.toUpperCase() ?? "?";
-    avatar.style.setProperty("--book-hue", String(hueOf(entry.comment)));
+    const avatar = createAvatar(entry.comment, entry.avatar, "book-avatar");
     const text = document.createElement("span");
     text.className = "book-text";
     const name = document.createElement("span");
@@ -66,11 +63,4 @@ export async function openAddressBookSheet(options: AddressBookSheetOptions): Pr
     ...(options.onClosed ? { onClosed: options.onClosed } : {}),
   });
   return sheet;
-}
-
-/** A stable hue (0-359) from the name: the same entry always gets the same avatar color. */
-function hueOf(text: string): number {
-  let hash = 0;
-  for (const ch of text) hash = (hash * 31 + ch.codePointAt(0)!) % 360;
-  return hash;
 }

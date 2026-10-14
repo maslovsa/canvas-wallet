@@ -307,6 +307,16 @@ describe("risk level mapping (plan E6)", () => {
     expect(mapAegisVerdict({ verdict: { risk_level: level, label }, coverage: { data_available: data } }).level).toBe(expected);
   });
 
+  it("a token's own smart contract is its own level, with the issuer's name; a risky one stays caution", () => {
+    const sc = { is_contract: true, token_contract: true, kind: "token_contract" };
+    const ok = (extra: Record<string, unknown>) => mapAegisVerdict({ verdict: { risk_level: "low", risk_score: 5, smart_contract: sc, ...extra }, coverage: { data_available: true } });
+    expect(ok({})).toEqual({ level: "contract" });
+    expect(ok({ label: "Tether" })).toEqual({ level: "contract", label: "Tether" });
+    expect(ok({ risk_level: "high", risk_score: 80 }).level).toBe("caution"); // risk comes first
+    expect(mapAegisVerdict({ verdict: { risk_level: "low", risk_score: 5, smart_contract: { ...sc, token_contract: false } }, coverage: { data_available: true } })).toEqual({ level: "clear" });
+    expect(JSON.stringify(ok({ label: "Tether" }))).not.toMatch(/smart|token_contract|score/);
+  });
+
   it("malformed answers map to unknown", () => {
     expect(mapAegisVerdict(null)).toEqual({ level: "unknown" });
     expect(mapAegisVerdict({})).toEqual({ level: "unknown" });

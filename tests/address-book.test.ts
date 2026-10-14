@@ -2,11 +2,12 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { readFileSync } from "node:fs";
 import { webcrypto } from "node:crypto";
 import { parseAddressBook, entriesForNetwork, bookNetworkFor, shortAddress, loadAddressBook, resetAddressBookCache } from "../src/send/address-book.ts";
-import { validateAddressBook, isValidEvmAddress } from "../src/send/address-book-validate.ts";
+import { validateAddressBook, isValidEvmAddress, isValidTonAddress } from "../src/send/address-book-validate.ts";
 
 const subtle = webcrypto.subtle as SubtleCrypto;
 const TRON = "TAzsQ9Gx8eqFNFSKbeXrbi45CuVPHzA8wr";
 const EVM = "0x28c6c06298d514db089934071355e5743bf21d60";
+const TON = "UQDKHZ7e70CzqdvZCC83Z4WVR8POC_ZB0J1Y4zo88G-zCSRH"; // Binance Hot Wallet on TON (tonviewer.com)
 const file = JSON.parse(readFileSync("public/address-book.json", "utf8"));
 
 describe("the shipped address book (public/address-book.json)", () => {
@@ -25,6 +26,29 @@ describe("the shipped address book (public/address-book.json)", () => {
     expect(entriesForNetwork(entries, "ETH").length).toBeGreaterThan(5);
     expect(entriesForNetwork(entries, "BSC")).toHaveLength(1);
     expect(entries.find((e) => e.address === TRON)!.comment.length).toBeGreaterThan(0); // the names are the owner's to edit
+  });
+});
+
+describe("TON addresses", () => {
+  it("accepts a user-friendly address with a correct checksum, in the UQ and EQ forms", () => {
+    expect(isValidTonAddress(TON)).toBe(true);
+    expect(isValidTonAddress("EQBugU5kUOjFeAZ7tlYpj7TQE5fdFQGNfzTcNp6rpMIRHLwm")).toBe(true);
+  });
+  it.each([
+    ["a changed character", `${TON.slice(0, -1)}A`],
+    ["a short string", TON.slice(0, 47)],
+    ["a Tron address", TRON],
+    ["an EVM address", EVM],
+  ])("refuses %s", (_n, address) => {
+    expect(isValidTonAddress(address)).toBe(false);
+  });
+  it("the book accepts TON entries and offers them for the TON network only", async () => {
+    const entries = [{ network: "TON", address: TON, comment: "Binance Hot Wallet" }];
+    expect(await validateAddressBook({ version: 1, entries }, subtle)).toEqual([]);
+    expect(bookNetworkFor("TON")).toBe("TON");
+    const parsed = parseAddressBook({ version: 1, entries });
+    expect(entriesForNetwork(parsed, "TON")).toHaveLength(1);
+    expect(entriesForNetwork(parsed, "TRON")).toHaveLength(0);
   });
 });
 

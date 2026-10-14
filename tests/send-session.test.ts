@@ -115,6 +115,17 @@ describe("address -> risk status", () => {
     expect(c.view().popup).toBe(false);
   });
 
+  it("a token smart contract gets its own status, and Send opens the contract popup", async () => {
+    const { c } = setup({ checkRisk: async () => ({ state: "contract", label: "Tether" }) as RiskResult });
+    await c.setAddress(CLEAR_PLAIN);
+    await settle();
+    expect(c.view().address.status).toMatchObject({ tone: "caution", contract: true, text: "Token contract: funds sent here are lost", identity: { name: "Tether", logo: null } });
+    c.setAmount("1");
+    expect(c.view().popup).toBe(false);
+    c.pressSend();
+    expect(c.view()).toMatchObject({ popup: true, popupKind: "contract", phase: "form" });
+  });
+
   it("an address nobody answered for is 'Couldn't verify' with Check again, and Check again can recover", async () => {
     let answer: RiskResult = { state: "unavailable" };
     const { c, clock } = setup({ checkRisk: async () => answer });

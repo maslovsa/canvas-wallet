@@ -4,182 +4,302 @@
     {
       "network": "ETH",
       "address": "0x56eddb7aa87536c09ccc2793473599fd21a8b17f",
-      "comment": "Changpeng Zhao (CZ)"
+      "comment": "Changpeng Zhao (CZ)",
+      "avatar": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/Changpeng_Zhao_in_2022.jpg/250px-Changpeng_Zhao_in_2022.jpg"
     },
     {
       "network": "TRON",
       "address": "TAzsQ9Gx8eqFNFSKbeXrbi45CuVPHzA8wr",
-      "comment": "Changpeng Zhao (CZ)"
+      "comment": "Changpeng Zhao (CZ)",
+      "avatar": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/Changpeng_Zhao_in_2022.jpg/250px-Changpeng_Zhao_in_2022.jpg"
     },
     {
       "network": "BSC",
       "address": "0x28c6c06298d514db089934071355e5743bf21d60",
-      "comment": "Changpeng Zhao (CZ)"
+      "comment": "Changpeng Zhao (CZ)",
+      "avatar": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/Changpeng_Zhao_in_2022.jpg/250px-Changpeng_Zhao_in_2022.jpg"
     },
     {
       "network": "TRON",
       "address": "TU4vEruvZwLLkSfV9bNw12EJTPvNr7Pvaa",
-      "comment": "Justin Sun"
+      "comment": "Justin Sun Office",
+      "avatar": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/Head_of_the_Grenadian_Delegation_to_the_12th_World_Trade_Organization_Ministerial_Conference_Justin_Sun.jpg/250px-Head_of_the_Grenadian_Delegation_to_the_12th_World_Trade_Organization_Ministerial_Conference_Justin_Sun.jpg"
     },
     {
       "network": "ETH",
       "address": "0xf89d7b9c864f589bbf53a82105107622b35eaa40",
-      "comment": "Vitalik Buterin"
+      "comment": "Vitalik Buterin",
+      "avatar": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/Vitalik_Buterin_TechCrunch_London_2015_%28cropped%29.jpg/250px-Vitalik_Buterin_TechCrunch_London_2015_%28cropped%29.jpg"
     },
     {
       "network": "ETH",
       "address": "0xa9d1e08c7793af67e9d92fe308d5697fb81d3e43",
-      "comment": "Vitalik Buterin"
+      "comment": "Vitalik Buterin",
+      "avatar": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/Vitalik_Buterin_TechCrunch_London_2015_%28cropped%29.jpg/250px-Vitalik_Buterin_TechCrunch_London_2015_%28cropped%29.jpg"
     },
     {
       "network": "TRON",
       "address": "TM1zzNDZD2DPASbKcgdVoTYhfmYgtfwx9R",
-      "comment": "Justin Sun"
+      "comment": "Justin Sun Work",
+      "avatar": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/Head_of_the_Grenadian_Delegation_to_the_12th_World_Trade_Organization_Ministerial_Conference_Justin_Sun.jpg/250px-Head_of_the_Grenadian_Delegation_to_the_12th_World_Trade_Organization_Ministerial_Conference_Justin_Sun.jpg"
     },
     {
       "network": "ETH",
       "address": "0x51e3d44172868acc60d68ca99591ce4230bc75e0",
-      "comment": "Elon Musk"
+      "comment": "Elon Musk",
+      "avatar": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Elon_Musk_-_54820081119_%28cropped%29.jpg/250px-Elon_Musk_-_54820081119_%28cropped%29.jpg"
     },
     {
       "network": "TRON",
       "address": "TJ7hhYhVhaxNx6BPyq7yFpqZrQULL3JSdb",
-      "comment": "Justin Sun"
+      "comment": "Justin Sun Home",
+      "avatar": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/Head_of_the_Grenadian_Delegation_to_the_12th_World_Trade_Organization_Ministerial_Conference_Justin_Sun.jpg/250px-Head_of_the_Grenadian_Delegation_to_the_12th_World_Trade_Organization_Ministerial_Conference_Justin_Sun.jpg"
     },
     {
       "network": "TRON",
       "address": "TDZiHNjB3gDu8Zu23i7HE4M5sPkBcsvPTJ",
-      "comment": "Roger Ver"
+      "comment": "Roger Ver",
+      "avatar": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Roger_Ver.jpg/250px-Roger_Ver.jpg"
     },
     {
       "network": "ETH",
       "address": "0x6b7dc81758483ecf91a14ba263831bfe6989716e",
-      "comment": "Gavin Wood"
+      "comment": "Gavin Wood",
+      "avatar": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bc/Gavin_Wood_in_2017.jpg/250px-Gavin_Wood_in_2017.jpg"
     },
     {
       "network": "TRON",
       "address": "TXSmtNhgRN1kMHUE9ZXvwg9Ew7CWu1WbLv",
-      "comment": "Contact 1"
+      "comment": "Contact 1",
+      "avatar": "https://api.dicebear.com/9.x/avataaars/png?seed=Contact%201&size=128"
     },
     {
       "network": "TRON",
       "address": "TNaRAoLUyYEV2uF7GUrzSjRQTU8v5ZJ5VR",
-      "comment": "Contact 2"
+      "comment": "Contact 2",
+      "avatar": "https://api.dicebear.com/9.x/avataaars/png?seed=Contact%202&size=128"
     },
     {
       "network": "ETH",
       "address": "0xa03400e098f4421b34a3a44a1b4e571419517687",
-      "comment": "Joseph Lubin"
+      "comment": "Joseph Lubin",
+      "avatar": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/Joseph_Lubin_%2824961256615%29.jpg/250px-Joseph_Lubin_%2824961256615%29.jpg"
     },
     {
       "network": "TRON",
       "address": "TLo45PfTdDuQjfJg7uSbG9UNaFokiDCd3k",
-      "comment": "Contact 3"
+      "comment": "Contact 3",
+      "avatar": "https://api.dicebear.com/9.x/avataaars/png?seed=Contact%203&size=128"
     },
     {
       "network": "TRON",
       "address": "TMuCgBejD5RsNANZdjGtaM3YyKGNgDoy7N",
-      "comment": "Contact 4"
+      "comment": "Contact 4",
+      "avatar": "https://api.dicebear.com/9.x/avataaars/png?seed=Contact%204&size=128"
     },
     {
       "network": "ETH",
       "address": "0x2f389ce8bd8ff92de3402ffce4691d17fc4f6535",
-      "comment": "Contact 5"
+      "comment": "Contact 5",
+      "avatar": "https://api.dicebear.com/9.x/avataaars/png?seed=Contact%205&size=128"
     },
     {
       "network": "TRON",
       "address": "TU4tDFRvcKhAZ1jdihojmBWZqvJhQCnJ4F",
-      "comment": "Contact 6"
+      "comment": "Contact 6",
+      "avatar": "https://api.dicebear.com/9.x/avataaars/png?seed=Contact%206&size=128"
     },
     {
       "network": "TRON",
       "address": "TNNcaQDVuE5xYqEcZs6XCn66asGShvbZ3y",
-      "comment": "Contact 7"
+      "comment": "Contact 7",
+      "avatar": "https://api.dicebear.com/9.x/avataaars/png?seed=Contact%207&size=128"
     },
     {
       "network": "ETH",
       "address": "0xaf5d53b9682119d0b3fb2afa8bd10a28192dcd91",
-      "comment": "Contact 8"
+      "comment": "Contact 8",
+      "avatar": "https://api.dicebear.com/9.x/avataaars/png?seed=Contact%208&size=128"
     },
     {
       "network": "ETH",
       "address": "0x905b63fff465b9ffbf41dea908ceb12478ec7601",
-      "comment": "Contact 9"
+      "comment": "Contact 9",
+      "avatar": "https://api.dicebear.com/9.x/avataaars/png?seed=Contact%209&size=128"
     },
     {
       "network": "ETH",
       "address": "0x7a250d5630b4cf539739df2c5dacb4c659f2488d",
-      "comment": "Hayden Adams"
+      "comment": "Hayden Adams",
+      "avatar": "https://api.dicebear.com/9.x/avataaars/png?seed=Hayden%20Adams&size=128"
     },
     {
       "network": "TRON",
       "address": "TKzxdSv2FZKQrEqkKVgp5DcwEXBEKMg2Ax",
-      "comment": "Justin Sun"
+      "comment": "Justin Sun",
+      "avatar": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/Head_of_the_Grenadian_Delegation_to_the_12th_World_Trade_Organization_Ministerial_Conference_Justin_Sun.jpg/250px-Head_of_the_Grenadian_Delegation_to_the_12th_World_Trade_Organization_Ministerial_Conference_Justin_Sun.jpg"
     },
     {
       "network": "ETH",
       "address": "0x11111112542d85b3ef69ae05771c2dccff4faa26",
-      "comment": "Jed McCaleb"
+      "comment": "Jed McCaleb",
+      "avatar": "https://api.dicebear.com/9.x/avataaars/png?seed=Jed%20McCaleb&size=128"
     },
     {
       "network": "TRON",
       "address": "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t",
-      "comment": "USDT token contract (TRC-20)"
+      "comment": "USDT token contract (TRC-20)",
+      "avatar": "https://cdn.jsdelivr.net/gh/trustwallet/assets@master/blockchains/tron/assets/TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t/logo.png"
     },
     {
       "network": "TRON",
       "address": "TEkxiTehnzSmSe2XqrBj4w32RUN966rdz8",
-      "comment": "USDC token contract (TRC-20)"
+      "comment": "USDC token contract (TRC-20)",
+      "avatar": "https://cdn.jsdelivr.net/gh/trustwallet/assets@master/blockchains/tron/assets/TEkxiTehnzSmSe2XqrBj4w32RUN966rdz8/logo.png"
     },
     {
       "network": "ETH",
       "address": "0xdac17f958d2ee523a2206206994597c13d831ec7",
-      "comment": "USDT token contract (ERC-20)"
+      "comment": "USDT token contract (ERC-20)",
+      "avatar": "https://cdn.jsdelivr.net/gh/trustwallet/assets@master/blockchains/ethereum/assets/0xdAC17F958D2ee523a2206206994597C13D831ec7/logo.png"
     },
     {
       "network": "ETH",
       "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
-      "comment": "USDC token contract (ERC-20)"
+      "comment": "USDC token contract (ERC-20)",
+      "avatar": "https://cdn.jsdelivr.net/gh/trustwallet/assets@master/blockchains/ethereum/assets/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48/logo.png"
     },
     {
       "network": "TRON",
       "address": "TCFLL5dx5ZJdKnWuesXxi1VPwjLVmWZZy9",
-      "comment": "JST token contract (JUST)"
+      "comment": "JST token contract (JUST)",
+      "avatar": "https://cdn.jsdelivr.net/gh/trustwallet/assets@master/blockchains/tron/assets/TCFLL5dx5ZJdKnWuesXxi1VPwjLVmWZZy9/logo.png"
     },
     {
       "network": "TRON",
       "address": "TNUC9Qb1rRpS5CbWLmNMxXBjyFoydXjWFR",
-      "comment": "WTRX token contract (wrapped TRX)"
+      "comment": "WTRX token contract (wrapped TRX)",
+      "avatar": "https://cdn.jsdelivr.net/gh/trustwallet/assets@master/blockchains/tron/assets/TNUC9Qb1rRpS5CbWLmNMxXBjyFoydXjWFR/logo.png"
     },
     {
       "network": "TRON",
       "address": "TSSMHYeV2uE9qYH95DqyoCuNCzEL1NvU3S",
-      "comment": "SUN token contract"
+      "comment": "SUN token contract",
+      "avatar": "https://cdn.jsdelivr.net/gh/trustwallet/assets@master/blockchains/tron/assets/TSSMHYeV2uE9qYH95DqyoCuNCzEL1NvU3S/logo.png"
     },
     {
       "network": "TRON",
       "address": "TXDk8mbtRbXeYuMNS83CfKPaYYT8XWv9Hz",
-      "comment": "USDD token contract"
+      "comment": "USDD token contract",
+      "avatar": "https://cdn.jsdelivr.net/gh/trustwallet/assets@master/blockchains/tron/assets/TXDk8mbtRbXeYuMNS83CfKPaYYT8XWv9Hz/logo.png"
     },
     {
       "network": "ETH",
       "address": "0x6b175474e89094c44da98b954eedeac495271d0f",
-      "comment": "DAI token contract"
+      "comment": "DAI token contract",
+      "avatar": "https://cdn.jsdelivr.net/gh/trustwallet/assets@master/blockchains/ethereum/assets/0x6B175474E89094C44Da98b954EedeAC495271d0F/logo.png"
     },
     {
       "network": "ETH",
       "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
-      "comment": "WETH token contract"
+      "comment": "WETH token contract",
+      "avatar": "https://cdn.jsdelivr.net/gh/trustwallet/assets@master/blockchains/ethereum/assets/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2/logo.png"
     },
     {
       "network": "ETH",
       "address": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
-      "comment": "WBTC token contract"
+      "comment": "WBTC token contract",
+      "avatar": "https://cdn.jsdelivr.net/gh/trustwallet/assets@master/blockchains/ethereum/assets/0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599/logo.png"
     },
     {
       "network": "ETH",
       "address": "0x514910771af9ca656af840dff83e8264ecf986ca",
-      "comment": "LINK token contract"
+      "comment": "LINK token contract",
+      "avatar": "https://cdn.jsdelivr.net/gh/trustwallet/assets@master/blockchains/ethereum/assets/0x514910771AF9Ca656af840dff83E8264EcF986CA/logo.png"
+    },
+    {
+      "network": "TON",
+      "address": "UQDKHZ7e70CzqdvZCC83Z4WVR8POC_ZB0J1Y4zo88G-zCSRH",
+      "comment": "Binance Hot Wallet",
+      "avatar": "https://cdn.jsdelivr.net/gh/maslovsa/kyt-entity-registry@main/logos/exchanges/binance-com.png"
+    },
+    {
+      "network": "TON",
+      "address": "UQD5mxRgCuRNLxKxeOjG6r14iSroLF5FtomPnet-sgP5xI-e",
+      "comment": "Binance",
+      "avatar": "https://cdn.jsdelivr.net/gh/maslovsa/kyt-entity-registry@main/logos/exchanges/binance-com.png"
+    },
+    {
+      "network": "TON",
+      "address": "UQBfAN7LfaUYgXZNw5Wc7GBgkEX2yhuJ5ka95J1JJwXXf9t5",
+      "comment": "OKX",
+      "avatar": "https://cdn.jsdelivr.net/gh/maslovsa/kyt-entity-registry@main/logos/exchanges/okx-com.png"
+    },
+    {
+      "network": "TON",
+      "address": "UQBKHz68xmvc76kCRb31QaUK2hxoikh1NLFYer_9kwOINDtf",
+      "comment": "Bybit",
+      "avatar": "https://api.dicebear.com/9.x/shapes/png?seed=Bybit&size=128"
+    },
+    {
+      "network": "TON",
+      "address": "UQDN9_DXwJA28GQnLjxCntVwvknvKes6c1tku8F5FQc3Mhut",
+      "comment": "Bitget",
+      "avatar": "https://cdn.jsdelivr.net/gh/maslovsa/kyt-entity-registry@main/logos/exchanges/bitget-com.png"
+    },
+    {
+      "network": "TON",
+      "address": "UQDYh9Di0cT8QSbnHJcNM6sYlpQAAOrnA7sats7Mgwd344Mm",
+      "comment": "MEXC",
+      "avatar": "https://cdn.jsdelivr.net/gh/maslovsa/kyt-entity-registry@main/logos/exchanges/mexc-com.png"
+    },
+    {
+      "network": "TON",
+      "address": "UQChSx9FI4Wyu5hK0sREHh0jyuBx_fwJbfulPrujtv8dEIro",
+      "comment": "LBank",
+      "avatar": "https://cdn.jsdelivr.net/gh/maslovsa/kyt-entity-registry@main/logos/exchanges/lbank-com.png"
+    },
+    {
+      "network": "TON",
+      "address": "UQC0lrj3O0af8GotieYsTXChA_wijIIVN7Sd_wkgYLwoHxMv",
+      "comment": "Gate.io",
+      "avatar": "https://cdn.jsdelivr.net/gh/maslovsa/kyt-entity-registry@main/logos/exchanges/gate-io.png"
+    },
+    {
+      "network": "TON",
+      "address": "UQCFr3jo0DXpIBF82mVGFc3zcdRkSAtinhENPFMQ2FqzYv0E",
+      "comment": "Huobi (HTX)",
+      "avatar": "https://cdn.jsdelivr.net/gh/maslovsa/kyt-entity-registry@main/logos/exchanges/htx-com-huobi-com.png"
+    },
+    {
+      "network": "TON",
+      "address": "UQCzflcDPbIdELlQ5hQ7ZYwQw79CW9GTAllgrvfyLbz0_Lup",
+      "comment": "KuCoin",
+      "avatar": "https://cdn.jsdelivr.net/gh/maslovsa/kyt-entity-registry@main/logos/exchanges/kucoin-com.png"
+    },
+    {
+      "network": "TON",
+      "address": "UQBAL11PT4vqewvVEbnTdxg0waIru7yKMmA16weqJPXJ-cql",
+      "comment": "Crypto.com",
+      "avatar": "https://cdn.jsdelivr.net/gh/maslovsa/kyt-entity-registry@main/logos/exchanges/crypto-com.png"
+    },
+    {
+      "network": "TON",
+      "address": "UQABGo8KCza3ea8DNHMnSWZmbRzW-05332eTdfvW-XDQEmnJ",
+      "comment": "xRocket Bot",
+      "avatar": "https://api.dicebear.com/9.x/bottts/png?seed=xRocket%20Bot&size=128"
+    },
+    {
+      "network": "TON",
+      "address": "UQCtiv7PrMJImWiF2L5oJCgPnzp-VML2CAt5cbn1VsKAxOVB",
+      "comment": "Crypto Bot",
+      "avatar": "https://api.dicebear.com/9.x/bottts/png?seed=Crypto%20Bot&size=128"
+    },
+    {
+      "network": "TON",
+      "address": "UQDd3NPNrWCvTA1pOJ9WetUdDCY_pJaNZVq0JMaara-TIsKx",
+      "comment": "Wallet Bot",
+      "avatar": "https://api.dicebear.com/9.x/bottts/png?seed=Wallet%20Bot&size=128"
     }
   ]
 }

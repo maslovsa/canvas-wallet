@@ -2,15 +2,19 @@
 // comment) read from public/address-book.json. Entries are shown for the network being sent on, so a Tron send lists
 // the Tron entries only. This module is bundled with the site; the strict validator used by CI lives in
 // address-book-validate.ts and is not.
-export type BookNetwork = "ETH" | "BSC" | "TRON";
+import { sanitizeAvatarUrl } from "./avatar-url.ts";
+
+export type BookNetwork = "ETH" | "BSC" | "TRON" | "TON";
 
 export interface AddressBookEntry {
   network: BookNetwork;
   address: string;
   comment: string;
+  /** A picture of the owner: an https image URL on an accepted host (see avatar-url.ts). Optional; the initial letter is the fallback. */
+  avatar?: string;
 }
 
-export const BOOK_NETWORKS: readonly BookNetwork[] = ["ETH", "BSC", "TRON"];
+export const BOOK_NETWORKS: readonly BookNetwork[] = ["ETH", "BSC", "TRON", "TON"];
 export const MAX_COMMENT_LENGTH = 80;
 export const MAX_BOOK_ENTRIES = 200;
 
@@ -23,6 +27,8 @@ export function bookNetworkFor(canonicalName: string | undefined): BookNetwork |
       return "ETH";
     case "BNB Smart Chain":
       return "BSC";
+    case "TON":
+      return "TON";
     default:
       return undefined;
   }
@@ -42,7 +48,8 @@ export function parseAddressBook(json: unknown): AddressBookEntry[] {
     const key = `${e.network}:${e.address}`;
     if (seen.has(key)) continue;
     seen.add(key);
-    entries.push({ network: e.network as BookNetwork, address: e.address, comment: e.comment.trim() });
+    const avatar = sanitizeAvatarUrl(e.avatar);
+    entries.push({ network: e.network as BookNetwork, address: e.address, comment: e.comment.trim(), ...(avatar ? { avatar } : {}) });
   }
   return entries;
 }

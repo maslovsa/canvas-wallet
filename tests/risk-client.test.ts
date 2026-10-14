@@ -68,6 +68,13 @@ describe("validateSeedShape / parseSeed", () => {
     expect(seedLookup(entries, A, NOW)).toEqual({ state: "caution", label: "Exchange X", logo: LOGO });
   });
 
+  it("a token-contract entry is valid and returned as state contract", () => {
+    const entries = [{ network: "TRON" as const, address: A, level: "contract" as const, label: "Tether", checkedAt: "2026-10-13" }];
+    expect(validateSeedShape({ version: 1, entries })).toEqual([]);
+    expect(seedLookup(entries, A, NOW)).toEqual({ state: "contract", label: "Tether" });
+    expect(parseProxyAnswer({ level: "contract" })).toEqual({ state: "contract" });
+  });
+
   it("parseSeed drops malformed entries and never throws", () => {
     expect(parseSeed(null)).toEqual([]);
     expect(parseSeed({ entries: "nope" })).toEqual([]);
