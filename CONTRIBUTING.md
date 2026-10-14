@@ -283,7 +283,7 @@ this address" until the live Worker is connected.
 of the screen; dismiss with Esc, the close button, a tap on the dimmed area or by dragging it down) with the saved
 recipients for the network being sent on; choosing one fills the field exactly as typing would (so it is validated and
 risk-checked). The list is `public/address-book.json`: `{"version": 1, "entries": [{"network": "TRON" | "ETH" | "BSC",
-"address": "...", "comment": "..."}]}`, at most 200 entries, comments up to 80 characters. `npm run validate:fixtures`
+"address": "...", "comment": "..."}]}`, at most 200 entries, comments up to 80 characters that name the owner ("Binance hot wallet"), never a risk reason: CI refuses words such as sanctions, OFAC, blacklist, frozen or mixer. `npm run validate:fixtures`
 checks every address for its network (Tron Base58Check; EVM `0x` + 40 hex, EIP-55 when mixed case), rejects duplicates and
 extra keys. Send is Tron-only for now, so only the `TRON` entries are shown; `ETH` and `BSC` entries wait for EVM Send.
 
