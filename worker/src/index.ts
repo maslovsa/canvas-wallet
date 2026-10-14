@@ -1,7 +1,7 @@
 // Risk-check proxy for the Send window (plan T9). It exists because a static GitHub Pages site cannot
 // hold a secret: the Aegis key lives ONLY here, as the Worker secret AEGIS_API_KEY.
 //
-//   POST /check {"network":"TRON","address":"T..."}  ->  {"level":"clear"|"caution","label"?:"...","logo"?:"https://..."} | {"level":"unknown"}
+//   POST /check {"network":"TRON"|"ETH"|"BSC"|"TON","address":"..."}  ->  {"level":"clear"|"caution","label"?:"...","logo"?:"https://..."} | {"level":"unknown"}
 //
 //   GET /price?id=<coingecko id>  ->  {"prices": number[]}  (24 h chart, cached 15 min; the browser cannot call CoinGecko)
 //
@@ -10,7 +10,7 @@
 // label that could name a sanctioned person). Anything that goes wrong becomes {"level":"unknown"} (fail closed:
 // no live call when the cache or the counters are unavailable). Aegis POST /v2/screen is synchronous and costs 0.1 credit per
 // call; a replay with the same Idempotency-Key within 24 h is free (docs.aegis-kyt.com/api-reference/v2-screen).
-import { validateTronAddress } from "../../src/send/tron-address.ts";
+import { isNetworkId, normalizeAddress, validateNetworkAddress, type NetworkId } from "../../src/send/network-id.ts";
 import { sanitizeLogoUrl } from "../../src/send/entity-logo.ts";
 import { logoForEntityName } from "../../src/send/known-entities.ts";
 import { Counter, type CounterStorage } from "./counter.ts";
@@ -115,6 +115,13 @@ function curatedVaspName(labels: unknown): string | undefined {
   return undefined;
 }
 
+/**
+ * What kind of entity may be NAMED on a risky address: an exchange. When Aegis says the entity is something else (a mixer,
+ * an OTC desk...), its name would itself state the reason, so such an address gets no name at all, not even from the
+ * curated row. (No entity category at all: the previous rule applies.)
+ */
+const EXCHANGE_CATEGORIES = new Set(["centralized_exchange", "p2p_exchange", "exchange", "decentralized_exchange", "dex"]);
+
 /** Aegis risk_score (0-100) at or above which the client shows the risk line and the confirmation alert. */
 export const RISK_ALERT_SCORE = 50;
 
@@ -134,7 +141,7 @@ export function mapAegisVerdict(body: unknown): Verdict {
       risk_score?: unknown;
       label?: unknown;
       sdn_match?: unknown;
-      entity?: { name?: unknown; logo_url?: unknown } | null;
+      entity?: { name?: unknown; logo_url?: unknown; category?: unknown } | null;
       labels?: unknown;
       smart_contract?: { token_contract?: unknown } | null;
     };
@@ -147,7 +154,9 @@ export function mapAegisVerdict(body: unknown): Verdict {
   const caution = (): Verdict => {
     // A risky address shows the VASP identity only (entity, or the curated VASP row): never verdict.label, which can be
     // a sanctioned person's name or a reason. Its logo must not name a reason either (forRisk).
-    const name = sanitizeLabel(entity?.name) ?? curatedVaspName(verdict?.labels);
+    const category = typeof entity?.category === "string" ? entity.category : undefined;
+    const notAnExchange = category !== undefined && !EXCHANGE_CATEGORIES.has(category);
+    const name = notAnExchange ? undefined : (sanitizeLabel(entity?.name) ?? curatedVaspName(verdict?.labels));
     if (!name) return { level: "caution" };
     const logo = sanitizeLogoUrl(entity?.logo_url, true) ?? sanitizeLogoUrl(logoForEntityName(name), true);
     return logo ? { level: "caution", label: name, logo } : { level: "caution", label: name };
@@ -219,7 +228,7 @@ function block(env: Env, key: string, now: number): void {
 /** What to remember about a result: a real Aegis answer for 24 h, an Aegis failure for 60 s, and nothing when WE declined to call (limits, budget, configuration). */
 type CachePolicy = "definitive" | "brief" | "none";
 
-async function liveCheck(address: string, request: Request, env: Env): Promise<{ verdict: Verdict; cache: CachePolicy }> {
+async function liveCheck(network: NetworkId, address: string, request: Request, env: Env): Promise<{ verdict: Verdict; cache: CachePolicy }> {
   const dailyBudget = Number.parseInt(env.DAILY_BUDGET, 10);
   const perVisitor = Number.parseInt(env.PER_VISITOR_PER_HOUR, 10);
   if (!Number.isFinite(dailyBudget) || !Number.isFinite(perVisitor) || !env.AEGIS_API_KEY) return { verdict: { level: "unknown" }, cache: "none" };
@@ -246,12 +255,12 @@ async function liveCheck(address: string, request: Request, env: Env): Promise<{
   }
 
   const day = new Date(now).toISOString().slice(0, 10);
-  const idempotencyKey = await sha256Hex(`TRON:${address}:${day}`); // 64 hex chars, the documented maximum
+  const idempotencyKey = await sha256Hex(`${network}:${address}:${day}`); // 64 hex chars, the documented maximum
   try {
     const res = await fetch(`${env.AEGIS_BASE_URL}/v2/screen`, {
       method: "POST",
       headers: { Authorization: `Bearer ${env.AEGIS_API_KEY}`, "Content-Type": "application/json", "Idempotency-Key": idempotencyKey },
-      body: JSON.stringify({ address, network: "TRON" }),
+      body: JSON.stringify({ address, network }),
       signal: AbortSignal.timeout(AEGIS_TIMEOUT_MS),
     });
     if (!res.ok) {
@@ -273,18 +282,19 @@ async function handleCheck(request: Request, env: Env, cors: Record<string, stri
   } catch {
     return json({ error: "bad_request" }, 400, cors);
   }
-  if (body.network !== "TRON" || typeof body.address !== "string") return json({ error: "bad_request" }, 400, cors);
-  const address = body.address;
+  if (!isNetworkId(body.network) || typeof body.address !== "string") return json({ error: "bad_request" }, 400, cors);
+  const network = body.network;
   // Strict validation before ANY paid call (Aegis charges even for an address with no data).
-  if (!(await validateTronAddress(address)).ok) return json({ error: "bad_request" }, 400, cors);
+  if (!(await validateNetworkAddress(network, body.address)).ok) return json({ error: "bad_request" }, 400, cors);
+  const address = normalizeAddress(network, body.address); // EVM addresses are keyed without case: one verdict, one paid call
 
   if (env.RISK_ENABLED !== "true") return json({ level: "unknown" } satisfies Verdict, 200, cors);
 
-  const cacheKey = `v6:TRON:${address}`;
+  const cacheKey = `v7:${network}:${address}`;
   try {
     const cached = await env.RISK_CACHE.get(cacheKey);
     if (cached) return json(JSON.parse(cached) as Verdict, 200, cors);
-    const { verdict, cache } = await liveCheck(address, request, env);
+    const { verdict, cache } = await liveCheck(network, address, request, env);
     // A refusal by our own limits is never cached: it must not turn into "unknown" for every other visitor.
     if (cache === "definitive") await env.RISK_CACHE.put(cacheKey, JSON.stringify(verdict)); // no expiry
     else if (cache === "brief") await env.RISK_CACHE.put(cacheKey, JSON.stringify(verdict), { expirationTtl: NEGATIVE_TTL_S });

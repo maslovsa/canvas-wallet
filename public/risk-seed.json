@@ -172,6 +172,253 @@
       "label": "USDD",
       "logo": "https://cdn.jsdelivr.net/gh/maslovsa/kyt-entity-registry@main/logos/dex/usdd.png",
       "checkedAt": "2026-10-14"
+    },
+    {
+      "network": "ETH",
+      "address": "0x56eddb7aa87536c09ccc2793473599fd21a8b17f",
+      "level": "clear",
+      "label": "Binance",
+      "logo": "https://cdn.jsdelivr.net/gh/maslovsa/kyt-entity-registry@main/logos/exchanges/binance-com.png",
+      "checkedAt": "2026-10-14"
+    },
+    {
+      "network": "BSC",
+      "address": "0x28c6c06298d514db089934071355e5743bf21d60",
+      "level": "clear",
+      "label": "Binance",
+      "logo": "https://cdn.jsdelivr.net/gh/maslovsa/kyt-entity-registry@main/logos/exchanges/binance-com.png",
+      "checkedAt": "2026-10-14"
+    },
+    {
+      "network": "ETH",
+      "address": "0xf89d7b9c864f589bbf53a82105107622b35eaa40",
+      "level": "clear",
+      "label": "Bybit",
+      "logo": "https://cdn.jsdelivr.net/gh/maslovsa/kyt-entity-registry@main/logos/exchanges/bybit-com.png",
+      "checkedAt": "2026-10-14"
+    },
+    {
+      "network": "ETH",
+      "address": "0xa9d1e08c7793af67e9d92fe308d5697fb81d3e43",
+      "level": "clear",
+      "label": "Coinbase",
+      "logo": "https://cdn.jsdelivr.net/gh/maslovsa/kyt-entity-registry@main/logos/exchanges/coinbase-com.png",
+      "checkedAt": "2026-10-14"
+    },
+    {
+      "network": "ETH",
+      "address": "0x51e3d44172868acc60d68ca99591ce4230bc75e0",
+      "level": "clear",
+      "label": "Mexc",
+      "logo": "https://cdn.jsdelivr.net/gh/maslovsa/kyt-entity-registry@main/logos/exchanges/mexc-com.png",
+      "checkedAt": "2026-10-14"
+    },
+    {
+      "network": "ETH",
+      "address": "0x6b7dc81758483ecf91a14ba263831bfe6989716e",
+      "level": "caution",
+      "label": "Rapira",
+      "logo": "https://cdn.jsdelivr.net/gh/maslovsa/kyt-entity-registry@main/logos/exchanges/rapira-net.png",
+      "checkedAt": "2026-10-14"
+    },
+    {
+      "network": "ETH",
+      "address": "0xa03400e098f4421b34a3a44a1b4e571419517687",
+      "level": "caution",
+      "label": "HTX",
+      "logo": "https://cdn.jsdelivr.net/gh/maslovsa/kyt-entity-registry@main/logos/exchanges/htx-com-huobi-com.png",
+      "checkedAt": "2026-10-14"
+    },
+    {
+      "network": "ETH",
+      "address": "0x2f389ce8bd8ff92de3402ffce4691d17fc4f6535",
+      "level": "caution",
+      "checkedAt": "2026-10-14"
+    },
+    {
+      "network": "ETH",
+      "address": "0xaf5d53b9682119d0b3fb2afa8bd10a28192dcd91",
+      "level": "caution",
+      "label": "001k",
+      "logo": "https://cdn.jsdelivr.net/gh/maslovsa/kyt-entity-registry@main/logos/exchanges/001k-exchange.png",
+      "checkedAt": "2026-10-14"
+    },
+    {
+      "network": "ETH",
+      "address": "0x905b63fff465b9ffbf41dea908ceb12478ec7601",
+      "level": "caution",
+      "checkedAt": "2026-10-14"
+    },
+    {
+      "network": "ETH",
+      "address": "0x7a250d5630b4cf539739df2c5dacb4c659f2488d",
+      "level": "clear",
+      "label": "Uniswap",
+      "logo": "https://cdn.jsdelivr.net/gh/maslovsa/kyt-entity-registry@main/logos/dex/uniswap.png",
+      "checkedAt": "2026-10-14"
+    },
+    {
+      "network": "ETH",
+      "address": "0x11111112542d85b3ef69ae05771c2dccff4faa26",
+      "level": "clear",
+      "label": "1inch",
+      "logo": "https://cdn.jsdelivr.net/gh/maslovsa/kyt-entity-registry@main/logos/dex/1inch.png",
+      "checkedAt": "2026-10-14"
+    },
+    {
+      "network": "ETH",
+      "address": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+      "level": "contract",
+      "label": "Tether",
+      "logo": "https://cdn.jsdelivr.net/gh/maslovsa/kyt-entity-registry@main/logos/psp/tether.png",
+      "checkedAt": "2026-10-14"
+    },
+    {
+      "network": "ETH",
+      "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+      "level": "contract",
+      "label": "Circle",
+      "logo": "https://cdn.jsdelivr.net/gh/maslovsa/kyt-entity-registry@main/logos/stablecoin_issuer/usd-coin.png",
+      "checkedAt": "2026-10-14"
+    },
+    {
+      "network": "ETH",
+      "address": "0x6b175474e89094c44da98b954eedeac495271d0f",
+      "level": "contract",
+      "label": "Sky (MakerDAO)",
+      "logo": "https://cdn.jsdelivr.net/gh/maslovsa/kyt-entity-registry@main/logos/defi/sky-makerdao.png",
+      "checkedAt": "2026-10-14"
+    },
+    {
+      "network": "ETH",
+      "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+      "level": "contract",
+      "checkedAt": "2026-10-14"
+    },
+    {
+      "network": "ETH",
+      "address": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+      "level": "contract",
+      "label": "WBTC DAO",
+      "checkedAt": "2026-10-14"
+    },
+    {
+      "network": "ETH",
+      "address": "0x514910771af9ca656af840dff83e8264ecf986ca",
+      "level": "contract",
+      "label": "Chainlink",
+      "logo": "https://cdn.jsdelivr.net/gh/maslovsa/kyt-entity-registry@main/logos/dex/chainlink.png",
+      "checkedAt": "2026-10-14"
+    },
+    {
+      "network": "TON",
+      "address": "UQDKHZ7e70CzqdvZCC83Z4WVR8POC_ZB0J1Y4zo88G-zCSRH",
+      "level": "clear",
+      "label": "Binance",
+      "logo": "https://cdn.jsdelivr.net/gh/maslovsa/kyt-entity-registry@main/logos/exchanges/binance-com.png",
+      "checkedAt": "2026-10-14"
+    },
+    {
+      "network": "TON",
+      "address": "UQD5mxRgCuRNLxKxeOjG6r14iSroLF5FtomPnet-sgP5xI-e",
+      "level": "clear",
+      "label": "Binance",
+      "logo": "https://cdn.jsdelivr.net/gh/maslovsa/kyt-entity-registry@main/logos/exchanges/binance-com.png",
+      "checkedAt": "2026-10-14"
+    },
+    {
+      "network": "TON",
+      "address": "UQBfAN7LfaUYgXZNw5Wc7GBgkEX2yhuJ5ka95J1JJwXXf9t5",
+      "level": "clear",
+      "label": "OKX",
+      "logo": "https://cdn.jsdelivr.net/gh/maslovsa/kyt-entity-registry@main/logos/exchanges/okx-com.png",
+      "checkedAt": "2026-10-14"
+    },
+    {
+      "network": "TON",
+      "address": "UQBKHz68xmvc76kCRb31QaUK2hxoikh1NLFYer_9kwOINDtf",
+      "level": "clear",
+      "label": "Bybit",
+      "logo": "https://cdn.jsdelivr.net/gh/maslovsa/kyt-entity-registry@main/logos/exchanges/bybit-com.png",
+      "checkedAt": "2026-10-14"
+    },
+    {
+      "network": "TON",
+      "address": "UQDN9_DXwJA28GQnLjxCntVwvknvKes6c1tku8F5FQc3Mhut",
+      "level": "clear",
+      "label": "Bitget",
+      "logo": "https://cdn.jsdelivr.net/gh/maslovsa/kyt-entity-registry@main/logos/exchanges/bitget-com.png",
+      "checkedAt": "2026-10-14"
+    },
+    {
+      "network": "TON",
+      "address": "UQDYh9Di0cT8QSbnHJcNM6sYlpQAAOrnA7sats7Mgwd344Mm",
+      "level": "clear",
+      "label": "Mexc",
+      "logo": "https://cdn.jsdelivr.net/gh/maslovsa/kyt-entity-registry@main/logos/exchanges/mexc-com.png",
+      "checkedAt": "2026-10-14"
+    },
+    {
+      "network": "TON",
+      "address": "UQChSx9FI4Wyu5hK0sREHh0jyuBx_fwJbfulPrujtv8dEIro",
+      "level": "clear",
+      "label": "Lbank",
+      "logo": "https://cdn.jsdelivr.net/gh/maslovsa/kyt-entity-registry@main/logos/exchanges/lbank-com.png",
+      "checkedAt": "2026-10-14"
+    },
+    {
+      "network": "TON",
+      "address": "UQC0lrj3O0af8GotieYsTXChA_wijIIVN7Sd_wkgYLwoHxMv",
+      "level": "clear",
+      "label": "Gate",
+      "logo": "https://cdn.jsdelivr.net/gh/maslovsa/kyt-entity-registry@main/logos/exchanges/gate-io.png",
+      "checkedAt": "2026-10-14"
+    },
+    {
+      "network": "TON",
+      "address": "UQCFr3jo0DXpIBF82mVGFc3zcdRkSAtinhENPFMQ2FqzYv0E",
+      "level": "clear",
+      "checkedAt": "2026-10-14"
+    },
+    {
+      "network": "TON",
+      "address": "UQCzflcDPbIdELlQ5hQ7ZYwQw79CW9GTAllgrvfyLbz0_Lup",
+      "level": "clear",
+      "label": "Kucoin",
+      "logo": "https://cdn.jsdelivr.net/gh/maslovsa/kyt-entity-registry@main/logos/exchanges/kucoin-com.png",
+      "checkedAt": "2026-10-14"
+    },
+    {
+      "network": "TON",
+      "address": "UQBAL11PT4vqewvVEbnTdxg0waIru7yKMmA16weqJPXJ-cql",
+      "level": "clear",
+      "label": "Crypto.com",
+      "logo": "https://cdn.jsdelivr.net/gh/maslovsa/kyt-entity-registry@main/logos/exchanges/crypto-com.png",
+      "checkedAt": "2026-10-14"
+    },
+    {
+      "network": "TON",
+      "address": "UQABGo8KCza3ea8DNHMnSWZmbRzW-05332eTdfvW-XDQEmnJ",
+      "level": "caution",
+      "label": "xRocket",
+      "logo": "https://cdn.jsdelivr.net/gh/maslovsa/kyt-entity-registry@main/logos/exchanges/xrocket-exchange.png",
+      "checkedAt": "2026-10-14"
+    },
+    {
+      "network": "TON",
+      "address": "UQCtiv7PrMJImWiF2L5oJCgPnzp-VML2CAt5cbn1VsKAxOVB",
+      "level": "clear",
+      "label": "CryptoBot",
+      "logo": "https://cdn.jsdelivr.net/gh/maslovsa/kyt-entity-registry@main/logos/bot/cryptobot.png",
+      "checkedAt": "2026-10-14"
+    },
+    {
+      "network": "TON",
+      "address": "UQDd3NPNrWCvTA1pOJ9WetUdDCY_pJaNZVq0JMaara-TIsKx",
+      "level": "clear",
+      "label": "Wallet.tg",
+      "logo": "https://cdn.jsdelivr.net/gh/maslovsa/kyt-entity-registry@main/logos/wallet/wallet-tg.png",
+      "checkedAt": "2026-10-14"
     }
   ]
 }

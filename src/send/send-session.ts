@@ -5,8 +5,10 @@
 //     only moves the state (address -> validation -> risk check + fee estimate -> Send).
 // Plan decisions: DR1-DR14 (design review), R5/E6/E7 (risk states), R10 (15 s ceiling).
 import { StaleFetchGuard } from "../registry-client/stale-fetch-guard.ts";
-import { validateTronAddress, type TronAddressCheck } from "./tron-address.ts";
-import { estimateFee, formatTrx, type FeeEstimate } from "./tron-fee.ts";
+import type { AddressCheck, AddressReason } from "./address-checks.ts";
+import { formatFeeAmount, type FeeEstimate } from "./fee.ts";
+import { SEND_NETWORKS, type SendNetwork, type SendNetworkId } from "./send-network.ts";
+import { NETWORK_IDS, validateNetworkAddress } from "./network-id.ts";
 import { checkAddress, loadSeed, type RiskResult } from "./risk-client.ts";
 import { parseAmount, maxSendable, formatUnits } from "./send-input.ts";
 
@@ -23,15 +25,17 @@ export interface SendTokenInfo {
   name: string;
   decimals: number;
   isNative: boolean;
-  /** Contract address for a TRC20 token, "native" for TRX. */
+  /** The network this token is sent on (its profile in send-network.ts drives addresses, fees and the risk check). */
+  network: SendNetworkId;
+  /** Contract / master address of a token, "native" for the network's own coin. */
   contract: string;
   /** Illustrative balance of this token (same fake balance the wallet-home screen shows), in base units. */
   balanceUnits: bigint;
-  /** Illustrative TRX balance, used to check that the network fee can be paid. */
-  trxBalanceUnits: bigint;
+  /** Illustrative balance of the network's native coin, used to check that the network fee can be paid. */
+  nativeBalanceUnits: bigint;
 }
 
-type AddressStatus = { kind: "empty" } | { kind: "pending" } | { kind: "invalid"; reason: Exclude<TronAddressCheck, { ok: true }>["reason"] } | { kind: "valid" };
+type AddressStatus = { kind: "empty" } | { kind: "pending" } | { kind: "invalid"; reason: AddressReason; /** A complete address of ANOTHER network: wrong here at any length, so no "still typing" quiet. */ otherNetwork?: boolean } | { kind: "valid" };
 type RiskUi = { kind: "idle" } | { kind: "checking"; startedAt: number } | { kind: "clear"; label?: string; logo?: string } | { kind: "caution"; label?: string; logo?: string } | { kind: "contract"; label?: string; logo?: string } | { kind: "unavailable" };
 type FeeUi = { kind: "none" } | { kind: "loading"; estimate: FeeEstimate } | { kind: "ready"; estimate: FeeEstimate };
 
@@ -103,8 +107,6 @@ export interface SendView {
   phase: SendState["phase"];
 }
 
-const TYPICAL_EXISTING_SUN = 6_500_000n; // used for balance checks before an address (and so a real estimate) exists
-
 export function currentFee(state: SendState): FeeEstimate | null {
   return state.fee.kind === "none" ? null : state.fee.estimate;
 }
@@ -121,13 +123,14 @@ function amountIssue(state: SendState, token: SendTokenInfo): { error: string | 
     } as const;
     return { error: messages[parsed.reason], units: null, empty: parsed.reason === "empty" };
   }
-  const feeSun = currentFee(state)?.sun ?? TYPICAL_EXISTING_SUN;
+  const network = SEND_NETWORKS[token.network];
+  const fee = currentFee(state)?.units ?? network.typicalFeeUnits(token.isNative); // before an address exists: a typical fee
   if (parsed.units > token.balanceUnits) return { error: `Not enough ${token.symbol}`, units: null, empty: false };
-  if (token.isNative && parsed.units + feeSun > token.balanceUnits) {
-    return { error: "Not enough TRX for the amount and the network fee", units: null, empty: false };
+  if (token.isNative && parsed.units + fee > token.balanceUnits) {
+    return { error: `Not enough ${network.nativeSymbol} for the amount and the network fee`, units: null, empty: false };
   }
-  if (!token.isNative && feeSun > token.trxBalanceUnits) {
-    return { error: "Not enough TRX for the network fee", units: null, empty: false };
+  if (!token.isNative && fee > token.nativeBalanceUnits) {
+    return { error: `Not enough ${network.nativeSymbol} for the network fee`, units: null, empty: false };
   }
   return { error: null, units: parsed.units, empty: false };
 }
@@ -193,24 +196,34 @@ function addressView(state: SendState, nowMs: number): SendView["address"]["stat
   return null;
 }
 
-function addressError(state: SendState): string | null {
+/** Is the text a complete, valid address of another supported network (a Tron address pasted into a TON field)? */
+async function isCompleteAddressElsewhere(text: string, here: SendNetworkId): Promise<boolean> {
+  for (const id of NETWORK_IDS) {
+    if (id === here) continue;
+    if ((await validateNetworkAddress(id, text)).ok) return true;
+  }
+  return false;
+}
+
+function addressError(state: SendState, network: SendNetwork): string | null {
   const s = state.addressStatus;
   if (s.kind !== "invalid") return null;
   if (s.reason === "no_crypto") return "Can't verify addresses in this browser. Send is unavailable.";
   // Still typing a valid-looking prefix: stay quiet. An illegal character is wrong at any length.
-  if (s.reason === "length" && state.address.length < 34 && /^[1-9A-HJ-NP-Za-km-z]*$/.test(state.address)) return null;
-  return "Enter a valid Tron address";
+  if (s.reason === "length" && !s.otherNetwork && state.address.length < network.addressLength && network.typingPattern.test(state.address)) return null;
+  return network.invalidMessage;
 }
 
-function feeView(state: SendState): SendView["fee"] {
+function feeView(state: SendState, network: SendNetwork): SendView["fee"] {
   if (state.fee.kind === "none") return { label: "Network fee (estimate)", value: "—", note: null };
   const { estimate } = state.fee;
   const label = state.fee.kind === "loading" ? "Network fee (estimate)" : estimate.kind === "live" ? "Network fee (estimate)" : "Network fee (typical)";
-  const value = state.fee.kind === "loading" ? "…" : `~${formatTrx(estimate.sun)} TRX`;
+  const value = state.fee.kind === "loading" ? "…" : `~${formatFeeAmount(estimate.units, network.nativeDecimals)} ${network.nativeSymbol}`;
   return { label, value, note: state.fee.kind === "ready" && estimate.newRecipient ? "new account" : null };
 }
 
 export function deriveSendView(state: SendState, token: SendTokenInfo, nowMs: number): SendView {
+  const network = SEND_NETWORKS[token.network];
   const amount = amountIssue(state, token);
   const addrOk = state.addressStatus.kind === "valid";
   const checking = state.risk.kind === "checking" || state.risk.kind === "idle";
@@ -218,26 +231,26 @@ export function deriveSendView(state: SendState, token: SendTokenInfo, nowMs: nu
   let reason: string | null = null;
   if (state.addressStatus.kind === "empty") reason = "Enter an address";
   else if (state.addressStatus.kind === "pending") reason = "Checking address…";
-  else if (!addrOk) reason = addressError(state) ?? "Enter a valid Tron address";
+  else if (!addrOk) reason = addressError(state, network) ?? network.invalidMessage;
   else if (checking) reason = "Checking address…";
   else if (amount.empty) reason = "Enter an amount";
   else if (amount.error) reason = amount.error;
 
   const enabled = state.phase === "form" && reason === null && amount.units !== null;
-  const feeLine = feeView(state);
+  const feeLine = feeView(state, network);
 
   return {
     title: `Send ${token.symbol}`,
     address: {
       value: state.address,
-      error: addressError(state),
+      error: addressError(state, network),
       status: addressView(state, nowMs),
     },
     amount: { value: state.amountText, error: amount.error, balanceText: `Balance ${formatDisplay(token.balanceUnits, token.decimals)} ${token.symbol}` },
     fee: feeLine,
     // The line above the button explains a disabled Send, but never repeats an error already shown inline
     // right under its field (design review: "Not enough USDT" appeared twice on one screen).
-    button: { label: state.phase === "sending" ? "Sending…" : "Send", enabled, reason: enabled || state.phase !== "form" || reason === amount.error || reason === addressError(state) ? null : reason },
+    button: { label: state.phase === "sending" ? "Sending…" : "Send", enabled, reason: enabled || state.phase !== "form" || reason === amount.error || reason === addressError(state, network) ? null : reason },
     backEnabled: state.phase !== "sending",
     popup: state.popupOpen,
     popupKind: state.risk.kind === "contract" ? "contract" : "caution",
@@ -263,7 +276,7 @@ export function formatDisplay(units: bigint, decimals: number): string {
 // ---------------------------------------------------------------- controller
 
 export interface SendDeps {
-  validateAddress: (address: string) => Promise<TronAddressCheck>;
+  validateAddress: (address: string) => Promise<AddressCheck>;
   estimateFee: (token: SendTokenInfo, recipient: string) => Promise<FeeEstimate>;
   checkRisk: (address: string) => Promise<RiskResult>;
   now: () => number;
@@ -271,11 +284,12 @@ export interface SendDeps {
   clearTimeout: (handle: unknown) => void;
 }
 
-export function defaultSendDeps(): SendDeps {
+export function defaultSendDeps(networkId: SendNetworkId = "TRON"): SendDeps {
+  const network = SEND_NETWORKS[networkId];
   return {
-    validateAddress: (address) => validateTronAddress(address),
-    estimateFee: (token, recipient) => estimateFee({ type: token.isNative ? "NATIVE" : "TRC20", id: token.contract }, recipient),
-    checkRisk: async (address) => checkAddress(address, { seed: await loadSeed(), now: new Date(), proxyUrl: import.meta.env.VITE_RISK_PROXY_URL }),
+    validateAddress: (address) => network.validateAddress(address),
+    estimateFee: (token, recipient) => network.estimateFee({ type: token.isNative ? "NATIVE" : network.tokenType, id: token.contract }, recipient),
+    checkRisk: async (address) => checkAddress(address, { network: networkId, seed: await loadSeed(), now: new Date(), proxyUrl: import.meta.env.VITE_RISK_PROXY_URL }),
     now: () => Date.now(),
     setTimeout: (fn, ms) => setTimeout(fn, ms),
     clearTimeout: (handle) => clearTimeout(handle as ReturnType<typeof setTimeout>),
@@ -288,10 +302,14 @@ export class SendController {
   private guard = new StaleFetchGuard();
   private timers = new Set<unknown>();
 
+  private readonly network: SendNetwork;
+
   constructor(
     readonly token: SendTokenInfo,
     private deps: SendDeps,
-  ) {}
+  ) {
+    this.network = SEND_NETWORKS[token.network];
+  }
 
   subscribe(listener: () => void): () => void {
     this.listeners.add(listener);
@@ -335,7 +353,9 @@ export class SendController {
     const check = await this.deps.validateAddress(text);
     if (!this.guard.isCurrent(token)) return; // the field changed while validating
     if (!check.ok) {
-      this.state.addressStatus = { kind: "invalid", reason: check.reason };
+      const otherNetwork = check.reason === "length" && (await isCompleteAddressElsewhere(text, this.network.id));
+      if (!this.guard.isCurrent(token)) return;
+      this.state.addressStatus = { kind: "invalid", reason: check.reason, ...(otherNetwork ? { otherNetwork: true } : {}) };
       this.emit();
       return;
     }
@@ -348,8 +368,8 @@ export class SendController {
     this.state.lastCheckAt = startedAt;
     this.state.risk = { kind: "checking", startedAt };
     if (this.state.fee.kind === "none") {
-      // Show a typical figure immediately; the live estimate replaces it when TronGrid answers.
-      this.state.fee = { kind: "loading", estimate: { kind: "typical", newRecipient: false, sun: TYPICAL_EXISTING_SUN } };
+      // Show a typical figure immediately; the live estimate replaces it when the network answers.
+      this.state.fee = { kind: "loading", estimate: { kind: "typical", newRecipient: false, units: this.network.typicalFeeUnits(this.token.isNative) } };
       void this.deps.estimateFee(this.token, address).then((estimate) => {
         if (!this.guard.isCurrent(token)) return;
         this.state.fee = { kind: "ready", estimate };
@@ -407,7 +427,7 @@ export class SendController {
   }
 
   pressMax(): void {
-    const fee = currentFee(this.state)?.sun ?? TYPICAL_EXISTING_SUN;
+    const fee = currentFee(this.state)?.units ?? this.network.typicalFeeUnits(this.token.isNative);
     this.state.amountText = formatUnits(maxSendable(this.token.balanceUnits, fee, this.token.isNative), this.token.decimals);
     this.emit();
   }
@@ -440,7 +460,7 @@ export class SendController {
     this.state.sent = {
       amountText: this.state.amountText.trim(),
       address: this.state.address,
-      feeText: fee ? `Network fee ~${formatTrx(fee.sun)} TRX` : "Network fee —",
+      feeText: fee ? `Network fee ~${formatFeeAmount(fee.units, this.network.nativeDecimals)} ${this.network.nativeSymbol}` : "Network fee —",
     };
     this.emit();
     this.later(() => {
@@ -461,7 +481,7 @@ export class SendController {
 let current: SendController | null = null;
 
 /** The session for this token: reused across phone re-renders, replaced (and the old one disposed) when the token changes. */
-export function getSendController(token: SendTokenInfo, deps: SendDeps = defaultSendDeps()): SendController {
+export function getSendController(token: SendTokenInfo, deps: SendDeps = defaultSendDeps(token.network)): SendController {
   if (current && current.token.key === token.key) return current;
   current?.dispose();
   current = new SendController(token, deps);

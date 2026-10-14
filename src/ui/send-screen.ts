@@ -5,6 +5,7 @@ import type { ChromeStyle } from "./phone-frame.ts";
 import { openOverlay, type OpenOverlay } from "./phone-overlay.ts";
 import { icon } from "./icons.ts";
 import { createAvatar } from "./avatar.ts";
+import { SEND_NETWORKS } from "../send/send-network.ts";
 import { openAddressBookSheet } from "./address-book-sheet.ts";
 import { bookNetworkFor, entriesForNetwork, loadAddressBook, type AddressBookEntry } from "../send/address-book.ts";
 import type { SendController, SendView, Tone } from "../send/send-session.ts";
@@ -126,7 +127,7 @@ export function mountSendScreen(options: SendScreenOptions): void {
   addrInput.setAttribute("autocorrect", "off");
   addrInput.setAttribute("autocomplete", "off");
   addrInput.spellcheck = false;
-  addrInput.placeholder = "Tron address (starts with T)"; // a hint only: the visible "To" label stays
+  addrInput.placeholder = SEND_NETWORKS[controller.token.network].addressHint; // a hint only: the visible "To" label stays
   addrInput.setAttribute("aria-describedby", "send-address-status");
   const bookBtn = el("button", "send-book-btn");
   bookBtn.type = "button";
@@ -213,7 +214,10 @@ export function mountSendScreen(options: SendScreenOptions): void {
   screen.append(root);
 
   // --- events
-  addrInput.addEventListener("input", () => void controller.setAddress(addrInput.value));
+  addrInput.addEventListener("input", () => {
+    fitAddress();
+    void controller.setAddress(addrInput.value);
+  });
   amountInput.addEventListener("input", () => controller.setAmount(amountInput.value));
   paste.addEventListener("click", async () => {
     try {
@@ -251,6 +255,17 @@ export function mountSendScreen(options: SendScreenOptions): void {
     if (root.isConnected) patch(controller.view());
   });
 
+  // A long address (EVM 42 characters, TON 48) must never be cut off in the field: the end of an address matters. The text
+  // shrinks just enough to fit on one line (never below 9 px); a Tron address (34) fits at the normal size.
+  const BASE_ADDRESS_PX = 14;
+  function fitAddress(): void {
+    addrInput.style.fontSize = "";
+    const room = addrInput.clientWidth;
+    if (room > 0 && addrInput.scrollWidth > room) {
+      addrInput.style.fontSize = `${Math.max(9, Math.floor(BASE_ADDRESS_PX * (room / addrInput.scrollWidth) * 10) / 10)}px`;
+    }
+  }
+
   // --- patching
   let seenFocusRequests = controller.state.focusAddressRequests;
 
@@ -267,6 +282,7 @@ export function mountSendScreen(options: SendScreenOptions): void {
     }
     addrLabelName.hidden = !saved;
     if (addrInput.value !== view.address.value && document.activeElement !== addrInput) addrInput.value = view.address.value;
+    fitAddress();
     if (amountInput.value !== view.amount.value && document.activeElement !== amountInput) amountInput.value = view.amount.value;
     addrInput.disabled = view.phase !== "form";
     bookBtn.disabled = view.phase !== "form";

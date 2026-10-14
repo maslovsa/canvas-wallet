@@ -1,15 +1,13 @@
 // Turns a registry token into what the Send screen needs, and decides up front whether Send can open at
 // all. A registry may put a `send` action on ANY token (the schema is network-agnostic), so the built-in
-// screen refuses everything it cannot handle explicitly instead of failing later: v1 sends only on Tron.
+// screen refuses everything it cannot handle explicitly instead of failing later: Send works on the networks that
+// have a profile in send-network.ts (Tron, Ethereum, BNB Smart Chain and TON) and their native coin / token standard.
 import type { Token } from "../types.ts";
 import { generateBalance } from "../ui/fake-balance.ts";
-import { validateTronAddress } from "./tron-address.ts";
+import { SEND_NETWORKS, sendNetworkFor } from "./send-network.ts";
 import type { SendTokenInfo } from "./send-session.ts";
 
-/** Illustrative TRX balance used to check that a token transfer's fee can be paid (the real wallet balance is unknown here). */
-export const DEMO_TRX_BALANCE_UNITS = 250_000_000n;
-
-export const REFUSAL_NOT_TRON = "Send is available for Tron tokens only";
+export const REFUSAL_UNSUPPORTED = "Send isn't available for this network or token type yet";
 export const REFUSAL_NO_CRYPTO = "Can't verify addresses in this browser. Send is unavailable.";
 
 export type SendPreparation = { ok: true; info: SendTokenInfo } | { ok: false; message: string };
@@ -25,27 +23,29 @@ export async function prepareSend(
   networkCanonicalName: string | undefined,
   subtle: SubtleCrypto | null = globalThis.crypto?.subtle ?? null,
 ): Promise<SendPreparation> {
-  if (networkCanonicalName !== "Tron") return { ok: false, message: REFUSAL_NOT_TRON };
+  const network = sendNetworkFor(networkCanonicalName);
+  if (!network) return { ok: false, message: REFUSAL_UNSUPPORTED };
   const isNative = token.type === "NATIVE";
-  if (!isNative && token.type !== "TRC20") return { ok: false, message: REFUSAL_NOT_TRON };
+  if (!isNative && token.type !== network.tokenType) return { ok: false, message: REFUSAL_UNSUPPORTED };
   if (!isNative) {
-    // The contract address is registry-controlled data: it must be a valid Tron address before any request uses it.
-    const check = await validateTronAddress(token.id, subtle);
-    if (!check.ok) return { ok: false, message: check.reason === "no_crypto" ? REFUSAL_NO_CRYPTO : REFUSAL_NOT_TRON };
+    // The contract address is registry-controlled data: it must be a valid address for the network before any request uses it.
+    const check = await network.validateAddress(token.id, subtle);
+    if (!check.ok) return { ok: false, message: check.reason === "no_crypto" ? REFUSAL_NO_CRYPTO : REFUSAL_UNSUPPORTED };
   }
   const balance = generateBalance(`${token.id}:${token.symbol}`, token.tags?.includes("stablecoin") ?? false);
   const balanceUnits = toUnits(balance.amount, token.decimals);
   return {
     ok: true,
     info: {
-      key: `Tron:${token.id}`,
+      key: `${network.id}:${token.id}`,
+      network: network.id,
       symbol: token.symbol,
       name: token.name,
       decimals: token.decimals,
       isNative,
       contract: isNative ? "native" : token.id,
       balanceUnits,
-      trxBalanceUnits: isNative ? balanceUnits : DEMO_TRX_BALANCE_UNITS,
+      nativeBalanceUnits: isNative ? balanceUnits : SEND_NETWORKS[network.id].demoNativeBalanceUnits,
     },
   };
 }

@@ -666,6 +666,9 @@
   line-height: 1;
   animation: send-pop 0.5s 0.12s cubic-bezier(0.2, 1.6, 0.4, 1) both;
 }
+.send-status[class*="send-v-"] .send-status-icon:empty {
+  display: none; /* a named owner shows its logo instead of a glyph: no empty colored disc */
+}
 .send-status[class*="send-v-"] .send-status-icon::after {
   content: "";
   position: absolute;

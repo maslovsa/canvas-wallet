@@ -123,7 +123,7 @@ const nameOf = (address: string) => BOOK.find((e) => e.address === address)!.com
 
 test("every Tron address in the address book gets a real answer, matching the risk seed", async ({ page }) => {
   const book = (JSON.parse(readFileSync("public/address-book.json", "utf8")).entries as Array<{ network: string; address: string; comment: string }>).filter((e) => e.network === "TRON");
-  const seed = new Map((JSON.parse(readFileSync("public/risk-seed.json", "utf8")).entries as Array<{ address: string; level: string; label?: string }>).map((e) => [e.address, e]));
+  const seed = new Map((JSON.parse(readFileSync("public/risk-seed.json", "utf8")).entries as Array<{ network: string; address: string; level: string; label?: string }>).filter((e) => e.network === "TRON").map((e) => [e.address, e]));
   await page.clock.install({ time: new Date("2026-10-20T12:00:00Z") }); // the seed's 90-day freshness is measured from "now"
   await page.setViewportSize({ width: 1440, height: 900 });
   await openSend(page);
@@ -181,8 +181,8 @@ test("?to= with a bad address shows the field's own error; for a token that cann
   await page.goto("/?list=aegis-super-list&network=Tron&token=USDT&to=not-an-address");
   await expect(page.locator("#send-address")).toHaveValue("not-an-address");
   await expect(page.locator(".send-error").first()).not.toHaveText("");
-  await page.goto("/?list=aegis-super-list&network=Ethereum&token=ETH&to=TMuA6YqfCeX8EhbfYEg5y7S4DqzSJireY9");
-  await expect(page.locator(".card-header-name")).toContainText("(ETH)"); // not a Tron token: stays on the card
+  await page.goto("/?list=paras&network=Solana&token=USDT&to=TMuA6YqfCeX8EhbfYEg5y7S4DqzSJireY9");
+  await expect(page.locator(".card-header-name")).toContainText("(USDT)"); // a network Send does not support: stays on the card
   await expect(page.locator(".send-nav-title")).toHaveCount(0);
   await expect.poll(() => new URL(page.url()).searchParams.has("to")).toBe(false);
   await page.goto("/?list=aegis-super-list&network=Tron&to=TMuA6YqfCeX8EhbfYEg5y7S4DqzSJireY9");
@@ -261,7 +261,7 @@ test("typing an address on Send puts it in the page address (?to=), live; cleari
 const PIXEL = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==", "base64");
 
 test("every known-exchange address in the risk seed shows the exchange's logo and name and no risk wording", async ({ page }) => {
-  const seed = (JSON.parse(readFileSync("public/risk-seed.json", "utf8")).entries as Array<{ address: string; level: string; label?: string; logo?: string }>).filter((e) => e.level === "clear" && e.label && e.logo);
+  const seed = (JSON.parse(readFileSync("public/risk-seed.json", "utf8")).entries as Array<{ network: string; address: string; level: string; label?: string; logo?: string }>).filter((e) => e.network === "TRON" && e.level === "clear" && e.label && e.logo);
   expect(seed.length).toBeGreaterThanOrEqual(5); // Binance (x3), Bybit, OKX, Bitget ...
   await page.clock.install({ time: new Date("2026-10-20T12:00:00Z") });
   await page.route("https://cdn.jsdelivr.net/**/*.png", (route) => route.fulfill({ contentType: "image/png", body: PIXEL })); // the logos, offline
@@ -297,7 +297,7 @@ test("the Binance hot wallet TAzsQ9Gx… shows Binance with its logo and no risk
 
 // ---- a known exchange that is ALSO risky: its logo and name, and the risk line
 test("a risky known-exchange address (HTX, Rapira, ABCex, Garantex…) shows the exchange's name and logo AND the risk line; sanctioned people stay anonymous", async ({ page }) => {
-  const entries = JSON.parse(readFileSync("public/risk-seed.json", "utf8")).entries as Array<{ address: string; level: string; label?: string; logo?: string }>;
+  const entries = (JSON.parse(readFileSync("public/risk-seed.json", "utf8")).entries as Array<{ network: string; address: string; level: string; label?: string; logo?: string }>).filter((e) => e.network === "TRON"); // this test drives the Tron Send screen
   const named = entries.filter((e) => e.level === "caution" && e.label);
   const bare = entries.filter((e) => e.level === "caution" && !e.label);
   expect(named.length).toBeGreaterThanOrEqual(4);

@@ -9,6 +9,10 @@
 //     recipient account does not exist yet.
 //   Any failure: the typical figures below, flagged kind "typical" — never zero, never shown as live.
 
+import type { FeeEstimate, FeeToken } from "./fee.ts";
+
+export type { FeeEstimate, FeeToken };
+
 const TRONGRID = "https://api.trongrid.io";
 
 const TYPICAL = {
@@ -19,19 +23,6 @@ const TYPICAL = {
   energyNewHolder: 130_000n,
   nativeBytes: 345n,
 };
-
-export interface FeeToken {
-  type: string; // "NATIVE" or "TRC20"
-  id: string; // contract address for TRC20
-}
-
-export interface FeeEstimate {
-  /** "live": prices and recipient state came from TronGrid. "typical": fallback figures. */
-  kind: "live" | "typical";
-  sun: bigint;
-  /** The recipient is new (empty token balance, or an account that does not exist yet), which makes the fee higher. */
-  newRecipient: boolean;
-}
 
 interface ChainPrices {
   energyPriceSun: bigint;
@@ -120,7 +111,7 @@ async function accountExists(fetchImpl: typeof fetch, recipient: string, timeout
 }
 
 function typicalEstimate(token: FeeToken, newRecipient: boolean): FeeEstimate {
-  return { kind: "typical", newRecipient, sun: compute(token, newRecipient, TYPICAL) };
+  return { kind: "typical", newRecipient, units: compute(token, newRecipient, TYPICAL) };
 }
 
 function compute(token: FeeToken, newRecipient: boolean, p: { energyPriceSun: bigint; bandwidthPriceSun: bigint; newAccountFeeSun: bigint }): bigint {
@@ -141,14 +132,8 @@ export async function estimateFee(
   try {
     const newRecipient =
       token.type === "NATIVE" ? !(await accountExists(fetchImpl, recipient, timeoutMs)) : !(await holdsToken(fetchImpl, token.id, recipient, timeoutMs));
-    return { kind: "live", newRecipient, sun: compute(token, newRecipient, prices) };
+    return { kind: "live", newRecipient, units: compute(token, newRecipient, prices) };
   } catch {
     return typicalEstimate(token, false);
   }
-}
-
-/** SUN -> "6.5" (TRX, one decimal, rounded half up) using integer math. */
-export function formatTrx(sun: bigint): string {
-  const tenths = (sun + 50_000n) / 100_000n;
-  return `${tenths / 10n}.${tenths % 10n}`;
 }

@@ -217,3 +217,48 @@ describe("proxyCheck and checkAddress with a Worker", () => {
     expect(calls).toHaveLength(1);
   });
 });
+
+describe("per network", () => {
+  const EVM = "0xdAC17F958D2ee523a2206206994597C13D831ec7";
+  const TON = "UQDKHZ7e70CzqdvZCC83Z4WVR8POC_ZB0J1Y4zo88G-zCSRH";
+  const multi: SeedEntry[] = [
+    { network: "TRON", address: A, level: "clear", label: "Binance", checkedAt: "2026-10-13" },
+    { network: "ETH", address: EVM.toLowerCase(), level: "contract", label: "Tether", checkedAt: "2026-10-13" },
+    { network: "TON", address: TON, level: "clear", label: "Binance", checkedAt: "2026-10-13" },
+  ];
+
+  it("the seed holds entries for every network and a lookup only sees its own network", () => {
+    expect(validateSeedShape({ version: 1, entries: multi })).toEqual([]);
+    expect(seedLookup(multi, TON, NOW, "TON")).toEqual({ state: "clear", label: "Binance" });
+    expect(seedLookup(multi, TON, NOW, "TRON")).toBeNull();
+    expect(seedLookup(multi, A, NOW, "TON")).toBeNull();
+    expect(seedLookup(multi, EVM, NOW, "BSC")).toBeNull(); // the same EVM address on another chain is another check
+  });
+
+  it("EVM addresses match without case, the others exactly", () => {
+    expect(seedLookup(multi, EVM, NOW, "ETH")).toEqual({ state: "contract", label: "Tether" });
+    expect(seedLookup(multi, EVM.toUpperCase().replace("0X", "0x"), NOW, "ETH")).toEqual({ state: "contract", label: "Tether" });
+    expect(seedLookup(multi, TON.toLowerCase(), NOW, "TON")).toBeNull();
+  });
+
+  it("the seed shape checks the address length of its own network and a duplicate per network", () => {
+    const bad = [{ network: "ETH", address: A, level: "clear", checkedAt: "2026-10-13" }, { network: "SOL", address: A, level: "clear", checkedAt: "2026-10-13" }];
+    const errors = validateSeedShape({ version: 1, entries: bad }).join("\n");
+    expect(errors).toContain("42 characters");
+    expect(errors).toContain("network must be one of");
+    const dup = validateSeedShape({ version: 1, entries: [multi[1], { ...multi[1], address: EVM }] }).join("\n");
+    expect(dup).toContain("duplicate address"); // the same EVM address in two cases
+  });
+
+  it("the Worker is asked with the network of the field", async () => {
+    const bodies: unknown[] = [];
+    const fetchImpl = (async (_u: unknown, init: RequestInit) => {
+      bodies.push(JSON.parse(String(init.body)));
+      return new Response(JSON.stringify({ level: "clear" }));
+    }) as unknown as typeof fetch;
+    const unknownTon = "UQBfAN7LfaUYgXZNw5Wc7GBgkEX2yhuJ5ka95J1JJwXXf9t5";
+    expect(await checkAddress(unknownTon, { network: "TON", seed: multi, now: NOW, proxyUrl: "https://w", fetchImpl })).toEqual({ state: "clear" });
+    expect(bodies).toEqual([{ network: "TON", address: unknownTon }]);
+    expect(await checkAddress(A, { network: "TON", seed: multi, now: NOW, proxyUrl: "", fetchImpl })).toEqual({ state: "unavailable" }); // a Tron seed hit does not answer a TON check
+  });
+});

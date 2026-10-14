@@ -654,3 +654,68 @@ describe("GET /price (CoinGecko proxy for the charts)", () => {
     expect(post.status).toBe(405);
   });
 });
+
+describe("ETH, BSC and TON", () => {
+  const EVM = "0x28c6c06298d514db089934071355e5743bf21d60";
+  const TON = "UQDKHZ7e70CzqdvZCC83Z4WVR8POC_ZB0J1Y4zo88G-zCSRH";
+  const body = (network: string, address: string) => ({ raw: JSON.stringify({ network, address }) });
+
+  it("screens an address on each supported network, with that network's code, and answers the same contract", async () => {
+    for (const [network, address] of [["ETH", EVM], ["BSC", EVM], ["TON", TON]] as const) {
+      aegisCalls = [];
+      const res = await post(makeEnv().env, null, body(network, address));
+      expect(res.status).toBe(200);
+      expect(await res.json()).toEqual({ level: "clear", label: "Binance", logo: BINANCE_LOGO });
+      expect(aegisCalls).toHaveLength(1);
+      expect(aegisCalls[0]!.body).toEqual({ address: address.toLowerCase() === address ? address : address, network });
+    }
+  });
+
+  it("validates the address FOR ITS NETWORK before any paid call", async () => {
+    const { env } = makeEnv();
+    const bad: Array<[string, string]> = [
+      ["ETH", ADDRESS], // a Tron address on Ethereum
+      ["ETH", EVM.slice(0, -1)], // too short
+      ["ETH", "0x28c6C06298d514Db089934071355E5743bf21d60"], // mixed case, wrong EIP-55 checksum (one letter flipped)
+      ["TON", TON.slice(0, -1) + "A"], // checksum
+      ["TON", EVM],
+      ["BSC", TON],
+      ["TRON", EVM],
+    ];
+    for (const [network, address] of bad) expect((await post(env, null, body(network, address))).status, `${network} ${address}`).toBe(400);
+    expect((await post(env, null, body("SOL", EVM))).status).toBe(400);
+    expect(aegisCalls).toHaveLength(0);
+  });
+
+  it("an EVM address is one cache entry whatever its case: the second check is free", async () => {
+    const { env, kv } = makeEnv();
+    const mixed = "0x28C6C06298D514DB089934071355E5743BF21D60"; // all upper case: valid, no checksum
+    await post(env, null, body("ETH", EVM));
+    await post(env, null, body("ETH", mixed));
+    expect(aegisCalls).toHaveLength(1);
+    expect([...kv.store.keys()]).toEqual([`v7:ETH:${EVM}`]);
+  });
+
+  it("the cache is per network: the same EVM address on BSC is its own check", async () => {
+    const { env } = makeEnv();
+    await post(env, null, body("ETH", EVM));
+    await post(env, null, body("BSC", EVM));
+    expect(aegisCalls.map((c) => c.body!.network)).toEqual(["ETH", "BSC"]);
+  });
+
+  it("a token contract is its own level and carries the issuer's name", async () => {
+    aegisAnswer = () => aegisBody("low", "Tether", true, { smart_contract: { is_contract: true, token_contract: true, kind: "token_contract" } });
+    const res = await post(makeEnv().env, null, body("ETH", "0xdac17f958d2ee523a2206206994597c13d831ec7"));
+    expect(await res.json()).toEqual({ level: "contract", label: "Tether" });
+  });
+
+  it("a risky address names only an exchange: a mixer or an OTC desk gets no name (its name would state the reason)", async () => {
+    for (const category of ["mixer", "otc_desk"]) {
+      aegisAnswer = () => aegisBody("sanctioned", "Whatever", true, { entity: { name: "Tornado.Cash", category, logo_url: LOGO }, labels: [{ source_name: "VASP entity defaults", label: "Tornado.Cash", category }] });
+      const res = await post(makeEnv().env, null, body("ETH", EVM));
+      expect(await res.json()).toEqual({ level: "caution" });
+    }
+    aegisAnswer = () => aegisBody("sanctioned", null, true, { entity: { name: "HTX", category: "centralized_exchange" } });
+    expect(await (await post(makeEnv().env, null, body("ETH", EVM))).json()).toMatchObject({ level: "caution", label: "HTX" });
+  });
+});

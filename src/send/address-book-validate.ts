@@ -1,43 +1,16 @@
-// Strict validation of public/address-book.json for CI (scripts/validate-fixtures.ts). Not part of the site bundle:
-// it needs keccak (EIP-55) and runs only in Node.
-import { keccak256 } from "js-sha3";
+// Strict validation of public/address-book.json for CI (scripts/validate-fixtures.ts). Not part of the site bundle.
 import { validateTronAddress } from "./tron-address.ts";
+import { isValidEvmAddress, isValidTonAddress } from "./address-checks.ts";
+
+export { isValidEvmAddress, isValidTonAddress };
 import { sanitizeAvatarUrl } from "./avatar-url.ts";
 import { BOOK_NETWORKS, MAX_BOOK_ENTRIES, MAX_COMMENT_LENGTH } from "./address-book.ts";
-
-/** An EVM address is 0x + 40 hex. All-lowercase or all-uppercase carry no checksum; mixed case must be a valid EIP-55 checksum. */
-export function isValidEvmAddress(address: string): boolean {
-  if (!/^0x[0-9a-fA-F]{40}$/.test(address)) return false;
-  const hex = address.slice(2);
-  if (hex === hex.toLowerCase() || hex === hex.toUpperCase()) return true;
-  const hash = keccak256(hex.toLowerCase());
-  return [...hex].every((c, i) => /\d/.test(c) || (parseInt(hash[i]!, 16) >= 8 ? c === c.toUpperCase() : c === c.toLowerCase()));
-}
 
 /**
  * A saved name says WHO an address is, never WHY it might be risky: the Send screen's rule is that a reason is not
  * disclosed anywhere, and the book sits right above the risk check. These words are therefore refused in a comment.
  */
 export const RISK_WORDING = /sanction|ofac|\bsdn\b|blacklist|black-list|frozen|mixer|laundering|illicit|scam|hack|stolen|exploit|terror|criminal|fraud|designated/i;
-
-/**
- * A TON address in the user-friendly form: 48 base64 / base64url characters = tag (1 byte: 0x11 bounceable or 0x51
- * non-bounceable, +0x80 for testnet) + workchain (1) + account hash (32) + CRC16-XMODEM of the first 34 bytes (2).
- * "UQ..." and "EQ..." are the two usual prefixes of workchain 0.
- */
-export function isValidTonAddress(address: string): boolean {
-  if (!/^[A-Za-z0-9_+/=-]{48}$/.test(address)) return false;
-  const bytes = Buffer.from(address.replace(/-/g, "+").replace(/_/g, "/"), "base64");
-  if (bytes.length !== 36) return false;
-  const tag = bytes[0]! & 0x7f;
-  if (tag !== 0x11 && tag !== 0x51) return false;
-  let crc = 0;
-  for (let i = 0; i < 34; i++) {
-    crc ^= bytes[i]! << 8;
-    for (let bit = 0; bit < 8; bit++) crc = crc & 0x8000 ? ((crc << 1) ^ 0x1021) & 0xffff : (crc << 1) & 0xffff;
-  }
-  return bytes[34] === crc >> 8 && bytes[35] === (crc & 0xff);
-}
 
 export async function validateAddressBook(json: unknown, subtle: SubtleCrypto | null = globalThis.crypto?.subtle ?? null): Promise<string[]> {
   const root = json as { version?: unknown; entries?: unknown } | null;

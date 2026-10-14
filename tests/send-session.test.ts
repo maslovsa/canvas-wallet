@@ -24,14 +24,15 @@ const RISKY = "THJUJFyTnrBWb1ijWav7qfRBrjUuKgP49Z";
 const UNKNOWN = "TLa2f6VPqDgRE67v1736s7bJ8Ray5wYjU7";
 
 const USDT: SendTokenInfo = {
-  key: "Tron:TR7NHq",
+  key: "TRON:TR7NHq",
+  network: "TRON",
   symbol: "USDT",
   name: "Tether USD",
   decimals: 6,
   isNative: false,
   contract: "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t",
   balanceUnits: 120_000_000n,
-  trxBalanceUnits: 250_000_000n,
+  nativeBalanceUnits: 250_000_000n,
 };
 const TRX: SendTokenInfo = { ...USDT, key: "Tron:native", symbol: "TRX", name: "Tron", isNative: true, contract: "native", balanceUnits: 100_000_000n };
 
@@ -62,7 +63,7 @@ class Clock {
   }
 }
 
-const LIVE_FEE: FeeEstimate = { kind: "live", newRecipient: false, sun: 6_400_000n };
+const LIVE_FEE: FeeEstimate = { kind: "live", newRecipient: false, units: 6_400_000n };
 const SEED: Record<string, RiskResult> = {
   [CLEAR_LABELED]: { state: "clear", label: "Binance" },
   [CLEAR_PLAIN]: { state: "clear" },
@@ -392,7 +393,7 @@ describe("amount and fee states (DR5)", () => {
   });
 
   it("a token send needs TRX for the fee", () => {
-    const poor = { ...USDT, trxBalanceUnits: 1_000_000n };
+    const poor = { ...USDT, nativeBalanceUnits: 1_000_000n };
     expect(view({ amountText: "10" }, poor).amount.error).toBe("Not enough TRX for the network fee");
   });
 
@@ -402,10 +403,10 @@ describe("amount and fee states (DR5)", () => {
   });
 
   it("fee line: loading dots, typical label on fallback, new-account note", () => {
-    const typical: FeeEstimate = { kind: "typical", newRecipient: false, sun: 6_500_000n };
+    const typical: FeeEstimate = { kind: "typical", newRecipient: false, units: 6_500_000n };
     expect(view({ fee: { kind: "loading", estimate: typical } }).fee).toEqual({ label: "Network fee (estimate)", value: "…", note: null });
     expect(view({ fee: { kind: "ready", estimate: typical } }).fee).toEqual({ label: "Network fee (typical)", value: "~6.5 TRX", note: null });
-    expect(view({ fee: { kind: "ready", estimate: { kind: "live", newRecipient: true, sun: 13_000_000n } } }).fee.note).toBe("new account");
+    expect(view({ fee: { kind: "ready", estimate: { kind: "live", newRecipient: true, units: 13_000_000n } } }).fee.note).toBe("new account");
     expect(view({}).fee.value).toBe("—");
   });
 
@@ -434,5 +435,84 @@ describe("module-scope session", () => {
     expect(b).not.toBe(a);
     expect(b.state.address).toBe("");
     resetSendSession();
+  });
+});
+
+describe("other networks", () => {
+  const EVM = "0xdAC17F958D2ee523a2206206994597C13D831ec7";
+  const TON_ADDR = "UQDKHZ7e70CzqdvZCC83Z4WVR8POC_ZB0J1Y4zo88G-zCSRH";
+  const ETH_USDT: SendTokenInfo = { key: "ETH:usdt", network: "ETH", symbol: "USDT", name: "Tether USD", decimals: 6, isNative: false, contract: EVM, balanceUnits: 120_000_000n, nativeBalanceUnits: 500_000_000_000_000_000n };
+  const GRAM: SendTokenInfo = { key: "TON:native", network: "TON", symbol: "GRAM", name: "Gram", decimals: 9, isNative: true, contract: "native", balanceUnits: 100_000_000_000n, nativeBalanceUnits: 100_000_000_000n };
+  const make = (token: SendTokenInfo, fee: bigint, risk: RiskResult = { state: "clear" }) => {
+    const clock = new Clock();
+    const deps: SendDeps = {
+      validateAddress: (a) => (token.network === "TON" ? import("../src/send/address-checks.ts").then((m) => m.validateTonAddress(a)) : import("../src/send/address-checks.ts").then((m) => m.validateEvmAddress(a))),
+      estimateFee: async () => ({ kind: "live", newRecipient: false, units: fee }),
+      checkRisk: async () => risk,
+      now: clock.now,
+      setTimeout: clock.setTimeout,
+      clearTimeout: clock.clearTimeout,
+    };
+    return new SendController(token, deps);
+  };
+
+  it("an Ethereum send validates EVM addresses, says so for a bad one, and shows the fee in ETH", async () => {
+    const c = make(ETH_USDT, 65_000_000_000_000n);
+    await c.setAddress("TAzsQ9Gx8eqFNFSKbeXrbi45CuVPHzA8wr");
+    await settle();
+    expect(c.view().address.error).toBe("Enter a valid Ethereum address");
+    await c.setAddress(EVM);
+    await settle();
+    expect(c.view().address.error).toBeNull();
+    expect(c.view().address.status).toMatchObject({ text: "No risk signals found" });
+    expect(c.view().fee).toEqual({ label: "Network fee (estimate)", value: "~0.000065 ETH", note: null });
+  });
+
+  it("a complete address of ANOTHER network is an error at once, not 'still typing'", async () => {
+    const t = make(GRAM, 1n);
+    await t.setAddress("TAzsQ9Gx8eqFNFSKbeXrbi45CuVPHzA8wr"); // a valid Tron address in the TON field
+    await settle();
+    expect(t.view().address.error).toBe("Enter a valid TON address");
+    await t.setAddress(EVM);
+    await settle();
+    expect(t.view().address.error).toBe("Enter a valid TON address");
+    const e = make(ETH_USDT, 1n);
+    await e.setAddress(TON_ADDR);
+    await settle();
+    expect(e.view().address.error).toBe("Enter a valid Ethereum address");
+  });
+
+  it("stays quiet while a long address is still being typed", async () => {
+    const c = make(ETH_USDT, 1n);
+    await c.setAddress("0xdAC17F958D2ee5");
+    await settle();
+    expect(c.view().address.error).toBeNull();
+    await c.setAddress("0xdAC17F958D2ee5zz"); // an illegal character is wrong at any length
+    await settle();
+    expect(c.view().address.error).toBe("Enter a valid Ethereum address");
+  });
+
+  it("a TON send takes TON addresses, checks the fee in GRAM, and a token contract warning works there too", async () => {
+    const c = make(GRAM, 5_500_000n, { state: "contract", label: "Tether" });
+    await c.setAddress(TON_ADDR);
+    await settle();
+    expect(c.view().fee.value).toBe("~0.0055 GRAM");
+    expect(c.view().address.status).toMatchObject({ contract: true });
+    c.setAmount("1");
+    c.pressSend();
+    expect(c.view()).toMatchObject({ popup: true, popupKind: "contract" });
+  });
+
+  it("the native-coin balance check names the network's own coin", async () => {
+    const c = make({ ...ETH_USDT, nativeBalanceUnits: 1n }, 65_000_000_000_000n);
+    await c.setAddress(EVM);
+    await settle();
+    c.setAmount("1");
+    expect(c.view().amount.error).toBe("Not enough ETH for the network fee");
+    const g = make({ ...GRAM, balanceUnits: 1_000_000_000n }, 5_500_000n);
+    await g.setAddress(TON_ADDR);
+    await settle();
+    g.setAmount("1");
+    expect(g.view().amount.error).toBe("Not enough GRAM for the amount and the network fee");
   });
 });

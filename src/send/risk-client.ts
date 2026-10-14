@@ -7,6 +7,7 @@
 // or unavailable. A label (a VASP's name) and its logo may accompany clear and caution results (plan R14; the Worker
 // only sends a corroborated VASP identity on caution); never a score or a reason (plan decisions R1, E6, E7).
 import { sanitizeLogoUrl } from "./entity-logo.ts";
+import { ADDRESS_LENGTH, NETWORK_IDS, isNetworkId, normalizeAddress, type NetworkId } from "./network-id.ts";
 
 export type RiskResult =
   | { state: "clear"; label?: string; logo?: string }
@@ -16,7 +17,7 @@ export type RiskResult =
   | { state: "unavailable" };
 
 export interface SeedEntry {
-  network: "TRON";
+  network: NetworkId;
   address: string;
   level: "clear" | "caution" | "contract";
   /** Owner label from Aegis; only allowed on a clear entry (a label on a risky address can reveal the reason). */
@@ -51,10 +52,14 @@ export function validateSeedShape(json: unknown): string[] {
         errors.push(`${where}: unexpected key "${key}"${FORBIDDEN_KEYS.includes(key) ? " (scores and reasons must never be stored)" : ""}`);
       }
     }
-    if (e.network !== "TRON") errors.push(`${where}: network must be "TRON"`);
-    if (typeof e.address !== "string" || e.address.length !== 34) errors.push(`${where}: address must be a 34-character string`);
-    else if (seen.has(e.address)) errors.push(`${where}: duplicate address`);
-    else seen.add(e.address);
+    if (!isNetworkId(e.network)) errors.push(`${where}: network must be one of ${NETWORK_IDS.join(", ")}`);
+    if (typeof e.address !== "string" || !isNetworkId(e.network) || e.address.length !== ADDRESS_LENGTH[e.network]) {
+      errors.push(`${where}: address must be ${isNetworkId(e.network) ? ADDRESS_LENGTH[e.network] : "a valid-length"} characters for its network`);
+    } else {
+      const key = `${e.network}:${normalizeAddress(e.network, e.address)}`;
+      if (seen.has(key)) errors.push(`${where}: duplicate address`);
+      else seen.add(key);
+    }
     if (e.level !== "clear" && e.level !== "caution" && e.level !== "contract") errors.push(`${where}: level must be "clear", "caution" or "contract"`);
     if (e.label !== undefined) {
       if (typeof e.label !== "string" || e.label.length === 0 || e.label.length > MAX_LABEL_LENGTH) {
@@ -81,8 +86,9 @@ export function parseSeed(json: unknown): SeedEntry[] {
 }
 
 /** Seed answer for an address, or null on a miss (unknown address or an entry older than 90 days). */
-export function seedLookup(entries: SeedEntry[], address: string, now: Date): RiskResult | null {
-  const entry = entries.find((e) => e.address === address);
+export function seedLookup(entries: SeedEntry[], address: string, now: Date, network: NetworkId = "TRON"): RiskResult | null {
+  const wanted = normalizeAddress(network, address);
+  const entry = entries.find((e) => e.network === network && normalizeAddress(e.network, e.address) === wanted);
   if (!entry) return null;
   const ageDays = (now.getTime() - Date.parse(entry.checkedAt)) / DAY_MS;
   if (!(ageDays <= SEED_MAX_AGE_DAYS)) return null; // also false for NaN/future-dated garbage
@@ -118,6 +124,8 @@ export function resetSeedCache(): void {
 export interface RiskDeps {
   seed: SeedEntry[];
   now: Date;
+  /** The network the address belongs to (default Tron). */
+  network?: NetworkId;
   /** Base URL of the risk-check Worker; undefined or empty means seed-only. */
   proxyUrl?: string | undefined;
   fetchImpl?: typeof fetch;
@@ -148,12 +156,12 @@ export function parseProxyAnswer(body: unknown): RiskResult {
 }
 
 /** One POST to the Worker. Never throws: any failure is "unavailable". */
-export async function proxyCheck(address: string, proxyUrl: string, fetchImpl: typeof fetch = fetch, timeoutMs = 14_000): Promise<RiskResult> {
+export async function proxyCheck(address: string, proxyUrl: string, fetchImpl: typeof fetch = fetch, timeoutMs = 14_000, network: NetworkId = "TRON"): Promise<RiskResult> {
   try {
     const res = await fetchImpl(`${proxyUrl.replace(/\/+$/, "")}/check`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ network: "TRON", address }),
+      body: JSON.stringify({ network, address }),
       signal: AbortSignal.timeout(timeoutMs),
     });
     if (!res.ok) return { state: "unavailable" };
@@ -165,8 +173,9 @@ export async function proxyCheck(address: string, proxyUrl: string, fetchImpl: t
 
 /** Seed first; on a miss, the Worker when one is configured. Anything not answered is "unavailable" (never "safe"). */
 export async function checkAddress(address: string, deps: RiskDeps): Promise<RiskResult> {
-  const fromSeed = seedLookup(deps.seed, address, deps.now);
+  const network = deps.network ?? "TRON";
+  const fromSeed = seedLookup(deps.seed, address, deps.now, network);
   if (fromSeed) return fromSeed;
   if (!deps.proxyUrl) return { state: "unavailable" };
-  return proxyCheck(address, deps.proxyUrl, deps.fetchImpl, deps.timeoutMs);
+  return proxyCheck(address, deps.proxyUrl, deps.fetchImpl, deps.timeoutMs, network);
 }

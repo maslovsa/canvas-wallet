@@ -262,13 +262,13 @@ test("Send: an invalid address is rejected inline and the page never leaves the 
   expect(dialogSeen).toBe(false);
 });
 
-test("Send on a non-Tron token shows the in-phone notice, not a browser alert", async ({ page }) => {
+test("Send on a token it cannot handle shows the in-phone notice, not a browser alert", async ({ page }) => {
   let dialogSeen = false;
   page.on("dialog", async (d) => {
     dialogSeen = true;
     await d.dismiss();
   });
-  await openShowcase(page); // showcase list: USDY is an Ethereum token
+  await openShowcase(page); // showcase list: USDY is an Ethereum token with a hand-made placeholder contract (0x...dEaD), which Send refuses
   await page.getByText("USDY — USDT Yield").click();
   const editor = page.locator(".json-editor");
   const json = await editor.inputValue();
@@ -277,7 +277,7 @@ test("Send on a non-Tron token shows the in-phone notice, not a browser alert", 
     .replace('"widgets": [', '"widgets": [\n    { "type": "action_group", "items": [{ "label": "Send", "action": "send" }] },');
   await editor.fill(withSend);
   await page.locator(".phone-screen .action-group-btn", { hasText: "Send" }).click();
-  await expect(page.locator(".phone-dialog")).toContainText("Send is available for Tron tokens only");
+  await expect(page.locator(".phone-dialog")).toContainText("Send isn't available for this network or token type yet");
   await page.locator(".phone-dialog button", { hasText: "OK" }).click();
   await expect(page.locator(".phone-overlay")).toHaveCount(0);
   expect(dialogSeen).toBe(false);

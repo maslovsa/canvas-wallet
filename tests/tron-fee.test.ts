@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import { estimateFee, formatTrx, resetFeeCache } from "../src/send/tron-fee.ts";
+import { estimateFee, resetFeeCache } from "../src/send/tron-fee.ts";
+import { formatFeeAmount } from "../src/send/fee.ts";
 
 const USDT = { type: "TRC20", id: "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t" };
 const TRX = { type: "NATIVE", id: "native" };
@@ -42,24 +43,24 @@ describe("estimateFee", () => {
   it("TRC20 to an address that already holds the token: ~65k energy x 100 SUN = 6.5 TRX, live", async () => {
     const { fetchImpl } = fakeTronGrid({ holderBalanceWord: "0".repeat(63) + "1" });
     const fee = await estimateFee(USDT, HOLDER, fetchImpl);
-    expect(fee).toEqual({ kind: "live", newRecipient: false, sun: 6_500_000n });
-    expect(formatTrx(fee.sun)).toBe("6.5");
+    expect(fee).toEqual({ kind: "live", newRecipient: false, units: 6_500_000n });
+    expect(formatFeeAmount(fee.units, 6)).toBe("6.5");
   });
 
   it("TRC20 to an empty address: ~130k energy = 13.0 TRX, flagged as a new recipient", async () => {
     const { fetchImpl } = fakeTronGrid({});
     const fee = await estimateFee(USDT, EMPTY, fetchImpl);
-    expect(fee).toEqual({ kind: "live", newRecipient: true, sun: 13_000_000n });
+    expect(fee).toEqual({ kind: "live", newRecipient: true, units: 13_000_000n });
   });
 
   it("native TRX to an existing account: bandwidth only (345 bytes x 1000 SUN)", async () => {
     const { fetchImpl } = fakeTronGrid({ accountExists: true });
-    expect(await estimateFee(TRX, HOLDER, fetchImpl)).toEqual({ kind: "live", newRecipient: false, sun: 345_000n });
+    expect(await estimateFee(TRX, HOLDER, fetchImpl)).toEqual({ kind: "live", newRecipient: false, units: 345_000n });
   });
 
   it("native TRX to an account that does not exist yet: + 1 TRX creation fee", async () => {
     const { fetchImpl } = fakeTronGrid({ accountExists: false });
-    expect(await estimateFee(TRX, EMPTY, fetchImpl)).toEqual({ kind: "live", newRecipient: true, sun: 1_345_000n });
+    expect(await estimateFee(TRX, EMPTY, fetchImpl)).toEqual({ kind: "live", newRecipient: true, units: 1_345_000n });
   });
 
   it("chain parameters are fetched once per session", async () => {
@@ -73,7 +74,7 @@ describe("estimateFee", () => {
     const { fetchImpl } = fakeTronGrid({ failParams: true });
     const fee = await estimateFee(USDT, HOLDER, fetchImpl);
     expect(fee.kind).toBe("typical");
-    expect(fee.sun).toBe(6_500_000n);
+    expect(fee.units).toBe(6_500_000n);
   });
 
   it("rate limited on the recipient lookup (429): typical figures", async () => {
@@ -84,16 +85,5 @@ describe("estimateFee", () => {
   it("a malformed parameters answer (missing getEnergyFee) falls back to typical", async () => {
     const fetchImpl = (async () => new Response(JSON.stringify({ chainParameter: [{ key: "getTransactionFee", value: 1000 }] }))) as unknown as typeof fetch;
     expect((await estimateFee(USDT, HOLDER, fetchImpl)).kind).toBe("typical");
-  });
-});
-
-describe("formatTrx", () => {
-  it("rounds to one decimal using integer math", () => {
-    expect(formatTrx(6_500_000n)).toBe("6.5");
-    expect(formatTrx(6_449_999n)).toBe("6.4");
-    expect(formatTrx(6_450_000n)).toBe("6.5");
-    expect(formatTrx(345_000n)).toBe("0.3");
-    expect(formatTrx(13_000_000n)).toBe("13.0");
-    expect(formatTrx(0n)).toBe("0.0");
   });
 });

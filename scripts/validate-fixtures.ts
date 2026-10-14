@@ -40,7 +40,7 @@ import { createAjv } from "../src/schema/create-validator.ts";
 import { declaresAtLeast, requiredSchemaVersion } from "../src/registry-client/schema-version-gate.ts";
 import { validateAddressBook } from "../src/send/address-book-validate.ts";
 import { validateSeedShape, parseSeed, seedLookup, SEED_MAX_AGE_DAYS } from "../src/send/risk-client.ts";
-import { validateTronAddress } from "../src/send/tron-address.ts";
+import { validateNetworkAddress, isNetworkId, normalizeAddress, type NetworkId } from "../src/send/network-id.ts";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, "..");
@@ -167,18 +167,18 @@ try {
 }
 
 // Send-window risk seed (public/risk-seed.json): strict shape (no scores or reasons, no label on a
-// caution entry), every address passes the Base58Check validator, and a stale seed is flagged.
+// caution entry), every address is valid for its network (Tron Base58Check, EVM EIP-55, TON CRC16), and a stale seed is flagged.
 {
   const seedPath = join(ROOT, "public", "risk-seed.json");
   const seedJson = JSON.parse(readFileSync(seedPath, "utf-8"));
   const shapeErrors = validateSeedShape(seedJson);
   log(shapeErrors.length === 0, seedPath, shapeErrors.length === 0 ? "seed shape valid" : shapeErrors.join("; "));
   for (const entry of parseSeed(seedJson)) {
-    const check = await validateTronAddress(entry.address, webcrypto.subtle as SubtleCrypto);
-    log(check.ok, `${seedPath} ${entry.address}`, check.ok ? "valid Tron address" : `invalid (${check.reason})`);
+    const check = await validateNetworkAddress(entry.network, entry.address, webcrypto.subtle as SubtleCrypto);
+    log(check.ok, `${seedPath} ${entry.network} ${entry.address}`, check.ok ? `valid ${entry.network} address` : `invalid (${check.reason})`);
   }
   const entries = parseSeed(seedJson);
-  const stale = entries.filter((e) => seedLookup([e], e.address, new Date()) === null);
+  const stale = entries.filter((e) => seedLookup([e], e.address, new Date(), e.network) === null);
   if (stale.length > 0) {
     console.warn(`[WARN] ${stale.length} seed entr${stale.length === 1 ? "y is" : "ies are"} older than ${SEED_MAX_AGE_DAYS} days and ignored at runtime — re-check them with Aegis.`);
   }
@@ -213,13 +213,14 @@ try {
   const bookErrors = await validateAddressBook(JSON.parse(readFileSync(bookPath, "utf-8")), webcrypto.subtle as SubtleCrypto);
   log(bookErrors.length === 0, bookPath, bookErrors.length === 0 ? "address book valid" : bookErrors.join("; "));
 
-  // Every Tron address in the book must have a risk-seed answer, or picking it in the Send screen ends in
+  // Every address in the book must have a risk-seed answer, or picking it in the Send screen ends in
   // "Couldn't verify this address" (no Worker needed for the demo addresses). A stale entry is only warned about.
   const seedEntries = parseSeed(JSON.parse(readFileSync(join(ROOT, "public", "risk-seed.json"), "utf-8")));
-  const tronBook = (JSON.parse(readFileSync(bookPath, "utf-8")).entries as Array<{ network: string; address: string }>).filter((e) => e.network === "TRON");
-  const unseeded = tronBook.filter((e) => !seedEntries.some((s) => s.address === e.address));
-  log(unseeded.length === 0, `${bookPath} x risk-seed.json`, unseeded.length === 0 ? "every Tron book address has a risk-seed entry" : `no risk-seed entry for: ${unseeded.map((e) => e.address).join(", ")}`);
-  const staleBook = tronBook.filter((e) => seedEntries.some((s) => s.address === e.address) && seedLookup(seedEntries, e.address, new Date()) === null);
+  const book = (JSON.parse(readFileSync(bookPath, "utf-8")).entries as Array<{ network: NetworkId; address: string }>).filter((e) => isNetworkId(e.network));
+  const seeded = (e: { network: NetworkId; address: string }) => seedEntries.some((s) => s.network === e.network && normalizeAddress(s.network, s.address) === normalizeAddress(e.network, e.address));
+  const unseeded = book.filter((e) => !seeded(e));
+  log(unseeded.length === 0, `${bookPath} x risk-seed.json`, unseeded.length === 0 ? "every book address has a risk-seed entry" : `no risk-seed entry for: ${unseeded.map((e) => `${e.network} ${e.address}`).join(", ")}`);
+  const staleBook = book.filter((e) => seeded(e) && seedLookup(seedEntries, e.address, new Date(), e.network) === null);
   if (staleBook.length > 0) console.warn(`[WARN] ${staleBook.length} address-book entr${staleBook.length === 1 ? "y has a" : "ies have a"} risk-seed entry older than ${SEED_MAX_AGE_DAYS} days: re-check with Aegis.`);
 }
 
