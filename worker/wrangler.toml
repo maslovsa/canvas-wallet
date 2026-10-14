@@ -19,7 +19,7 @@ enabled = false
 ALLOWED_ORIGIN = "https://maslovsa.github.io,http://localhost:5173,http://127.0.0.1:5173" # the site, and a local `npm run dev`
 AEGIS_BASE_URL = "https://api.aegis-kyt.com"
 # Abuse limits (plan R4 / E3): live Aegis calls per day for the whole demo, and per visitor per hour.
-DAILY_BUDGET = "30"
+DAILY_BUDGET = "100"
 PER_VISITOR_PER_HOUR = "10"
 
 # Verdict cache (a verdict is kept 24 h, a failed check 60 s).

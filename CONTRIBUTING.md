@@ -340,7 +340,7 @@ Workers Builds 3,000 build minutes/month.
 | --- | --- | --- |
 | Bad origin, bad JSON, invalid address | none (rejected before KV and the Durable Object) | n/a |
 | Cached verdict | 1 KV read | kept forever (no expiry); to drop every cached verdict bump the key version in `worker/src/index.ts` |
-| Live check | 1-2 DO requests, 1 KV write, 1 Aegis call | `DAILY_BUDGET` = 30/day, so at most 30 KV writes (quota 1,000); each address is written once, ever |
+| Live check | 1-2 DO requests, 1 KV write, 1 Aegis call | `DAILY_BUDGET` = 100/day (about 10 Aegis credits), so at most 100 KV writes (quota 1,000); each address is written once, ever |
 | Price chart (`GET /price`) | 1 Worker request, 0 KV; CoinGecko (DefiLlama as fallback) only on a Cache API miss | cached 15 min per id; 502 on an upstream error (the phone shows its sample chart) |
 | Refused by a limit (flood) | 0 DO requests after the first refusal: the isolate remembers it for 60 s | per-visitor 10/h, global budget |
 | Git build of `main` | about 1 build minute (`npm test`) | quota 3,000/month; branches other than `main` do not build |

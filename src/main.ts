@@ -547,8 +547,10 @@ async function loadSource(source: RegistrySource, listMeta: ListMeta | undefined
 function parseGithubQueryParam(): { owner: string; repo: string } | undefined {
   const value = new URLSearchParams(location.search).get("registry");
   if (!value) return undefined;
-  const [owner, repo] = value.split("/");
-  if (!owner || !repo) return undefined;
+  const [owner, repo, ...rest] = value.split("/");
+  // GitHub names only: they go straight into github.com / raw.githubusercontent.com URL paths.
+  const NAME = /^[A-Za-z0-9_.-]{1,100}$/;
+  if (rest.length > 0 || !owner || !repo || !NAME.test(owner) || !NAME.test(repo) || owner === "." || owner === ".." || repo === "." || repo === "..") return undefined;
   return { owner, repo };
 }
 

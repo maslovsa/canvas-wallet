@@ -24,6 +24,14 @@ export function sanitizeLogoUrl(raw: unknown, forRisk = false): string | undefin
   if (url.protocol !== "https:" || !ALLOWED_HOSTS.has(url.hostname)) return undefined;
   if (url.username !== "" || url.password !== "" || url.port !== "" || url.search !== "" || url.hash !== "") return undefined;
   if (!url.pathname.toLowerCase().endsWith(".png")) return undefined;
-  if (forRisk && RISK_PATH.test(decodeURIComponent(url.pathname))) return undefined;
+  if (forRisk) {
+    let path: string;
+    try {
+      path = decodeURIComponent(url.pathname);
+    } catch {
+      return undefined; // malformed %-escapes: refuse rather than throw
+    }
+    if (RISK_PATH.test(path)) return undefined;
+  }
   return url.href;
 }

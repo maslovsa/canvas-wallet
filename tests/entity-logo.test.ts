@@ -9,6 +9,8 @@ describe("sanitizeLogoUrl for a risky address", () => {
     expect(sanitizeLogoUrl(risky)).toBe(risky); // on a clear address the path is not a reason
     expect(sanitizeLogoUrl(risky, true)).toBeUndefined();
     expect(sanitizeLogoUrl("https://cdn.jsdelivr.net/gh/example/r@main/logos/OFAC/x.png", true)).toBeUndefined();
+    expect(() => sanitizeLogoUrl("https://cdn.jsdelivr.net/gh/example/r@main/logos/%E0%A4%A/x.png", true)).not.toThrow();
+    expect(sanitizeLogoUrl("https://cdn.jsdelivr.net/gh/example/r@main/logos/%E0%A4%A/x.png", true)).toBeUndefined();
     expect(sanitizeLogoUrl("https://cdn.jsdelivr.net/gh/example/r@main/logos/exchanges/bybit-com.png", true)).toBe("https://cdn.jsdelivr.net/gh/example/r@main/logos/exchanges/bybit-com.png");
   });
 });
