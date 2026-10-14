@@ -142,6 +142,7 @@ export function renderPhoneFrame(container: HTMLElement, token: Token | undefine
         networkLabel: options.networkInfo?.canonicalName ?? options.networkName,
         onBack: leave,
         onDone: leave,
+        ...(options.onScreenChange ? { onAddressChange: options.onScreenChange } : {}),
       });
     });
   } else if (screenMode === "detail" && token) {

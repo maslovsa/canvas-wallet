@@ -192,6 +192,29 @@ describe("clear and caution flows", () => {
     });
   });
 
+  describe("the address bar follows the field", () => {
+    it("reports an address change once typing pauses (debounced), not per keystroke", async () => {
+      document.body.innerHTML = "";
+      const frame = document.createElement("div");
+      frame.className = "phone-frame";
+      const screen = document.createElement("div");
+      frame.append(screen);
+      document.body.append(frame);
+      const onAddressChange = vi.fn();
+      const controller = new SendController(USDT, deps);
+      mountSendScreen({ frame, screen, chromeStyle: "ios", controller, networkLabel: "Tron", onBack: vi.fn(), onDone: vi.fn(), onAddressChange });
+      const input = screen.querySelector<HTMLInputElement>("#send-address")!;
+      for (const text of ["T", "TM", "TMu", "TMuA6YqfCeX8EhbfYEg5y7S4DqzSJireY9"]) {
+        input.value = text;
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+      }
+      expect(onAddressChange).not.toHaveBeenCalled(); // not per keystroke
+      await vi.waitFor(() => expect(onAddressChange).toHaveBeenCalledTimes(1), { timeout: 3000 });
+      await new Promise((r) => setTimeout(r, 600));
+      expect(onAddressChange).toHaveBeenCalledTimes(1); // one report for the whole burst
+    });
+  });
+
   describe("address book", () => {
     const BOOK = {
       version: 1,

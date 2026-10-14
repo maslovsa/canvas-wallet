@@ -12,6 +12,7 @@
 // call; a replay with the same Idempotency-Key within 24 h is free (docs.aegis-kyt.com/api-reference/v2-screen).
 import { validateTronAddress } from "../../src/send/tron-address.ts";
 import { sanitizeLogoUrl } from "../../src/send/entity-logo.ts";
+import { logoForEntityName } from "../../src/send/known-entities.ts";
 import { Counter, type CounterStorage } from "./counter.ts";
 
 export { Counter } from "./counter.ts";
@@ -97,6 +98,18 @@ export function sanitizeLabel(raw: unknown): string | undefined {
   return cleaned === "" ? undefined : cleaned;
 }
 
+/** The name from the admin-curated "VASP entity defaults" row of `verdict.labels[]` (never the community tag packs). */
+function curatedVaspName(labels: unknown): string | undefined {
+  if (!Array.isArray(labels)) return undefined;
+  for (const row of labels as Array<{ source_name?: unknown; label?: unknown; category?: unknown }>) {
+    if (typeof row?.source_name === "string" && /VASP entity defaults/i.test(row.source_name) && row.category === "exchange") {
+      const name = sanitizeLabel(row.label);
+      if (name) return name;
+    }
+  }
+  return undefined;
+}
+
 /** Aegis risk_score (0-100) at or above which the client shows the risk line and the confirmation alert. */
 export const RISK_ALERT_SCORE = 50;
 
@@ -117,6 +130,7 @@ export function mapAegisVerdict(body: unknown): Verdict {
       label?: unknown;
       sdn_match?: unknown;
       entity?: { name?: unknown; logo_url?: unknown } | null;
+      labels?: unknown;
     };
     coverage?: { data_available?: unknown };
   } | null;
@@ -139,7 +153,13 @@ export function mapAegisVerdict(body: unknown): Verdict {
   // No numeric score: the level decides (medium and above are caution, as before).
   if (score === null && (level === "medium" || level === "high" || level === "critical")) return caution();
   if (belowThreshold || (score === null && (level === "low" || (level === "none" && hasData)))) {
-    return withIdentity("clear", sanitizeLabel(entity?.name) ?? sanitizeLabel(verdict?.label));
+    // A clear address's owner: the entity, else the raw label, else the admin-curated VASP row of labels[] ("Binance",
+    // "OKX"): Aegis often names an exchange there without filling `entity`. Its logo comes from the entity if it has one,
+    // else from the known-exchange table. (A risky address never takes this route: caution identity is entity-only.)
+    const name = sanitizeLabel(entity?.name) ?? sanitizeLabel(verdict?.label) ?? curatedVaspName(verdict?.labels);
+    if (!name) return { level: "clear" };
+    const logo = sanitizeLogoUrl(entity?.logo_url) ?? sanitizeLogoUrl(logoForEntityName(name));
+    return logo ? { level: "clear", label: name, logo } : { level: "clear", label: name };
   }
   return { level: "unknown" }; // none without data, an unknown level, or a malformed answer
 }
@@ -244,7 +264,7 @@ async function handleCheck(request: Request, env: Env, cors: Record<string, stri
 
   if (env.RISK_ENABLED !== "true") return json({ level: "unknown" } satisfies Verdict, 200, cors);
 
-  const cacheKey = `v3:TRON:${address}`;
+  const cacheKey = `v4:TRON:${address}`;
   try {
     const cached = await env.RISK_CACHE.get(cacheKey);
     if (cached) return json(JSON.parse(cached) as Verdict, 200, cors);

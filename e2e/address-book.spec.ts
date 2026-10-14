@@ -230,3 +230,63 @@ test("a ?to= link with a saved address shows its name; with an unknown one it do
   await page.goto("/?list=aegis-super-list&network=Tron&token=USDT&to=TLa2f6VPqDgRE67v1736s7bJ8Ray5wYjU7");
   await expect(page.locator("label[for=send-address]")).toHaveText("To");
 });
+
+// ---- the address bar follows the address typed on Send
+test("typing an address on Send puts it in the page address (?to=), live; clearing or leaving removes it", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await openSend(page);
+  const to = () => new URL(page.url()).searchParams.get("to");
+  expect(to()).toBeNull();
+  await page.locator("#send-address").fill("TAzsQ9Gx8eqFNFSKbeXrbi45CuVPHzA8wr");
+  await expect.poll(to).toBe("TAzsQ9Gx8eqFNFSKbeXrbi45CuVPHzA8wr");
+  expect(new URL(page.url()).searchParams.get("token")).toBe("USDT"); // the rest of the link is intact
+  await page.locator("#send-address").fill("TM1zzNDZD2DPASbKcgdVoTYhfmYgtfwx9R");
+  await expect.poll(to).toBe("TM1zzNDZD2DPASbKcgdVoTYhfmYgtfwx9R");
+  await page.locator("#send-address").fill("");
+  await expect.poll(to).toBeNull();
+  await page.locator("#send-address").fill("TAzsQ9Gx8eqFNFSKbeXrbi45CuVPHzA8wr");
+  await expect.poll(to).not.toBeNull();
+  await page.locator(".send-back").click();
+  await expect.poll(to).toBeNull();
+  // and the link round-trips: opening it shows the same address
+  await page.goto("/?list=aegis-super-list&network=Tron&token=USDT&to=TAzsQ9Gx8eqFNFSKbeXrbi45CuVPHzA8wr");
+  await expect(page.locator("#send-address")).toHaveValue("TAzsQ9Gx8eqFNFSKbeXrbi45CuVPHzA8wr");
+});
+
+// ---- addresses of known exchanges: the exchange's logo and name, and nothing about risk
+const PIXEL = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==", "base64");
+
+test("every known-exchange address in the risk seed shows the exchange's logo and name and no risk wording", async ({ page }) => {
+  const seed = (JSON.parse(readFileSync("public/risk-seed.json", "utf8")).entries as Array<{ address: string; level: string; label?: string; logo?: string }>).filter((e) => e.level === "clear" && e.label && e.logo);
+  expect(seed.length).toBeGreaterThanOrEqual(5); // Binance (x3), Bybit, OKX, Bitget ...
+  await page.clock.install({ time: new Date("2026-10-20T12:00:00Z") });
+  await page.route("https://cdn.jsdelivr.net/**/*.png", (route) => route.fulfill({ contentType: "image/png", body: PIXEL })); // the logos, offline
+  await page.setViewportSize({ width: 1440, height: 1200 });
+  await openSend(page);
+  const rows: string[] = [];
+  for (const entry of seed) {
+    await page.locator("#send-address").fill(entry.address);
+    const status = page.locator(".send-status-text");
+    await expect(status, entry.address).toHaveText(entry.label!);
+    const img = page.locator(".send-status .send-owner-logo");
+    await expect(img).toHaveAttribute("src", entry.logo!);
+    await expect(img).toBeVisible(); // the logo loaded (not just the initial placeholder)
+    const wording = (await page.locator(".send-status").innerText()).toLowerCase();
+    expect(wording).not.toMatch(/risk|caution|sanction|⚠/);
+    await expect(page.locator(".send-status.send-tone-caution")).toHaveCount(0);
+    await expect(page.locator(".send-identity")).toBeHidden(); // that row is for a risky address that is also a known exchange
+    rows.push(`${entry.address.slice(0, 8)}…  ${entry.label}`);
+  }
+  console.log(`\nKNOWN EXCHANGES (${seed.length})\n${rows.join("\n")}`);
+});
+
+test("the Binance hot wallet TAzsQ9Gx… shows Binance with its logo and no risk line", async ({ page }) => {
+  await page.clock.install({ time: new Date("2026-10-20T12:00:00Z") });
+  await page.route("https://cdn.jsdelivr.net/**/*.png", (route) => route.fulfill({ contentType: "image/png", body: PIXEL }));
+  await page.setViewportSize({ width: 1440, height: 1200 });
+  await openSend(page);
+  await page.locator("#send-address").fill("TAzsQ9Gx8eqFNFSKbeXrbi45CuVPHzA8wr");
+  await expect(page.locator(".send-status-text")).toHaveText("Binance");
+  await expect(page.locator(".send-status .send-owner-logo")).toHaveAttribute("src", /binance-com\.png$/);
+  await expect(page.locator(".send-status")).not.toContainText(/risk/i);
+});
