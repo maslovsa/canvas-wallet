@@ -59,7 +59,7 @@
     {
       "network": "TRON",
       "address": "TXSmtNhgRN1kMHUE9ZXvwg9Ew7CWu1WbLv",
-      "comment": "ABCEX hot wallet (EU/UA sanctions)"
+      "comment": "ABCEX hot wallet"
     },
     {
       "network": "TRON",
@@ -74,37 +74,37 @@
     {
       "network": "TRON",
       "address": "TLo45PfTdDuQjfJg7uSbG9UNaFokiDCd3k",
-      "comment": "Garantex hot wallet (sanctioned exchange)"
+      "comment": "Garantex hot wallet"
     },
     {
       "network": "TRON",
       "address": "TMuCgBejD5RsNANZdjGtaM3YyKGNgDoy7N",
-      "comment": "Grinex hot wallet (Garantex successor)"
+      "comment": "Grinex hot wallet"
     },
     {
       "network": "ETH",
       "address": "0x2f389ce8bd8ff92de3402ffce4691d17fc4f6535",
-      "comment": "OFAC SDN: SUEX OTC"
+      "comment": "SUEX OTC"
     },
     {
       "network": "TRON",
       "address": "TU4tDFRvcKhAZ1jdihojmBWZqvJhQCnJ4F",
-      "comment": "OFAC SDN: Aeza Group"
+      "comment": "Aeza Group"
     },
     {
       "network": "TRON",
       "address": "TNNcaQDVuE5xYqEcZs6XCn66asGShvbZ3y",
-      "comment": "Tether blacklist (frozen USDT)"
+      "comment": "USDT wallet"
     },
     {
       "network": "ETH",
       "address": "0xaf5d53b9682119d0b3fb2afa8bd10a28192dcd91",
-      "comment": "Tether blacklist (frozen USDT)"
+      "comment": "USDT wallet"
     },
     {
       "network": "ETH",
       "address": "0x905b63fff465b9ffbf41dea908ceb12478ec7601",
-      "comment": "Tornado Cash contract (sanctioned mixer)"
+      "comment": "Tornado Cash contract"
     },
     {
       "network": "ETH",

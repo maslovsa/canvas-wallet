@@ -13,6 +13,12 @@ export function isValidEvmAddress(address: string): boolean {
   return [...hex].every((c, i) => /\d/.test(c) || (parseInt(hash[i]!, 16) >= 8 ? c === c.toUpperCase() : c === c.toLowerCase()));
 }
 
+/**
+ * A saved name says WHO an address is, never WHY it might be risky: the Send screen's rule is that a reason is not
+ * disclosed anywhere, and the book sits right above the risk check. These words are therefore refused in a comment.
+ */
+export const RISK_WORDING = /sanction|ofac|\bsdn\b|blacklist|black-list|frozen|mixer|laundering|illicit|scam|hack|stolen|exploit|terror|criminal|fraud|designated/i;
+
 export async function validateAddressBook(json: unknown, subtle: SubtleCrypto | null = globalThis.crypto?.subtle ?? null): Promise<string[]> {
   const root = json as { version?: unknown; entries?: unknown } | null;
   if (!root || typeof root !== "object" || root.version !== 1 || !Array.isArray(root.entries)) return ['address book must be {"version": 1, "entries": [...]}'];
@@ -39,6 +45,8 @@ export async function validateAddressBook(json: unknown, subtle: SubtleCrypto | 
     }
     if (typeof e.comment !== "string" || e.comment.trim() === "" || e.comment.length > MAX_COMMENT_LENGTH) {
       errors.push(`${where}: comment must be 1-${MAX_COMMENT_LENGTH} characters`);
+    } else if (RISK_WORDING.test(e.comment)) {
+      errors.push(`${where}: comment must name the owner, not a risk reason (found "${RISK_WORDING.exec(e.comment)![0]}")`);
     }
   }
   return errors;

@@ -13,6 +13,10 @@ describe("the shipped address book (public/address-book.json)", () => {
   it("passes the strict validator: every address is valid for its network, no duplicates", async () => {
     expect(await validateAddressBook(file, subtle)).toEqual([]);
   });
+  it("names owners only: no comment states a risk reason", () => {
+    const wording = /sanction|ofac|sdn|blacklist|frozen|mixer|illicit|scam|hack|stolen/i;
+    expect(parseAddressBook(file).filter((e) => wording.test(e.comment))).toEqual([]);
+  });
   it("has entries for Tron, Ethereum and BSC, with the saved comments", () => {
     const entries = parseAddressBook(file);
     expect(entries).toHaveLength(24);
@@ -37,6 +41,10 @@ describe("validateAddressBook", () => {
     ["an empty comment", { network: "TRON", address: TRON, comment: " " }, "comment must be"],
     ["a too long comment", { network: "TRON", address: TRON, comment: "x".repeat(81) }, "comment must be"],
     ["an extra key (a score, say)", { network: "TRON", address: TRON, comment: "c", risk_score: 9 }, 'unexpected key "risk_score"'],
+    ["a risk reason in the comment (sanctions)", { network: "TRON", address: TRON, comment: "Exchange (EU sanctions)" }, "not a risk reason"],
+    ["a risk reason in the comment (OFAC SDN)", { network: "TRON", address: TRON, comment: "OFAC SDN: Someone" }, "not a risk reason"],
+    ["a risk reason in the comment (blacklist)", { network: "TRON", address: TRON, comment: "Tether blacklist" }, "not a risk reason"],
+    ["a risk reason in the comment (mixer)", { network: "ETH", address: EVM, comment: "Sanctioned mixer" }, "not a risk reason"],
     ["surrounding spaces", { network: "TRON", address: ` ${TRON}`, comment: "c" }, "without surrounding spaces"],
   ])("rejects %s", async (_why, entry, message) => {
     expect((await validateAddressBook(book([entry]), subtle)).join("\n")).toContain(message);
