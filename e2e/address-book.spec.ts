@@ -1,8 +1,10 @@
 // The address book: a small book button at the end of the To field opens a bottom sheet (about two thirds of the
 // screen) with the saved recipients for the network; choosing one fills the field and closes the sheet.
 import { test, expect, devices, type Page } from "@playwright/test";
+import { readFileSync, mkdirSync } from "node:fs";
 
 const SHOTS = "docs/designs/redesign/v2";
+const TRON_SAVED = (JSON.parse(readFileSync("public/address-book.json", "utf8")).entries as Array<{ network: string }>).filter((e) => e.network === "TRON").length;
 const WORKER = "https://risk-worker.test";
 const { defaultBrowserType: _ignored, ...iphone } = devices["iPhone 14"];
 
@@ -31,10 +33,10 @@ test("the book button opens a sheet with the Tron addresses only; picking one fi
   const sheet = page.locator(".phone-sheet");
   await expect(sheet).toBeVisible();
   await expect(page.locator(".phone-sheet-title")).toHaveText("Address book");
-  await expect(page.locator(".phone-sheet-subtitle")).toHaveText("Tron · 12 saved");
+  await expect(page.locator(".phone-sheet-subtitle")).toHaveText(`Tron · ${TRON_SAVED} saved`);
   // only Tron addresses: every row's address starts with T; no 0x (Ethereum / BSC) address appears
   const labels = await page.locator(".book-row").evaluateAll((els) => els.map((e) => e.getAttribute("aria-label") ?? ""));
-  expect(labels).toHaveLength(12);
+  expect(labels).toHaveLength(TRON_SAVED);
   expect(labels.every((l) => /, T[1-9A-HJ-NP-Za-km-z]{33}$/.test(l))).toBe(true);
   // about two thirds of the screen
   const sheetBox = (await sheet.boundingBox())!;
@@ -116,7 +118,6 @@ async function clipOf(page: Page, selector: string) {
 }
 
 // ---- every Tron address of the book is answered (from the risk seed), none ends in "Couldn't verify"
-import { readFileSync, mkdirSync } from "node:fs";
 const BOOK = JSON.parse(readFileSync("public/address-book.json", "utf8")).entries as Array<{ network: string; address: string; comment: string }>;
 const nameOf = (address: string) => BOOK.find((e) => e.address === address)!.comment;
 

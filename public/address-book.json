@@ -120,6 +120,66 @@
       "network": "ETH",
       "address": "0x11111112542d85b3ef69ae05771c2dccff4faa26",
       "comment": "Jed McCaleb"
+    },
+    {
+      "network": "TRON",
+      "address": "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t",
+      "comment": "USDT token contract (TRC-20)"
+    },
+    {
+      "network": "TRON",
+      "address": "TEkxiTehnzSmSe2XqrBj4w32RUN966rdz8",
+      "comment": "USDC token contract (TRC-20)"
+    },
+    {
+      "network": "ETH",
+      "address": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+      "comment": "USDT token contract (ERC-20)"
+    },
+    {
+      "network": "ETH",
+      "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+      "comment": "USDC token contract (ERC-20)"
+    },
+    {
+      "network": "TRON",
+      "address": "TCFLL5dx5ZJdKnWuesXxi1VPwjLVmWZZy9",
+      "comment": "JST token contract (JUST)"
+    },
+    {
+      "network": "TRON",
+      "address": "TNUC9Qb1rRpS5CbWLmNMxXBjyFoydXjWFR",
+      "comment": "WTRX token contract (wrapped TRX)"
+    },
+    {
+      "network": "TRON",
+      "address": "TSSMHYeV2uE9qYH95DqyoCuNCzEL1NvU3S",
+      "comment": "SUN token contract"
+    },
+    {
+      "network": "TRON",
+      "address": "TXDk8mbtRbXeYuMNS83CfKPaYYT8XWv9Hz",
+      "comment": "USDD token contract"
+    },
+    {
+      "network": "ETH",
+      "address": "0x6b175474e89094c44da98b954eedeac495271d0f",
+      "comment": "DAI token contract"
+    },
+    {
+      "network": "ETH",
+      "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+      "comment": "WETH token contract"
+    },
+    {
+      "network": "ETH",
+      "address": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+      "comment": "WBTC token contract"
+    },
+    {
+      "network": "ETH",
+      "address": "0x514910771af9ca656af840dff83e8264ecf986ca",
+      "comment": "LINK token contract"
     }
   ]
 }

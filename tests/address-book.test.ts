@@ -19,7 +19,8 @@ describe("the shipped address book (public/address-book.json)", () => {
   });
   it("has entries for Tron, Ethereum and BSC, with the saved comments", () => {
     const entries = parseAddressBook(file);
-    expect(entries).toHaveLength(24);
+    expect(entries).toHaveLength(file.entries.length); // every entry of the file is well-formed (none dropped)
+    expect(entries.length).toBeGreaterThanOrEqual(36);
     expect(entriesForNetwork(entries, "TRON").length).toBeGreaterThan(5);
     expect(entriesForNetwork(entries, "ETH").length).toBeGreaterThan(5);
     expect(entriesForNetwork(entries, "BSC")).toHaveLength(1);
@@ -87,7 +88,7 @@ describe("loadAddressBook", () => {
     const fetchImpl = vi.fn(async () => new Response(JSON.stringify(file))) as unknown as typeof fetch;
     const first = await loadAddressBook(fetchImpl, "/canvas-wallet/");
     await loadAddressBook(fetchImpl, "/canvas-wallet/");
-    expect(first).toHaveLength(24);
+    expect(first).toHaveLength(file.entries.length);
     expect(fetchImpl).toHaveBeenCalledTimes(1);
     expect((fetchImpl as unknown as { mock: { calls: unknown[][] } }).mock.calls[0]![0]).toBe("/canvas-wallet/address-book.json");
   });
