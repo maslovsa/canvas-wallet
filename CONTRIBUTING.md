@@ -53,6 +53,13 @@ device up to 900 px, counts as a phone.
    you see locally is what ships.
 3. Open a pull request.
 
+### List logos in the Gallery
+
+A list may carry a `logo` in `public/lists/manifest.json` (e.g. `"logo": "list-logos/uniswap.png"`): a small png, svg or
+webp under `public/list-logos/` (at most 100 KB; `npm run validate:fixtures` checks it) drawn in a tile in the corner of
+the card. The logos shown are taken from each source's own site (Trust Wallet, Uniswap, Aegis, Pharos Watch) and are
+trademarks of their owners, used here only to identify where a list comes from.
+
 ### Adding a whole new list
 
 1. Add `public/lists/{your-list-id}.json` (schema-shaped).
