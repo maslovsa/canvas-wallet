@@ -184,6 +184,28 @@ try {
   }
 }
 
+// Gallery list logos (manifest.json `logo`): the file exists under public/, is a small png/svg/webp, and an SVG carries
+// no script or event handler (it is only ever shown through <img>, but stays clean anyway).
+{
+  const manifest = JSON.parse(readFileSync(join(ROOT, "public", "lists", "manifest.json"), "utf-8")) as { lists: Array<{ id: string; logo?: string }> };
+  for (const list of manifest.lists) {
+    if (list.logo === undefined) continue;
+    const file = join(ROOT, "public", list.logo);
+    let problem = "";
+    if (!/^list-logos\/[a-z0-9-]+\.(png|svg|webp)$/.test(list.logo)) problem = "logo must be list-logos/<name>.png|svg|webp";
+    else {
+      try {
+        const bytes = readFileSync(file);
+        if (bytes.length > 100_000) problem = `logo is ${bytes.length} bytes (max 100000)`;
+        else if (list.logo.endsWith(".svg") && /<script|\son[a-z]+\s*=|javascript:/i.test(bytes.toString("utf-8"))) problem = "svg contains a script or an event handler";
+      } catch {
+        problem = "logo file is missing";
+      }
+    }
+    log(problem === "", `${file} (list ${list.id})`, problem === "" ? "list logo ok" : problem);
+  }
+}
+
 // Send-screen address book (public/address-book.json): strict shape, and every address is valid for its network
 // (Tron Base58Check; EVM 0x + 40 hex, EIP-55 when mixed case), no duplicates.
 {

@@ -14,6 +14,21 @@ function countTokens(registry: Registry): number {
 }
 
 /** A small, decorative picture of what the list looks like in the phone: its first network and first three assets. */
+/** The list source's logo, in a small rounded tile in the corner of the preview. Decorative (the title names the source). */
+function renderListLogo(logo: string): HTMLElement {
+  const tile = document.createElement("span");
+  tile.className = "gallery-card-logo";
+  tile.setAttribute("aria-hidden", "true");
+  const img = document.createElement("img");
+  img.alt = "";
+  img.decoding = "async";
+  img.loading = "lazy";
+  img.src = `${import.meta.env.BASE_URL}${logo.replace(/^\/+/, "")}`;
+  img.addEventListener("error", () => tile.remove());
+  tile.append(img);
+  return tile;
+}
+
 export function renderMiniPhone(registry: Registry, networks: readonly NetworkInfo[]): HTMLElement {
   const preview = document.createElement("div");
   preview.className = "gallery-card-preview";
@@ -62,7 +77,9 @@ export function renderGalleryCards(
     card.className = "gallery-card";
 
     if (entry.registry) {
-      card.append(renderMiniPhone(entry.registry, networks));
+      const preview = renderMiniPhone(entry.registry, networks);
+      if (entry.meta.logo) preview.append(renderListLogo(entry.meta.logo));
+      card.append(preview);
       const open = icon("arrow-up-right", { size: 18, className: "gallery-card-open" });
       card.append(open);
     }

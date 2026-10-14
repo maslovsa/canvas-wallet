@@ -44,4 +44,6 @@ export interface ListMeta {
   name: string;
   description: string;
   file: string;
+  /** The source's logo, relative to the site root (public/list-logos/...): drawn in the corner of the Gallery card. */
+  logo?: string;
 }
