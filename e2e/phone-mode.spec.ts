@@ -135,3 +135,34 @@ test("token rows are keyboard-operable: Tab to a row, Enter opens it (sidebar an
   await page.keyboard.press("Space");
   await expect(page.locator(".card-header-name")).toContainText("(TRX)");
 });
+
+test("wallet home: the Send shortcut asks which asset, then opens its Send screen; Receive does the same", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/?list=aegis-super-list&network=Tron");
+  await expect(page.locator(".wallet-hero-amount")).toBeVisible();
+  await page.locator(".wallet-action", { hasText: "Send" }).click();
+  await expect(page.locator(".phone-dialog .phone-dialog-title")).toHaveText("Send");
+  await page.locator(".pick-row", { hasText: "USDT" }).click();
+  await expect(page.locator(".send-nav-title")).toHaveText("Send USDT");
+  await page.locator(".send-back").click();
+  await page.locator(".card-back-btn").click();
+  await page.locator(".wallet-action", { hasText: "Receive" }).click();
+  await page.locator(".pick-row", { hasText: "TRX" }).click();
+  await expect(page.locator(".phone-dialog .phone-dialog-title")).toHaveText("Receive TRX");
+});
+
+test("scrolling the wallet home and a token card turns their bars into compact blurred bars", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/?list=aegis-super-list&network=Tron");
+  const bar = page.locator(".phone-list-bar");
+  await expect(bar).not.toHaveClass(/is-scrolled/);
+  await page.locator(".phone-screen").evaluate((el) => el.scrollTo(0, 400));
+  await expect(bar).toHaveClass(/is-scrolled/);
+  await expect(page.locator(".phone-list-bar-title")).toHaveCSS("opacity", "1");
+  await page.goto("/?list=aegis-super-list&network=Tron&token=USDT");
+  const nav = page.locator(".card-nav-bar");
+  await expect(nav).not.toHaveClass(/is-scrolled/);
+  await page.locator(".phone-screen").evaluate((el) => el.scrollTo(0, 600));
+  await expect(nav).toHaveClass(/is-scrolled/);
+  await expect(page.locator(".card-nav-title")).toHaveText("USDT");
+});

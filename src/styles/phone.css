@@ -1,12 +1,22 @@
 /* The phone's content: wallet list, token card and widgets. iOS-flavoured grouped layout: the screen is a quiet
    canvas, content sits on rounded cards, separators are hairlines, numbers are tabular, titles are tight.
    Palette per theme lives on .phone-screen (--ph-*); --phone-dim is the secondary text color. */
-.phone-screen {
+/* The palette lives on the frame, not the screen: dialogs are children of the frame and use it too. */
+.phone-frame {
   --ph-bg: #f2f3f5;
   --ph-card: #ffffff;
   --ph-line: rgba(60, 60, 67, 0.13);
   --ph-fill: rgba(120, 120, 128, 0.12);
   --phone-dim: rgba(60, 60, 67, 0.74);
+}
+.phone-frame.theme-dark {
+  --ph-bg: #0b0c0e;
+  --ph-card: #15171a;
+  --ph-line: rgba(255, 255, 255, 0.08);
+  --ph-fill: rgba(255, 255, 255, 0.08);
+  --phone-dim: #9aa1ab;
+}
+.phone-screen {
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter Variable", "Segoe UI", system-ui, sans-serif;
   background: var(--ph-bg);
   color: #111214;
@@ -15,11 +25,6 @@
   -webkit-font-smoothing: antialiased;
 }
 .phone-frame.theme-dark .phone-screen {
-  --ph-bg: #0b0c0e;
-  --ph-card: #15171a;
-  --ph-line: rgba(255, 255, 255, 0.08);
-  --ph-fill: rgba(255, 255, 255, 0.08);
-  --phone-dim: #9aa1ab;
   color: #f2f3f5;
 }
 .phone-frame.chrome-android .phone-screen {
@@ -31,7 +36,9 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  min-height: 188px;
+  /* room for the sticky bar that is laid over the top of the art, plus the art itself */
+  padding-top: calc(var(--safe-top, 32px) + 44px);
+  min-height: calc(var(--safe-top, 32px) + 44px + 150px);
   margin-bottom: 4px;
   overflow: hidden;
 }
@@ -50,17 +57,56 @@
   background: linear-gradient(180deg, rgba(0, 0, 0, 0.18), rgba(0, 0, 0, 0) 38%, rgba(0, 0, 0, 0.22));
   pointer-events: none;
 }
-.card-nav-bar {
+/* Sticky bar over the art. Transparent with white controls at the top; a blurred bar with a compact title once scrolled. */
+.card-nav-bar,
+.phone-list-bar {
   position: sticky;
-  top: var(--safe-top, 32px);
-  z-index: 5;
-  flex-shrink: 0;
-  display: flex;
+  top: 0;
+  z-index: 6;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  justify-content: space-between;
-  height: 44px;
-  padding: 0 12px 0 8px;
-  margin-top: var(--safe-top, 32px);
+  flex-shrink: 0;
+  height: calc(var(--safe-top, 32px) + 44px);
+  padding: var(--safe-top, 32px) 12px 0 8px;
+  transition: background 180ms ease, box-shadow 180ms ease;
+}
+.card-nav-bar {
+  margin-bottom: calc(-1 * (var(--safe-top, 32px) + 44px));
+}
+.card-nav-bar.is-scrolled,
+.phone-list-bar.is-scrolled {
+  background: color-mix(in srgb, var(--ph-bg) 78%, transparent);
+  backdrop-filter: blur(20px) saturate(1.5);
+  -webkit-backdrop-filter: blur(20px) saturate(1.5);
+  box-shadow: 0 0.5px 0 var(--ph-line);
+}
+.card-nav-title,
+.phone-list-bar-title {
+  max-width: 55vw;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  opacity: 0;
+  transition: opacity 160ms ease;
+}
+.card-nav-bar.is-scrolled .card-nav-title,
+.phone-list-bar.is-scrolled .phone-list-bar-title {
+  opacity: 1;
+}
+.card-nav-bar.is-scrolled .card-back-btn {
+  color: var(--send-accent, #2a66ab);
+  text-shadow: none;
+}
+.card-nav-bar .badge-chip {
+  justify-self: end;
+  transition: opacity 160ms ease;
+}
+.card-nav-bar.is-scrolled .badge-chip {
+  opacity: 0;
 }
 .card-back-btn {
   display: flex;
@@ -162,14 +208,15 @@
 
 /* ---- wallet home: large title, network filter, grouped token list ------------------------------------ */
 .phone-list-header {
-  padding: calc(var(--safe-top, 32px) + 20px) 20px 4px;
+  padding: 4px 20px 4px;
 }
 .phone-list-exit {
   display: inline-flex;
   align-items: center;
+  justify-self: start;
   gap: 2px;
   min-height: 44px; /* touch target */
-  margin: 0 0 2px -6px;
+  margin-left: -6px;
   padding: 4px 8px 4px 2px;
   border: 0;
   background: transparent;
@@ -685,4 +732,121 @@
 .price-skeleton-chart {
   width: 100%;
   height: 64px;
+}
+
+/* ---- wallet home: balance hero and shortcuts ----------------------------------------------------------- */
+.wallet-hero {
+  margin: 12px 16px 0;
+  padding: 18px 18px 16px;
+  border-radius: 22px;
+  background: var(--ph-card);
+}
+.wallet-hero-label {
+  font-size: 13px;
+  color: var(--phone-dim);
+}
+.wallet-hero-amount {
+  margin-top: 2px;
+  font-size: 38px;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1.15;
+  font-variant-numeric: tabular-nums;
+}
+.wallet-hero-cents {
+  font-size: 22px;
+  color: var(--phone-dim);
+  letter-spacing: -0.02em;
+}
+.wallet-hero-note {
+  margin-top: 2px;
+  font-size: 12.5px;
+  color: var(--phone-dim);
+}
+.wallet-hero-actions {
+  display: flex;
+  gap: 28px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 0.5px solid var(--ph-line);
+}
+.wallet-action {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.wallet-action-disc {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  transition: filter 140ms ease, transform 140ms ease;
+}
+.wallet-action:hover .wallet-action-disc {
+  filter: brightness(1.1);
+}
+.wallet-action:active .wallet-action-disc {
+  transform: scale(0.94);
+}
+.pick-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 260px;
+  margin: 0 -8px 12px;
+  overflow-y: auto;
+  text-align: left;
+}
+.pick-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 52px;
+  padding: 6px 8px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.pick-row:hover {
+  background: rgba(127, 127, 127, 0.12);
+}
+.pick-row-logo {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  font-size: 14px;
+}
+.pick-row-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.pick-row-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  font-size: 13px;
+  color: var(--phone-dim);
+}
+.pick-row-text strong {
+  font-size: 15px;
+  color: inherit;
 }

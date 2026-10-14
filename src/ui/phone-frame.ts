@@ -122,6 +122,24 @@ export function renderPhoneFrame(container: HTMLElement, token: Token | undefine
         onDismiss: () => notice.close(),
       });
     };
+    const doSend = async (): Promise<void> => {
+      const prepared = await prepareSend(token, options.networkInfo?.canonicalName);
+      if (!prepared.ok) {
+        showNotice(prepared.message);
+        return;
+      }
+      screenMode = "send";
+      renderPhoneFrame(container, token, options);
+    };
+    const doReceive = async (): Promise<void> => {
+      const networkName = options.networkInfo?.canonicalName;
+      const address = receiveAddressFor(await loadReceiveAddresses(), networkName);
+      if (!address || !networkName) {
+        showNotice(REFUSAL_NO_RECEIVE_ADDRESS);
+        return;
+      }
+      openReceiveDialog({ frame: container, screen, chromeStyle: options.chromeStyle, token, networkName, address });
+    };
     renderDetailScreen(
       screen,
       token,
@@ -130,45 +148,68 @@ export function renderPhoneFrame(container: HTMLElement, token: Token | undefine
         screenMode = "list";
         renderPhoneFrame(container, token, options);
       },
-      async () => {
-        const prepared = await prepareSend(token, options.networkInfo?.canonicalName);
-        if (!prepared.ok) {
-          showNotice(prepared.message);
-          return;
-        }
-        screenMode = "send";
-        renderPhoneFrame(container, token, options);
-      },
-      async () => {
-        const networkName = options.networkInfo?.canonicalName;
-        const address = receiveAddressFor(await loadReceiveAddresses(), networkName);
-        if (!address || !networkName) {
-          showNotice(REFUSAL_NO_RECEIVE_ADDRESS);
-          return;
-        }
-        openReceiveDialog({ frame: container, screen, chromeStyle: options.chromeStyle, token, networkName, address });
-      },
+      doSend,
+      doReceive,
     );
+    if (pendingAction) {
+      // Arrived from a wallet-home shortcut: start the action it asked for once the card is up.
+      const action = pendingAction;
+      pendingAction = null;
+      void (action === "send" ? doSend() : doReceive());
+    }
   } else {
-    renderListScreen(screen, options);
+    renderListScreen(container, screen, options);
   }
   if (!direction && previousScroll > 0) screen.scrollTop = previousScroll;
   options.onScreenChange?.();
 }
 
-function renderListScreen(screen: HTMLElement, options: PhoneFrameOptions): void {
-  const header = document.createElement("div");
-  header.className = "phone-list-header";
+/** Collapses a bar into its compact, blurred state once the screen has scrolled past `threshold()` px. */
+function bindBarCollapse(screen: HTMLElement, bar: HTMLElement, threshold: () => number): void {
+  let collapsed = false;
+  screen.addEventListener(
+    "scroll",
+    () => {
+      const next = screen.scrollTop > threshold();
+      if (next === collapsed) return;
+      collapsed = next;
+      bar.classList.toggle("is-scrolled", next);
+    },
+    { passive: true },
+  );
+}
 
+type WalletAction = "send" | "receive";
+
+function tokensWithAction(tokens: readonly Token[], action: WalletAction): Token[] {
+  return tokens.filter((t) => Object.values(t.actions ?? {}).some((a) => a.type === action));
+}
+
+/** What a wallet-home action asks for next: after the picked token's card opens, this action starts. */
+let pendingAction: WalletAction | null = null;
+
+function renderListScreen(container: HTMLElement, screen: HTMLElement, options: PhoneFrameOptions): void {
+  // A sticky bar: the way out on the left, and the list's name which fades in (on a blurred bar) once the large title scrolls away.
+  const bar = document.createElement("div");
+  bar.className = "phone-list-bar";
   if (options.onExit) {
     const exit = document.createElement("button");
     exit.type = "button";
     exit.className = "phone-list-exit";
     exit.append(icon("chevron-left", { size: 18, strokeWidth: 2.25 }), document.createTextNode(options.onExit.label));
-    const run = options.onExit.run;
-    exit.addEventListener("click", run);
-    header.append(exit);
+    exit.addEventListener("click", options.onExit.run);
+    bar.append(exit);
+  } else {
+    bar.append(document.createElement("span"));
   }
+  const barTitle = document.createElement("div");
+  barTitle.className = "phone-list-bar-title";
+  barTitle.textContent = options.listName;
+  bar.append(barTitle, document.createElement("span"));
+  screen.append(bar);
+
+  const header = document.createElement("div");
+  header.className = "phone-list-header";
   const title = document.createElement("div");
   title.className = "phone-list-title";
   title.textContent = options.listName;
@@ -181,6 +222,10 @@ function renderListScreen(screen: HTMLElement, options: PhoneFrameOptions): void
     header.append(desc);
   }
   screen.append(header);
+  bindBarCollapse(screen, bar, () => title.offsetTop + title.offsetHeight - bar.offsetHeight);
+
+  const networkTokens = options.registryNetworks.find((n) => n.name === options.networkName)?.tokens ?? [];
+  screen.append(renderWalletHero(container, screen, options, networkTokens));
 
   const filter = document.createElement("div");
   filter.className = "phone-network-filter";
@@ -210,6 +255,90 @@ function renderListScreen(screen: HTMLElement, options: PhoneFrameOptions): void
     list.append(renderTokenListRow(token, options.onSelectToken));
   }
   screen.append(list);
+}
+
+/** Total balance (illustrative, like every amount here) and Send / Receive shortcuts that ask which token. */
+function renderWalletHero(container: HTMLElement, screen: HTMLElement, options: PhoneFrameOptions, tokens: readonly Token[]): HTMLElement {
+  const hero = document.createElement("section");
+  hero.className = "wallet-hero";
+
+  const total = tokens.reduce((sum, t) => sum + generateBalance(`${t.id}:${t.symbol}`, t.tags?.includes("stablecoin") ?? false).usd, 0);
+  const [dollars = "0", cents = "00"] = total.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).split(".");
+  const label = document.createElement("div");
+  label.className = "wallet-hero-label";
+  label.textContent = `Total balance on ${options.networkInfo?.canonicalName ?? options.networkName}`;
+  const amount = document.createElement("div");
+  amount.className = "wallet-hero-amount";
+  amount.append(document.createTextNode(`$${dollars}`));
+  const centsEl = document.createElement("span");
+  centsEl.className = "wallet-hero-cents";
+  centsEl.textContent = `.${cents}`;
+  amount.append(centsEl);
+  const note = document.createElement("div");
+  note.className = "wallet-hero-note";
+  note.textContent = `${tokens.length} asset${tokens.length === 1 ? "" : "s"} · illustrative amounts`;
+  hero.append(label, amount, note);
+
+  const actions = document.createElement("div");
+  actions.className = "wallet-hero-actions";
+  for (const [action, text, iconName] of [["send", "Send", "arrow-up-right"], ["receive", "Receive", "arrow-down-left"]] as const) {
+    const eligible = tokensWithAction(tokens, action);
+    if (eligible.length === 0) continue;
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "wallet-action";
+    const disc = document.createElement("span");
+    disc.className = "wallet-action-disc";
+    disc.append(icon(iconName, { size: 22, strokeWidth: 2 }));
+    const caption = document.createElement("span");
+    caption.textContent = text;
+    button.append(disc, caption);
+    button.addEventListener("click", () => pickTokenFor(container, screen, options, action, eligible, text));
+    actions.append(button);
+  }
+  if (actions.childElementCount > 0) hero.append(actions);
+  return hero;
+}
+
+function pickTokenFor(container: HTMLElement, screen: HTMLElement, options: PhoneFrameOptions, action: WalletAction, eligible: readonly Token[], title: string): void {
+  if (eligible.length === 1) {
+    pendingAction = action;
+    options.onSelectToken(eligible[0]!);
+    return;
+  }
+  const list = document.createElement("div");
+  list.className = "pick-list";
+  const sheet = openOverlay({
+    frame: container,
+    screen,
+    chromeStyle: options.chromeStyle,
+    tone: "info",
+    title,
+    body: "Choose an asset",
+    content: list,
+    buttons: [{ label: "Cancel", primary: true, onClick: () => sheet.close() }],
+    onDismiss: () => sheet.close(),
+  });
+  for (const token of eligible) {
+    const row = document.createElement("button");
+    row.type = "button";
+    row.className = "pick-row";
+    row.append(createLogoBadge(token.logo, token.symbol, "pick-row-logo"));
+    const text = document.createElement("span");
+    text.className = "pick-row-text";
+    const symbol = document.createElement("strong");
+    symbol.textContent = token.symbol;
+    const name = document.createElement("span");
+    name.textContent = token.name;
+    text.append(symbol, name);
+    row.append(text);
+    row.addEventListener("click", () => {
+      sheet.close();
+      pendingAction = action;
+      options.onSelectToken(token);
+    });
+    list.append(row);
+  }
 }
 
 function renderTokenListRow(token: Token, onSelect: (token: Token) => void): HTMLElement {
@@ -296,11 +425,9 @@ function renderDetailScreen(
   header.className = "card-header";
   applyHeaderBackground(header, token, options.chromeTheme);
 
-  // A pinned nav bar (back button + badge) — a CHILD of the header (not a
-  // sibling floated on top via negative margin) so it stays correctly
-  // layered above the header's background regardless of scroll. No bar
-  // background of its own — it's just a positioning strip for the back
-  // button and badge, not a visible band over the art.
+  // A sticky nav bar (back, compact title, badge) laid over the top of the header art (negative bottom margin).
+  // Over the art it is transparent with white controls; once the card scrolls past the art it turns into a blurred
+  // bar with the token's symbol as its title.
   const navBar = document.createElement("div");
   navBar.className = "card-nav-bar";
 
@@ -316,6 +443,10 @@ function renderDetailScreen(
   backBtn.append(chevron, label);
   backBtn.addEventListener("click", onBack);
   navBar.append(backBtn);
+  const navTitle = document.createElement("div");
+  navTitle.className = "card-nav-title";
+  navTitle.textContent = token.symbol;
+  navBar.append(navTitle);
 
   if (token.ui?.theme?.badgeText) {
     const badge = document.createElement("div");
@@ -323,7 +454,7 @@ function renderDetailScreen(
     badge.textContent = token.ui.theme.badgeText;
     navBar.append(badge);
   }
-  header.append(navBar);
+  screen.append(navBar);
 
   const bottomRow = document.createElement("div");
   bottomRow.className = "card-header-bottom";
@@ -380,6 +511,7 @@ function renderDetailScreen(
   bottomRow.append(infoStack);
   header.append(bottomRow);
   screen.append(header);
+  bindBarCollapse(screen, navBar, () => header.offsetHeight - navBar.offsetHeight - 8);
 
   const body = document.createElement("div");
   body.className = "card-body";

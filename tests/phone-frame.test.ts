@@ -47,3 +47,79 @@ describe("phone screen transitions", () => {
     host.remove();
   });
 });
+
+describe("wallet home", () => {
+  const send = { type: "send" } as const;
+  const receive = { type: "receive" } as const;
+  const usdt = { ...token, actions: { send, receive } } as unknown as Token;
+  const trx = { ...token, symbol: "TRX", id: "native", actions: { send } } as unknown as Token;
+  const plain = { ...token, symbol: "SUN", id: "TSUN", actions: undefined } as unknown as Token;
+  const home = (tokens: Token[], over: Partial<PhoneFrameOptions> = {}) =>
+    options({ registryNetworks: [{ name: "Tron", tokens }] as unknown as PhoneFrameOptions["registryNetworks"], ...over });
+
+  it("shows an (illustrative) total balance for the network and a compact bar title that is hidden until scrolled", () => {
+    const host = document.createElement("div");
+    document.body.append(host);
+    setPhoneNavScreen("list");
+    renderPhoneFrame(host, undefined, home([usdt, trx, plain]));
+    expect(host.querySelector(".wallet-hero-amount")!.textContent).toMatch(/^\$[\d,]+\.\d\d$/);
+    expect(host.querySelector(".wallet-hero-note")!.textContent).toBe("3 assets · illustrative amounts");
+    expect(host.querySelector(".phone-list-bar-title")!.textContent).toBe("Test list");
+    expect(host.querySelector(".phone-list-bar")!.classList.contains("is-scrolled")).toBe(false);
+    host.remove();
+  });
+
+  it("offers Send and Receive only for actions some token has, and a single candidate is opened directly", () => {
+    const host = document.createElement("div");
+    document.body.append(host);
+    setPhoneNavScreen("list");
+    const picked: string[] = [];
+    renderPhoneFrame(host, undefined, home([usdt, plain], { onSelectToken: (t) => picked.push(t.symbol) }));
+    const labels = [...host.querySelectorAll(".wallet-action")].map((b) => b.textContent);
+    expect(labels).toEqual(["Send", "Receive"]);
+    (host.querySelector(".wallet-action") as HTMLButtonElement).click(); // only USDT can send: no picker
+    expect(picked).toEqual(["USDT"]);
+    expect(host.querySelector(".phone-overlay")).toBeNull();
+    host.remove();
+  });
+
+  it("with several candidates a picker lists them and choosing one opens that token", () => {
+    const host = document.createElement("div");
+    document.body.append(host);
+    setPhoneNavScreen("list");
+    const picked: string[] = [];
+    renderPhoneFrame(host, undefined, home([usdt, trx], { onSelectToken: (t) => picked.push(t.symbol) }));
+    (host.querySelector(".wallet-action") as HTMLButtonElement).click(); // Send: USDT and TRX
+    const rows = [...host.querySelectorAll(".pick-row")];
+    expect(rows.map((r) => r.querySelector("strong")!.textContent)).toEqual(["USDT", "TRX"]);
+    (rows[1] as HTMLButtonElement).click();
+    expect(picked).toEqual(["TRX"]);
+    expect(host.querySelector(".phone-overlay")).toBeNull();
+    host.remove();
+  });
+
+  it("a network where no token can send or receive has no shortcuts", () => {
+    const host = document.createElement("div");
+    document.body.append(host);
+    setPhoneNavScreen("list");
+    renderPhoneFrame(host, undefined, home([plain]));
+    expect(host.querySelector(".wallet-hero-actions")).toBeNull();
+    host.remove();
+  });
+
+  it("the list bar and the token bar turn into compact blurred bars when the screen scrolls", () => {
+    const host = document.createElement("div");
+    document.body.append(host);
+    setPhoneNavScreen("list");
+    renderPhoneFrame(host, undefined, home([usdt]));
+    const screen = host.querySelector<HTMLElement>(".phone-screen")!;
+    // happy-dom has no layout: offsets are 0, so any positive scroll is past the threshold
+    screen.scrollTop = 500;
+    screen.dispatchEvent(new Event("scroll"));
+    expect(host.querySelector(".phone-list-bar")!.classList.contains("is-scrolled")).toBe(true);
+    screen.scrollTop = 0;
+    screen.dispatchEvent(new Event("scroll"));
+    expect(host.querySelector(".phone-list-bar")!.classList.contains("is-scrolled")).toBe(false);
+    host.remove();
+  });
+});

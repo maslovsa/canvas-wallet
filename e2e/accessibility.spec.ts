@@ -5,6 +5,8 @@ import AxeBuilder from "@axe-core/playwright";
 const { defaultBrowserType: _ignored, ...iphone } = devices["iPhone 14"];
 
 async function seriousViolations(page: Page): Promise<string[]> {
+  // Let entrance animations finish: axe would otherwise measure the contrast of half-transparent text.
+  await page.evaluate(() => Promise.all(document.getAnimations().filter((a) => a.effect?.getComputedTiming().iterations !== Infinity).map((a) => a.finished.catch(() => undefined))));
   const results = await new AxeBuilder({ page }).analyze();
   return results.violations
     .filter((v) => v.impact === "serious" || v.impact === "critical")
