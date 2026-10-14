@@ -73,24 +73,31 @@
       "network": "TRON",
       "address": "TDZiHNjB3gDu8Zu23i7HE4M5sPkBcsvPTJ",
       "level": "caution",
+      "label": "Rapira",
+      "logo": "https://cdn.jsdelivr.net/gh/maslovsa/kyt-entity-registry@main/logos/exchanges/rapira-net.png",
       "checkedAt": "2026-10-14"
     },
     {
       "network": "TRON",
       "address": "TXSmtNhgRN1kMHUE9ZXvwg9Ew7CWu1WbLv",
       "level": "caution",
+      "label": "ABCex",
+      "logo": "https://cdn.jsdelivr.net/gh/maslovsa/kyt-entity-registry@main/logos/exchanges/abcex-io.png",
       "checkedAt": "2026-10-14"
     },
     {
       "network": "TRON",
       "address": "TNaRAoLUyYEV2uF7GUrzSjRQTU8v5ZJ5VR",
       "level": "caution",
+      "label": "HTX",
+      "logo": "https://cdn.jsdelivr.net/gh/maslovsa/kyt-entity-registry@main/logos/exchanges/htx-com-huobi-com.png",
       "checkedAt": "2026-10-14"
     },
     {
       "network": "TRON",
       "address": "TLo45PfTdDuQjfJg7uSbG9UNaFokiDCd3k",
       "level": "caution",
+      "label": "Garantex",
       "checkedAt": "2026-10-14"
     },
     {
@@ -117,6 +124,7 @@
       "network": "TRON",
       "address": "TKzxdSv2FZKQrEqkKVgp5DcwEXBEKMg2Ax",
       "level": "clear",
+      "label": "SunSwap",
       "checkedAt": "2026-10-14"
     }
   ]

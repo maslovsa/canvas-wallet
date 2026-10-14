@@ -98,11 +98,16 @@ export function sanitizeLabel(raw: unknown): string | undefined {
   return cleaned === "" ? undefined : cleaned;
 }
 
-/** The name from the admin-curated "VASP entity defaults" row of `verdict.labels[]` (never the community tag packs). */
+/**
+ * The name from the operator-curated "VASP entity defaults" row of `verdict.labels[]` ("HTX", "Binance", "Rapira"). That
+ * row IS the VASP identity (the same fact `verdict.entity` carries); its category may be a risk category, which is
+ * ignored: only the name is used. Never the community tag packs, the sanctions lists, the stablecoin blacklists or the
+ * discovery traces, whose labels can name a person or state a reason.
+ */
 function curatedVaspName(labels: unknown): string | undefined {
   if (!Array.isArray(labels)) return undefined;
-  for (const row of labels as Array<{ source_name?: unknown; label?: unknown; category?: unknown }>) {
-    if (typeof row?.source_name === "string" && /VASP entity defaults/i.test(row.source_name) && row.category === "exchange") {
+  for (const row of labels as Array<{ source_name?: unknown; label?: unknown }>) {
+    if (typeof row?.source_name === "string" && /^VASP entity defaults/i.test(row.source_name)) {
       const name = sanitizeLabel(row.label);
       if (name) return name;
     }
@@ -118,9 +123,9 @@ export const RISK_ALERT_SCORE = 50;
  * level is `sanctioned` / there is a sanctions-list match (always, whatever the score); without a numeric score the
  * level decides (medium and above). The reason (categories, score, sanctions match) never leaves the Worker.
  *
- * Identity (plan R14): a clear result carries the owner's name (verdict.entity.name, else verdict.label) and logo.
- * A caution result carries ONLY the corroborated VASP identity (verdict.entity.name and its logo): never
- * verdict.label, which on a risky address can be a sanctioned person's name or a risk annotation.
+ * Identity (plan R14): a clear result carries the owner's name (the VASP identity, else verdict.label) and logo.
+ * A caution result carries ONLY the VASP identity (verdict.entity.name, or the curated VASP row of labels[]) and its
+ * logo: never verdict.label, which on a risky address can be a sanctioned person's name or a risk annotation.
  */
 export function mapAegisVerdict(body: unknown): Verdict {
   const root = body as {
@@ -138,12 +143,14 @@ export function mapAegisVerdict(body: unknown): Verdict {
   const level = verdict?.risk_level;
   const score = typeof verdict?.risk_score === "number" && Number.isFinite(verdict.risk_score) ? verdict.risk_score : null;
   const entity = verdict?.entity;
-  const withIdentity = (base: "clear" | "caution", name: string | undefined): Verdict => {
-    if (!name) return { level: base };
-    const logo = sanitizeLogoUrl(entity?.logo_url, base === "caution");
-    return logo ? { level: base, label: name, logo } : { level: base, label: name };
+  const caution = (): Verdict => {
+    // A risky address shows the VASP identity only (entity, or the curated VASP row): never verdict.label, which can be
+    // a sanctioned person's name or a reason. Its logo must not name a reason either (forRisk).
+    const name = sanitizeLabel(entity?.name) ?? curatedVaspName(verdict?.labels);
+    if (!name) return { level: "caution" };
+    const logo = sanitizeLogoUrl(entity?.logo_url, true) ?? sanitizeLogoUrl(logoForEntityName(name), true);
+    return logo ? { level: "caution", label: name, logo } : { level: "caution", label: name };
   };
-  const caution = (): Verdict => withIdentity("caution", sanitizeLabel(entity?.name));
 
   if (level === "sanctioned" || (verdict?.sdn_match !== undefined && verdict.sdn_match !== null)) return caution();
   if (score !== null && score >= RISK_ALERT_SCORE) return caution();
@@ -264,7 +271,7 @@ async function handleCheck(request: Request, env: Env, cors: Record<string, stri
 
   if (env.RISK_ENABLED !== "true") return json({ level: "unknown" } satisfies Verdict, 200, cors);
 
-  const cacheKey = `v4:TRON:${address}`;
+  const cacheKey = `v5:TRON:${address}`;
   try {
     const cached = await env.RISK_CACHE.get(cacheKey);
     if (cached) return json(JSON.parse(cached) as Verdict, 200, cors);
