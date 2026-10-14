@@ -3,6 +3,7 @@ import { webcrypto } from "node:crypto";
 import { mountSendScreen, unmountSendScreen } from "../src/ui/send-screen.ts";
 import { SendController, type SendDeps, type SendTokenInfo } from "../src/send/send-session.ts";
 import { validateTronAddress } from "../src/send/tron-address.ts";
+import { resetAddressBookCache } from "../src/send/address-book.ts";
 import type { RiskResult } from "../src/send/risk-client.ts";
 
 const CLEAR = "TMuA6YqfCeX8EhbfYEg5y7S4DqzSJireY9";
@@ -188,6 +189,57 @@ describe("clear and caution flows", () => {
       await type(q("#send-amount"), "10");
       q<HTMLButtonElement>(".send-submit").click(); // the confirmation still appears on Send
       expect(frame.querySelector(".phone-dialog")).not.toBeNull();
+    });
+  });
+
+  describe("address book", () => {
+    const BOOK = {
+      version: 1,
+      entries: [
+        { network: "TRON", address: "TMuA6YqfCeX8EhbfYEg5y7S4DqzSJireY9", comment: "Binance hot wallet" },
+        { network: "ETH", address: "0x28c6c06298d514db089934071355e5743bf21d60", comment: "Binance (Ethereum)" },
+        { network: "TRON", address: "THJUJFyTnrBWb1ijWav7qfRBrjUuKgP49Z", comment: "Saved contact" },
+      ],
+    };
+    const withBook = () => {
+      resetAddressBookCache();
+      vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify(BOOK))));
+    };
+
+    it("the book button sits at the end of the To field and opens a bottom sheet with this network's saved addresses only", async () => {
+      withBook();
+      const { q, frame } = mount();
+      const button = q<HTMLButtonElement>(".send-field .send-book-btn");
+      expect(button.getAttribute("aria-label")).toBe("Address book");
+      expect(button.parentElement!.lastElementChild).toBe(button);
+      button.click();
+      await vi.waitFor(() => expect(frame.querySelector(".phone-sheet")).not.toBeNull());
+      expect([...frame.querySelectorAll(".book-name")].map((e) => e.textContent)).toEqual(["Binance hot wallet", "Saved contact"]);
+      vi.unstubAllGlobals();
+    });
+
+    it("choosing an entry puts its address in the field (validated like typing), closes the sheet, and moves to the amount", async () => {
+      withBook();
+      const { q, frame, controller } = mount();
+      q<HTMLButtonElement>(".send-book-btn").click();
+      await vi.waitFor(() => expect(frame.querySelector(".book-row")).not.toBeNull());
+      frame.querySelector<HTMLButtonElement>(".book-row")!.click();
+      expect(q<HTMLInputElement>("#send-address").value).toBe("TMuA6YqfCeX8EhbfYEg5y7S4DqzSJireY9");
+      await vi.waitFor(() => expect(controller.state.risk.kind).toBe("clear"));
+      expect(q(".send-status-text").textContent).toBe("Binance");
+      expect(frame.querySelector(".phone-overlay")!.classList.contains("is-closing")).toBe(true);
+      expect(document.activeElement).toBe(q("#send-amount"));
+      vi.unstubAllGlobals();
+    });
+
+    it("a risky saved address goes through the same check as a typed one", async () => {
+      withBook();
+      const { q, frame } = mount();
+      q<HTMLButtonElement>(".send-book-btn").click();
+      await vi.waitFor(() => expect(frame.querySelectorAll(".book-row")).toHaveLength(2));
+      frame.querySelectorAll<HTMLButtonElement>(".book-row")[1]!.click();
+      await vi.waitFor(() => expect(q(".send-status-text").textContent).toBe("Risk signals found for this address"));
+      vi.unstubAllGlobals();
     });
   });
 

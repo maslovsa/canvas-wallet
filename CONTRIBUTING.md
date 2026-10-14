@@ -279,6 +279,14 @@ person), a category or a score. `e2e/send-risk-examples.spec.ts` regenerates exa
 Addresses that are not in the seed show "Couldn't verify
 this address" until the live Worker is connected.
 
+**Address book.** The small book button at the end of the Send screen's To field opens a bottom sheet (about two thirds
+of the screen; dismiss with Esc, the close button, a tap on the dimmed area or by dragging it down) with the saved
+recipients for the network being sent on; choosing one fills the field exactly as typing would (so it is validated and
+risk-checked). The list is `public/address-book.json`: `{"version": 1, "entries": [{"network": "TRON" | "ETH" | "BSC",
+"address": "...", "comment": "..."}]}`, at most 200 entries, comments up to 80 characters. `npm run validate:fixtures`
+checks every address for its network (Tron Base58Check; EVM `0x` + 40 hex, EIP-55 when mixed case), rejects duplicates and
+extra keys. Send is Tron-only for now, so only the `TRON` entries are shown; `ETH` and `BSC` entries wait for EVM Send.
+
 **CI gates.** Every pull request and every push to `main` runs `npm test` (a push to `main` deploys, so
 the tests run before the build). After the build, `npm run check:dist` fails the deploy if `dist/`
 contains secret-shaped text: this repository is public and the built site is world-readable.

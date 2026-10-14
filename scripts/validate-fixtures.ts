@@ -38,6 +38,7 @@ import { fileURLToPath } from "node:url";
 import { ICON_DOMAIN_ALLOWLIST } from "../src/icon/domain-allowlist.ts";
 import { createAjv } from "../src/schema/create-validator.ts";
 import { declaresAtLeast, requiredSchemaVersion } from "../src/registry-client/schema-version-gate.ts";
+import { validateAddressBook } from "../src/send/address-book-validate.ts";
 import { validateSeedShape, parseSeed, seedLookup, SEED_MAX_AGE_DAYS } from "../src/send/risk-client.ts";
 import { validateTronAddress } from "../src/send/tron-address.ts";
 
@@ -181,6 +182,14 @@ try {
   if (stale.length > 0) {
     console.warn(`[WARN] ${stale.length} seed entr${stale.length === 1 ? "y is" : "ies are"} older than ${SEED_MAX_AGE_DAYS} days and ignored at runtime — re-check them with Aegis.`);
   }
+}
+
+// Send-screen address book (public/address-book.json): strict shape, and every address is valid for its network
+// (Tron Base58Check; EVM 0x + 40 hex, EIP-55 when mixed case), no duplicates.
+{
+  const bookPath = join(ROOT, "public", "address-book.json");
+  const bookErrors = await validateAddressBook(JSON.parse(readFileSync(bookPath, "utf-8")), webcrypto.subtle as SubtleCrypto);
+  log(bookErrors.length === 0, bookPath, bookErrors.length === 0 ? "address book valid" : bookErrors.join("; "));
 }
 
 if (failed) {
