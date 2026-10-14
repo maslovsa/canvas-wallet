@@ -36,6 +36,7 @@ const FILES: Record<string, string> = {
   coinex: "coinex-com",
   bitmart: "bitmart-com",
   kuna: "kuna-io",
+  abcex: "abcex-io",
   rapira: "rapira-net",
 };
 

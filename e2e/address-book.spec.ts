@@ -290,3 +290,48 @@ test("the Binance hot wallet TAzsQ9Gx… shows Binance with its logo and no risk
   await expect(page.locator(".send-status .send-owner-logo")).toHaveAttribute("src", /binance-com\.png$/);
   await expect(page.locator(".send-status")).not.toContainText(/risk/i);
 });
+
+// ---- a known exchange that is ALSO risky: its logo and name, and the risk line
+test("a risky known-exchange address (HTX, Rapira, ABCex, Garantex…) shows the exchange's name and logo AND the risk line; sanctioned people stay anonymous", async ({ page }) => {
+  const entries = JSON.parse(readFileSync("public/risk-seed.json", "utf8")).entries as Array<{ address: string; level: string; label?: string; logo?: string }>;
+  const named = entries.filter((e) => e.level === "caution" && e.label);
+  const bare = entries.filter((e) => e.level === "caution" && !e.label);
+  expect(named.length).toBeGreaterThanOrEqual(4);
+  expect(bare.length).toBeGreaterThanOrEqual(2);
+  await page.clock.install({ time: new Date("2026-10-20T12:00:00Z") });
+  await page.route("https://cdn.jsdelivr.net/**/*.png", (route) => route.fulfill({ contentType: "image/png", body: PIXEL }));
+  await page.setViewportSize({ width: 1440, height: 1200 });
+  await openSend(page);
+  const rows: string[] = [];
+  for (const entry of named) {
+    await page.locator("#send-address").fill(entry.address);
+    await expect(page.locator(".send-identity-name"), entry.address).toHaveText(entry.label!);
+    await expect(page.locator(".send-status-text")).toHaveText("Risk signals found for this address");
+    if (entry.logo) {
+      await expect(page.locator(".send-identity .send-owner-logo")).toHaveAttribute("src", entry.logo);
+      await expect(page.locator(".send-identity .send-owner-logo")).toBeVisible();
+    } else {
+      await expect(page.locator(".send-identity .send-owner-logo")).toHaveCount(0); // name with an initial
+    }
+    // never the reason: no list, category or score wording anywhere on the status
+    expect((await page.locator(".send-form").innerText()).toLowerCase()).not.toMatch(/sanction|ofac|sdn|blacklist|score|critical|exposure/);
+    rows.push(`${entry.address.slice(0, 8)}…  ${entry.label}  ${entry.logo ? "+ logo" : "(no logo)"}  + risk line`);
+  }
+  for (const entry of bare) {
+    await page.locator("#send-address").fill(entry.address);
+    await expect(page.locator(".send-status-text"), entry.address).toHaveText("Risk signals found for this address");
+    await expect(page.locator(".send-identity")).toBeHidden();
+  }
+  console.log(`\nRISKY KNOWN EXCHANGES (${named.length}), anonymous cautions (${bare.length})\n${rows.join("\n")}`);
+});
+
+test("TNaRAoLU… (HTX): the name HTX, its logo, and the risk line", async ({ page }) => {
+  await page.clock.install({ time: new Date("2026-10-20T12:00:00Z") });
+  await page.route("https://cdn.jsdelivr.net/**/*.png", (route) => route.fulfill({ contentType: "image/png", body: PIXEL }));
+  await page.setViewportSize({ width: 1440, height: 1200 });
+  await openSend(page);
+  await page.locator("#send-address").fill("TNaRAoLUyYEV2uF7GUrzSjRQTU8v5ZJ5VR");
+  await expect(page.locator(".send-identity-name")).toHaveText("HTX");
+  await expect(page.locator(".send-identity .send-owner-logo")).toHaveAttribute("src", /htx-com-huobi-com\.png$/);
+  await expect(page.locator(".send-status-text")).toHaveText("Risk signals found for this address");
+});

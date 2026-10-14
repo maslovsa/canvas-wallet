@@ -235,15 +235,34 @@ describe("exchange named only in labels[] (Aegis often leaves entity empty)", ()
   it("an exchange that is not in the logo table keeps its name with no logo", () => {
     expect(map({ label: null, entity: null, labels: rows(["VASP entity defaults (admin-curated)", "Some Small Exchange", "exchange"]) })).toEqual({ level: "clear", label: "Some Small Exchange" });
   });
-  it("a non-exchange category row is ignored", () => {
-    expect(map({ label: null, entity: null, labels: rows(["VASP entity defaults (admin-curated)", "Some Mixer", "mixer"]) })).toEqual({ level: "clear" });
-  });
   it("an entity's own logo wins over the table; the entity name wins over labels[]", () => {
     expect(map({ entity: { name: "Binance", logo_url: LOGO }, labels: rows(CURATED) })).toEqual({ level: "clear", label: "Binance", logo: LOGO });
     expect(map({ entity: { name: "Entity Name", logo_url: null }, labels: rows(CURATED) })).toEqual({ level: "clear", label: "Entity Name" });
   });
-  it("a risky address never takes its name from labels[]: caution stays entity-only", () => {
-    expect(mapAegisVerdict({ verdict: { risk_level: "sanctioned", risk_score: 100, entity: null, labels: rows(CURATED) }, coverage: { data_available: true } })).toEqual({ level: "caution" });
+  const VASP_RISKY: [string, string, string] = ["VASP entity defaults (operator override, authority)", "HTX", "sanctioned"];
+  const SANCTIONS_LIST: [string, string, string] = ["OFAC SDN Sanctions List", "OFAC SDN: Some Person", "sanctioned"];
+  const TETHER: [string, string, string] = ["Tether USDT On-Chain Blacklist", "Tether blacklist - TXXXXX", "tether_blacklist"];
+  const TRACE: [string, string, string] = ["Aegis BFS discovery - some trace", "Htx.com - Huobi.com", "sanctioned"];
+  const risky = (extra: Record<string, unknown>) => mapAegisVerdict({ verdict: { risk_level: "sanctioned", risk_score: 100, ...extra }, coverage: { data_available: true } });
+
+  it("a risky address shows the VASP identity from the curated VASP row (even though its category is a risk category), with the exchange logo", () => {
+    expect(risky({ label: "Htx.com - Huobi.com", entity: null, labels: rows(SANCTIONS_LIST, VASP_RISKY, TRACE) })).toEqual({
+      level: "caution",
+      label: "HTX",
+      logo: "https://cdn.jsdelivr.net/gh/maslovsa/kyt-entity-registry@main/logos/exchanges/htx-com-huobi-com.png",
+    });
+  });
+  it("a risky address with only lists, blacklists, traces and a raw label stays bare: nothing there is a VASP identity", () => {
+    expect(risky({ label: "Some Sanctioned Person", entity: null, labels: rows(SANCTIONS_LIST, TETHER, TRACE) })).toEqual({ level: "caution" });
+    expect(risky({ label: "Tether USDT: blacklisted", entity: null, labels: rows(TETHER) })).toEqual({ level: "caution" });
+  });
+  it("a risky address's logo is dropped when its path names a reason, but the name stays", () => {
+    const risky_ = "https://cdn.jsdelivr.net/gh/maslovsa/kyt-entity-registry@main/logos/sanctioned/grinex.png";
+    expect(risky({ entity: { name: "Grinex", logo_url: risky_ }, labels: rows() })).toEqual({ level: "caution", label: "Grinex" });
+  });
+  it("the identity of a risky address never carries the reason: no category, list or trace text in the answer", () => {
+    const text = JSON.stringify(risky({ label: "Htx.com - Huobi.com", entity: null, labels: rows(SANCTIONS_LIST, VASP_RISKY, TETHER, TRACE) }));
+    expect(text).not.toMatch(/sanction|ofac|sdn|blacklist|trace|score|categor/i);
   });
 });
 
@@ -435,7 +454,7 @@ describe("cache", () => {
     const { env, kv } = makeEnv({ PER_VISITOR_PER_HOUR: "1" });
     await post(env, ADDRESS);
     expect(await (await post(env, OTHER)).json()).toEqual({ level: "unknown" }); // visitor limit hit
-    expect(kv.store.has(`v4:TRON:${OTHER}`)).toBe(false);
+    expect(kv.store.has(`v5:TRON:${OTHER}`)).toBe(false);
     expect(await (await post(env, OTHER, { ip: "198.51.100.9" })).json()).toEqual({ level: "clear", label: "Binance", logo: BINANCE_LOGO });
   });
 
