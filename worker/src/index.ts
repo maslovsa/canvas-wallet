@@ -3,6 +3,8 @@
 //
 //   POST /check {"network":"TRON","address":"T..."}  ->  {"level":"clear"|"caution","label"?:"...","logo"?:"https://..."} | {"level":"unknown"}
 //
+//   GET /price?id=<coingecko id>  ->  {"prices": number[]}  (24 h chart, cached 15 min; the browser cannot call CoinGecko)
+//
 // The response is exactly that: never a score, a reason, flags or the Aegis session. A VASP's name and logo may
 // accompany a clear or a caution result (plan R14: on caution only a corroborated VASP identity, never a raw
 // label that could name a sanctioned person). Anything that goes wrong becomes {"level":"unknown"} (fail closed:
@@ -52,7 +54,8 @@ interface Verdict {
 }
 
 const AEGIS_TIMEOUT_MS = 8000; // inside the client's 15 s ceiling (plan R10)
-const DEFINITIVE_TTL_S = 24 * 60 * 60; // matches Aegis's 24 h Idempotency-Key replay window
+// A definitive verdict (clear / caution, with its name and logo) is kept FOREVER: the owner of an address rarely changes,
+// and every repeat is then a free KV read, never a paid Aegis call. To drop all of them, bump the key version below.
 const NEGATIVE_TTL_S = 60; // KV's minimum: a failed check is retried soon, not for a day
 const HOUR_MS = 60 * 60 * 1000;
 const DAY_MS = 24 * HOUR_MS;
@@ -68,7 +71,7 @@ function corsHeaders(origin: string | null, env: Env): Record<string, string> {
   const headers: Record<string, string> = { Vary: "Origin" };
   if (origin && allowedOrigins(env).includes(origin)) {
     headers["Access-Control-Allow-Origin"] = origin;
-    headers["Access-Control-Allow-Methods"] = "POST, OPTIONS";
+    headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS";
     headers["Access-Control-Allow-Headers"] = "Content-Type";
     headers["Access-Control-Max-Age"] = "86400";
   }
@@ -247,12 +250,57 @@ async function handleCheck(request: Request, env: Env, cors: Record<string, stri
     if (cached) return json(JSON.parse(cached) as Verdict, 200, cors);
     const { verdict, cache } = await liveCheck(address, request, env);
     // A refusal by our own limits is never cached: it must not turn into "unknown" for every other visitor.
-    if (cache !== "none") await env.RISK_CACHE.put(cacheKey, JSON.stringify(verdict), { expirationTtl: cache === "definitive" ? DEFINITIVE_TTL_S : NEGATIVE_TTL_S });
+    if (cache === "definitive") await env.RISK_CACHE.put(cacheKey, JSON.stringify(verdict)); // no expiry
+    else if (cache === "brief") await env.RISK_CACHE.put(cacheKey, JSON.stringify(verdict), { expirationTtl: NEGATIVE_TTL_S });
     log({ event: "check", level: verdict.level });
     return json(verdict, 200, cors);
   } catch {
     log({ event: "failed_closed" }); // KV or counter unavailable: no live call, the client shows "Couldn't verify"
     return json({ level: "unknown" } satisfies Verdict, 200, cors);
+  }
+}
+
+// ---------------------------------------------------------------- price proxy
+
+const PRICE_ID = /^[a-z0-9-]{1,64}$/;
+const PRICE_TTL_S = 15 * 60; // a chart is cached 15 min per CoinGecko id (Cache API: no KV writes, no extra cost)
+const PRICE_MAX_POINTS = 96;
+const COINGECKO_MARKET_CHART = "https://api.coingecko.com/api/v3/coins";
+
+interface PriceCache {
+  match(request: Request): Promise<Response | undefined>;
+  put(request: Request, response: Response): Promise<void>;
+}
+
+/** 24 h of USD prices for one CoinGecko id, as {prices: number[]} (at most 96 points). The browser cannot call CoinGecko itself: it is rate-limited and sends no CORS header. */
+async function handlePrice(url: URL, cors: Record<string, string>): Promise<Response> {
+  const id = url.searchParams.get("id") ?? "";
+  if (!PRICE_ID.test(id)) return json({ error: "bad_request" }, 400, cors);
+  const cache = (globalThis as { caches?: { default?: PriceCache } }).caches?.default;
+  const cacheRequest = new Request(`https://price-cache.invalid/${id}`);
+  try {
+    const hit = await cache?.match(cacheRequest);
+    if (hit) return json(await hit.json(), 200, { ...cors, "Cache-Control": `public, max-age=${PRICE_TTL_S}` });
+  } catch {
+    // the miss path below still works
+  }
+  try {
+    const res = await fetch(`${COINGECKO_MARKET_CHART}/${id}/market_chart?vs_currency=usd&days=1`, { headers: { Accept: "application/json" }, signal: AbortSignal.timeout(6000) });
+    if (!res.ok) return json({ error: "upstream" }, 502, cors);
+    const data = (await res.json()) as { prices?: unknown };
+    const series = Array.isArray(data.prices) ? data.prices.map((p) => (Array.isArray(p) ? Number(p[1]) : NaN)).filter((n) => Number.isFinite(n)) : [];
+    if (series.length === 0) return json({ error: "upstream" }, 502, cors);
+    const stride = Math.max(1, Math.ceil(series.length / PRICE_MAX_POINTS));
+    const prices = series.filter((_, i) => i % stride === 0);
+    const body = { prices };
+    try {
+      await cache?.put(cacheRequest, new Response(JSON.stringify(body), { headers: { "Content-Type": "application/json", "Cache-Control": `public, max-age=${PRICE_TTL_S}` } }));
+    } catch {
+      // not cached this time; the answer is still good
+    }
+    return json(body, 200, { ...cors, "Cache-Control": `public, max-age=${PRICE_TTL_S}` });
+  } catch {
+    return json({ error: "upstream" }, 502, cors);
   }
 }
 
@@ -269,6 +317,11 @@ export default {
       if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: cors });
       if (request.method !== "POST") return json({ error: "method_not_allowed" }, 405, cors);
       return handleCheck(request, env, cors);
+    }
+    if (url.pathname === "/price") {
+      if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: cors });
+      if (request.method !== "GET") return json({ error: "method_not_allowed" }, 405, cors);
+      return handlePrice(url, cors);
     }
     return json({ error: "not_found" }, 404, cors);
   },

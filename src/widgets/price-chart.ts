@@ -18,18 +18,37 @@ const COINGECKO_BASE = "https://api.coingecko.com/api/v3";
 // every keystroke would burn through the rate limit almost immediately.
 const cache = new Map<string, Promise<number[] | null>>();
 
+/**
+ * With a Worker URL (VITE_RISK_PROXY_URL) the chart comes from the Worker's /price endpoint: CoinGecko rate-limits
+ * browsers and sends no CORS header, so a direct call fails for most visitors. Without one (local dev) it calls
+ * CoinGecko directly.
+ */
 export async function fetchPriceHistory(
   coingeckoId: string,
   days: number,
   fetchImpl: typeof fetch = fetch,
+  proxyUrl: string | undefined = import.meta.env.VITE_RISK_PROXY_URL,
 ): Promise<number[] | null> {
   const key = `${coingeckoId}:${days}`;
   const cached = cache.get(key);
   if (cached) return cached;
 
-  const promise = fetchPriceHistoryUncached(coingeckoId, days, fetchImpl);
+  const promise = proxyUrl && days === 1 ? fetchViaProxy(coingeckoId, proxyUrl, fetchImpl) : fetchPriceHistoryUncached(coingeckoId, days, fetchImpl);
   cache.set(key, promise);
   return promise;
+}
+
+async function fetchViaProxy(coingeckoId: string, proxyUrl: string, fetchImpl: typeof fetch): Promise<number[] | null> {
+  try {
+    const res = await fetchImpl(`${proxyUrl.replace(/\/+$/, "")}/price?id=${encodeURIComponent(coingeckoId)}`, { signal: AbortSignal.timeout(10_000) });
+    if (!res.ok) return null;
+    const data = (await res.json()) as { prices?: unknown };
+    if (!Array.isArray(data.prices) || data.prices.length === 0) return null;
+    const prices = data.prices.filter((p): p is number => typeof p === "number" && Number.isFinite(p));
+    return prices.length > 0 ? prices : null;
+  } catch {
+    return null;
+  }
 }
 
 async function fetchPriceHistoryUncached(

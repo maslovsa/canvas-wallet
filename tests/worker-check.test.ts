@@ -64,7 +64,7 @@ function makeEnv(overrides: Partial<Env> = {}): { env: Env; kv: FakeKV; counterF
   return { env, kv, counterFailing };
 }
 
-interface AegisCall { url: string; headers: Record<string, string>; body: { address: string; network: string } }
+interface AegisCall { url: string; headers: Record<string, string>; body?: { address: string; network: string } }
 let aegisCalls: AegisCall[] = [];
 let aegisAnswer: () => Response | Promise<Response>;
 
@@ -77,7 +77,7 @@ beforeEach(() => {
   aegisCalls = [];
   aegisAnswer = () => aegisBody("low", "Binance");
   vi.stubGlobal("fetch", async (url: string, init: RequestInit) => {
-    aegisCalls.push({ url, headers: init.headers as Record<string, string>, body: JSON.parse(String(init.body)) });
+    aegisCalls.push({ url, headers: (init?.headers ?? {}) as Record<string, string>, ...(init?.body ? { body: JSON.parse(String(init.body)) } : {}) });
     return aegisAnswer();
   });
 });
@@ -379,13 +379,13 @@ describe("the Aegis call", () => {
 });
 
 describe("cache", () => {
-  it("serves the second request for an address from KV with no second Aegis call; a verdict is kept 24 h", async () => {
+  it("serves the second request for an address from KV with no second Aegis call; a verdict is kept forever (no expiry)", async () => {
     const { env, kv } = makeEnv();
     const first = await (await post(env, ADDRESS)).json();
     const second = await (await post(env, ADDRESS, { ip: "198.51.100.9" })).json();
     expect(second).toEqual(first);
     expect(aegisCalls).toHaveLength(1);
-    expect([...kv.store.values()][0]?.ttl).toBe(86_400);
+    expect([...kv.store.values()][0]?.ttl).toBeUndefined();
   });
 
   it("a refusal by our own limits is not cached: another visitor can still get a real answer for the same address", async () => {
@@ -515,5 +515,54 @@ describe("Counter and the Durable Object wrapper", () => {
     await expect(durable.fetch(new Request("https://counter/op", { method: "POST", body: "not json" }))).rejects.toThrow();
     const ok = await durable.fetch(new Request("https://counter/op", { method: "POST", body: JSON.stringify({ op: "peek", key: "g", limit: 0, windowMs: 1000 }) }));
     expect(await ok.json()).toEqual({ count: 0 });
+  });
+});
+
+describe("GET /price (CoinGecko proxy for the charts)", () => {
+  const getPrice = (env: Env, query: string, origin: string | null = ORIGIN) =>
+    worker.fetch(new Request(`https://worker.example/price${query}`, { headers: origin ? { Origin: origin } : {} }), env);
+  const series = (n: number) => ({ prices: Array.from({ length: n }, (_, i) => [1_700_000_000_000 + i * 60_000, 1 + i / 1000]) });
+
+  it("returns {prices} with CORS and a 15 min cache header, downsampled to at most 96 points", async () => {
+    aegisAnswer = () => new Response(JSON.stringify(series(288)));
+    const res = await getPrice(makeEnv().env, "?id=tether");
+    expect(res.status).toBe(200);
+    expect(res.headers.get("access-control-allow-origin")).toBe(ORIGIN);
+    expect(res.headers.get("cache-control")).toBe("public, max-age=900");
+    const body = (await res.json()) as { prices: number[] };
+    expect(body.prices.length).toBeLessThanOrEqual(96);
+    expect(body.prices[0]).toBe(1);
+    expect(aegisCalls[0]?.url).toBe("https://api.coingecko.com/api/v3/coins/tether/market_chart?vs_currency=usd&days=1");
+  });
+
+  it.each(["", "?id=", "?id=Tether", "?id=a/b", "?id=../x", `?id=${"a".repeat(65)}`])("rejects a bad id (%s) without calling CoinGecko", async (query) => {
+    const res = await getPrice(makeEnv().env, query);
+    expect(res.status).toBe(400);
+    expect(aegisCalls).toHaveLength(0);
+  });
+
+  it("an upstream failure (429, 500, junk, empty) is a 502, never a made-up chart", async () => {
+    for (const answer of [() => new Response("", { status: 429 }), () => new Response("", { status: 500 }), () => new Response("<html>"), () => new Response(JSON.stringify({ prices: [] }))]) {
+      aegisAnswer = answer;
+      expect((await getPrice(makeEnv().env, "?id=tether")).status).toBe(502);
+    }
+  });
+
+  it("uses the Cache API: the second request for an id does not call CoinGecko again", async () => {
+    const store = new Map<string, Response>();
+    vi.stubGlobal("caches", { default: { match: async (r: Request) => store.get(r.url)?.clone(), put: async (r: Request, res: Response) => void store.set(r.url, res.clone()) } });
+    aegisAnswer = () => new Response(JSON.stringify(series(10)));
+    const env = makeEnv().env;
+    await getPrice(env, "?id=bitcoin");
+    const second = await getPrice(env, "?id=bitcoin");
+    expect(second.status).toBe(200);
+    expect(aegisCalls).toHaveLength(1);
+    vi.unstubAllGlobals();
+  });
+
+  it("refuses a foreign origin like /check does, and only allows GET", async () => {
+    expect((await getPrice(makeEnv().env, "?id=tether", "https://evil.example")).status).toBe(403);
+    const post = await worker.fetch(new Request("https://worker.example/price?id=tether", { method: "POST", headers: { Origin: ORIGIN } }), makeEnv().env);
+    expect(post.status).toBe(405);
   });
 });
