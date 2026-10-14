@@ -3,6 +3,7 @@
 // All text goes in with textContent; nothing here builds HTML from data.
 import type { ChromeStyle } from "./phone-frame.ts";
 import { openOverlay, type OpenOverlay } from "./phone-overlay.ts";
+import { icon } from "./icons.ts";
 import type { SendController, SendView, Tone } from "../send/send-session.ts";
 
 export interface SendScreenOptions {
@@ -73,7 +74,8 @@ export function mountSendScreen(options: SendScreenOptions): void {
   const back = el("button", "send-back");
   back.type = "button";
   back.setAttribute("aria-label", "Back to token");
-  back.append(el("span", "send-back-chevron", "‹"), el("span", "send-back-label", "Back"));
+  const arrow = icon("arrow-left", { size: 24, strokeWidth: 2, className: "back-arrow" }); // Android shows this instead
+  back.append(el("span", "send-back-chevron", "‹"), el("span", "send-back-label", "Back"), arrow);
   back.addEventListener("click", () => {
     if (controller.view().backEnabled) options.onBack();
   });

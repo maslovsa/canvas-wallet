@@ -49,3 +49,18 @@ Earlier in the branch: contrast, field label, landmarks, honest sample chart, ta
 10. **Sidebar search** once a network has more than ~20 tokens.
 
 Screenshots: `docs/designs/redesign/review/` (before and after for the gallery and the iPhone list, studio at 1920).
+
+## Status of the prioritized list (2026-10-14)
+All ten items are done on branch `design-v2`:
+1. Screen transitions: screens slide in (forward/back), dialogs rise, live edits keep the scroll.
+2. Large-title collapse and a blurred sticky bar on the wallet home and the token card.
+3. Gallery cards show a cropped mini phone of the list.
+4. Wallet-home hero: illustrative total balance and Send/Receive shortcuts (asset picker when several tokens qualify).
+5. Android is Material 3: tonal surfaces, app bar with an arrow, filter chips, pill buttons, action tiles, ripple.
+6. Editor: syntax colors, the exact character where the JSON breaks (line and column), trust findings grouped and collapsible.
+7. Loading polish: logos fade in, the price chart has a skeleton.
+8. Light studio theme following the system, with a toggle (system / light / dark) that remembers the choice.
+9. Live prices through the Worker (`GET /price`), cached 15 min, so charts work without CoinGecko CORS/rate limits.
+10. Sidebar filter for networks with more than 12 tokens.
+
+Screenshots: `docs/designs/redesign/v2/`.

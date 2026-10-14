@@ -1,12 +1,22 @@
 /* The phone's content: wallet list, token card and widgets. iOS-flavoured grouped layout: the screen is a quiet
    canvas, content sits on rounded cards, separators are hairlines, numbers are tabular, titles are tight.
    Palette per theme lives on .phone-screen (--ph-*); --phone-dim is the secondary text color. */
-.phone-screen {
+/* The palette lives on the frame, not the screen: dialogs are children of the frame and use it too. */
+.phone-frame {
   --ph-bg: #f2f3f5;
   --ph-card: #ffffff;
   --ph-line: rgba(60, 60, 67, 0.13);
   --ph-fill: rgba(120, 120, 128, 0.12);
   --phone-dim: rgba(60, 60, 67, 0.74);
+}
+.phone-frame.theme-dark {
+  --ph-bg: #0b0c0e;
+  --ph-card: #15171a;
+  --ph-line: rgba(255, 255, 255, 0.08);
+  --ph-fill: rgba(255, 255, 255, 0.08);
+  --phone-dim: #9aa1ab;
+}
+.phone-screen {
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter Variable", "Segoe UI", system-ui, sans-serif;
   background: var(--ph-bg);
   color: #111214;
@@ -15,11 +25,6 @@
   -webkit-font-smoothing: antialiased;
 }
 .phone-frame.theme-dark .phone-screen {
-  --ph-bg: #0b0c0e;
-  --ph-card: #15171a;
-  --ph-line: rgba(255, 255, 255, 0.08);
-  --ph-fill: rgba(255, 255, 255, 0.08);
-  --phone-dim: #9aa1ab;
   color: #f2f3f5;
 }
 .phone-frame.chrome-android .phone-screen {
@@ -31,7 +36,9 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  min-height: 188px;
+  /* room for the sticky bar that is laid over the top of the art, plus the art itself */
+  padding-top: calc(var(--safe-top, 32px) + 44px);
+  min-height: calc(var(--safe-top, 32px) + 44px + 150px);
   margin-bottom: 4px;
   overflow: hidden;
 }
@@ -50,17 +57,56 @@
   background: linear-gradient(180deg, rgba(0, 0, 0, 0.18), rgba(0, 0, 0, 0) 38%, rgba(0, 0, 0, 0.22));
   pointer-events: none;
 }
-.card-nav-bar {
+/* Sticky bar over the art. Transparent with white controls at the top; a blurred bar with a compact title once scrolled. */
+.card-nav-bar,
+.phone-list-bar {
   position: sticky;
-  top: var(--safe-top, 32px);
-  z-index: 5;
-  flex-shrink: 0;
-  display: flex;
+  top: 0;
+  z-index: 6;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  justify-content: space-between;
-  height: 44px;
-  padding: 0 12px 0 8px;
-  margin-top: var(--safe-top, 32px);
+  flex-shrink: 0;
+  height: calc(var(--safe-top, 32px) + 44px);
+  padding: var(--safe-top, 32px) 12px 0 8px;
+  transition: background 180ms ease, box-shadow 180ms ease;
+}
+.card-nav-bar {
+  margin-bottom: calc(-1 * (var(--safe-top, 32px) + 44px));
+}
+.card-nav-bar.is-scrolled,
+.phone-list-bar.is-scrolled {
+  background: color-mix(in srgb, var(--ph-bg) 78%, transparent);
+  backdrop-filter: blur(20px) saturate(1.5);
+  -webkit-backdrop-filter: blur(20px) saturate(1.5);
+  box-shadow: 0 0.5px 0 var(--ph-line);
+}
+.card-nav-title,
+.phone-list-bar-title {
+  max-width: 55vw;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  opacity: 0;
+  transition: opacity 160ms ease;
+}
+.card-nav-bar.is-scrolled .card-nav-title,
+.phone-list-bar.is-scrolled .phone-list-bar-title {
+  opacity: 1;
+}
+.card-nav-bar.is-scrolled .card-back-btn {
+  color: var(--send-accent, #2a66ab);
+  text-shadow: none;
+}
+.card-nav-bar .badge-chip {
+  justify-self: end;
+  transition: opacity 160ms ease;
+}
+.card-nav-bar.is-scrolled .badge-chip {
+  opacity: 0;
 }
 .card-back-btn {
   display: flex;
@@ -162,14 +208,15 @@
 
 /* ---- wallet home: large title, network filter, grouped token list ------------------------------------ */
 .phone-list-header {
-  padding: calc(var(--safe-top, 32px) + 20px) 20px 4px;
+  padding: 4px 20px 4px;
 }
 .phone-list-exit {
   display: inline-flex;
   align-items: center;
+  justify-self: start;
   gap: 2px;
   min-height: 44px; /* touch target */
-  margin: 0 0 2px -6px;
+  margin-left: -6px;
   padding: 4px 8px 4px 2px;
   border: 0;
   background: transparent;
@@ -626,4 +673,360 @@
 }
 .history-usd-out {
   color: #d63b40;
+}
+
+/* ---- motion: screens slide in, dialogs rise, logos and charts fade in --------------------------------- */
+@keyframes ph-slide-forward {
+  from {
+    opacity: 0;
+    transform: translateX(28px);
+  }
+}
+@keyframes ph-slide-back {
+  from {
+    opacity: 0;
+    transform: translateX(-28px);
+  }
+}
+@keyframes ph-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes ph-sheet-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.97);
+  }
+}
+@keyframes ph-shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+.phone-screen.enter-forward > * {
+  animation: ph-slide-forward 280ms cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+}
+.phone-screen.enter-back > * {
+  animation: ph-slide-back 280ms cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+}
+.logo-fade-in {
+  animation: ph-fade-in 220ms ease-out;
+}
+.phone-overlay {
+  animation: ph-fade-in 160ms ease-out;
+}
+.phone-dialog {
+  animation: ph-sheet-in 240ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.skeleton {
+  border-radius: 8px;
+  background: linear-gradient(90deg, var(--ph-fill) 25%, rgba(127, 127, 127, 0.2) 50%, var(--ph-fill) 75%) 0 0 / 200% 100%;
+  animation: ph-shimmer 1.4s linear infinite;
+}
+.price-skeleton-price {
+  width: 120px;
+  height: 28px;
+  margin-bottom: 10px;
+}
+.price-skeleton-chart {
+  width: 100%;
+  height: 64px;
+}
+
+/* ---- wallet home: balance hero and shortcuts ----------------------------------------------------------- */
+.wallet-hero {
+  margin: 12px 16px 0;
+  padding: 18px 18px 16px;
+  border-radius: 22px;
+  background: var(--ph-card);
+}
+.wallet-hero-label {
+  font-size: 13px;
+  color: var(--phone-dim);
+}
+.wallet-hero-amount {
+  margin-top: 2px;
+  font-size: 38px;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1.15;
+  font-variant-numeric: tabular-nums;
+}
+.wallet-hero-cents {
+  font-size: 22px;
+  color: var(--phone-dim);
+  letter-spacing: -0.02em;
+}
+.wallet-hero-note {
+  margin-top: 2px;
+  font-size: 12.5px;
+  color: var(--phone-dim);
+}
+.wallet-hero-actions {
+  display: flex;
+  gap: 28px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 0.5px solid var(--ph-line);
+}
+.wallet-action {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.wallet-action-disc {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  transition: filter 140ms ease, transform 140ms ease;
+}
+.wallet-action:hover .wallet-action-disc {
+  filter: brightness(1.1);
+}
+.wallet-action:active .wallet-action-disc {
+  transform: scale(0.94);
+}
+.pick-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 260px;
+  margin: 0 -8px 12px;
+  overflow-y: auto;
+  text-align: left;
+}
+.pick-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 52px;
+  padding: 6px 8px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.pick-row:hover {
+  background: rgba(127, 127, 127, 0.12);
+}
+.pick-row-logo {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  font-size: 14px;
+}
+.pick-row-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.pick-row-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  font-size: 13px;
+  color: var(--phone-dim);
+}
+.pick-row-text strong {
+  font-size: 15px;
+  color: inherit;
+}
+
+/* ==== Android: Material 3 ==================================================================================
+   Not iOS with a punch-hole: tonal surfaces, a top app bar with an arrow, pill buttons, filter chips, rounded-square
+   action tiles, regular-weight headlines and a press ripple. The wallet blue (--accent) seeds the tonal palette. */
+.back-arrow {
+  display: none;
+}
+.phone-frame.chrome-android {
+  --ph-bg: #fbfbff;
+  --ph-card: color-mix(in srgb, var(--accent) 7%, #fbfbff);
+  --ph-line: rgba(60, 60, 70, 0.1);
+  --ph-fill: color-mix(in srgb, var(--accent) 12%, transparent);
+  --phone-dim: #4a5160;
+}
+.phone-frame.chrome-android.theme-dark {
+  --ph-bg: #111317;
+  --ph-card: color-mix(in srgb, var(--accent) 11%, #1b1d22);
+  --ph-line: rgba(255, 255, 255, 0.08);
+  --ph-fill: color-mix(in srgb, var(--accent) 22%, transparent);
+  --phone-dim: #aeb4c0;
+}
+.chrome-android .back-arrow {
+  display: block;
+}
+.chrome-android .card-back-chevron,
+.chrome-android .card-back-label,
+.chrome-android .send-back-chevron,
+.chrome-android .send-back-label,
+.chrome-android .exit-chevron,
+.chrome-android .exit-label {
+  display: none;
+}
+.chrome-android .card-back-btn,
+.chrome-android .phone-list-exit,
+.chrome-android .send-back {
+  min-width: 48px;
+  justify-content: center;
+  border-radius: 50%;
+  padding: 0;
+}
+.chrome-android .phone-list-bar,
+.chrome-android .card-nav-bar {
+  grid-template-columns: 48px 1fr auto;
+  padding-left: 4px;
+}
+.chrome-android .card-nav-title,
+.chrome-android .phone-list-bar-title {
+  justify-self: start;
+  margin-left: 8px;
+  font-size: 22px;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+.chrome-android .card-nav-bar.is-scrolled,
+.chrome-android .phone-list-bar.is-scrolled {
+  /* Material raises a scrolled app bar by tinting it, not by blurring */
+  background: var(--ph-card);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: none;
+}
+.chrome-android .phone-list-title {
+  font-size: 30px;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+.chrome-android .phone-list-desc {
+  font-size: 14px;
+  letter-spacing: 0.1px;
+}
+.chrome-android .wallet-hero {
+  border-radius: 28px;
+}
+.chrome-android .wallet-hero-amount {
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+.chrome-android .wallet-hero-actions {
+  border-top: 0;
+  padding-top: 8px;
+}
+.chrome-android .wallet-action-disc {
+  width: 56px;
+  height: 56px;
+  border-radius: 18px;
+  background: var(--ph-fill);
+  color: var(--accent);
+}
+.phone-frame.chrome-android.theme-dark .wallet-action-disc {
+  color: #9cc3f2;
+}
+.chrome-android .phone-network-filter {
+  padding-top: 12px;
+}
+.chrome-android .phone-network-chip {
+  height: 32px;
+  padding: 0 14px 0 8px;
+  border-radius: 8px;
+  box-shadow: inset 0 0 0 1px var(--ph-line);
+  background: transparent;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.1px;
+}
+.chrome-android .phone-network-chip.active {
+  background: var(--ph-fill);
+  color: inherit;
+  box-shadow: none;
+}
+.chrome-android .phone-token-list {
+  margin: 8px 0 calc(24px + var(--safe-bottom, 0px));
+  border-radius: 0;
+  background: transparent;
+}
+.chrome-android .phone-token-row {
+  padding: 10px 20px;
+}
+.chrome-android .phone-token-row + .phone-token-row::before {
+  display: none; /* Material lists breathe instead of drawing separators */
+}
+.chrome-android .widget {
+  border-radius: 16px;
+}
+.chrome-android .action-group-btn {
+  min-height: 48px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.1px;
+}
+.chrome-android .action-group-btn.action-primary,
+.chrome-android .action-group-btn.action-secondary {
+  min-height: 56px;
+  border-radius: 999px;
+  font-size: 16px;
+}
+.chrome-android .action-group-btn.action-primary {
+  box-shadow: none; /* Material filled buttons are flat */
+}
+.chrome-android .widget-action-btn {
+  height: 40px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 500;
+}
+.chrome-android .card-header {
+  border-radius: 0 0 28px 28px;
+}
+.chrome-android .send-field {
+  border-radius: 12px;
+}
+.chrome-android .send-submit {
+  border-radius: 999px;
+}
+.chrome-android .badge-chip {
+  border-radius: 8px;
+}
+
+/* Press ripple (Android): the circle is appended by phone-frame.ts on pointerdown. */
+.chrome-android button,
+.chrome-android [role="button"] {
+  position: relative;
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+.ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.16;
+  transform: scale(0);
+  pointer-events: none;
+  animation: ph-ripple 480ms ease-out forwards;
+}
+@keyframes ph-ripple {
+  to {
+    transform: scale(1);
+    opacity: 0;
+  }
 }

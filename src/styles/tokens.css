@@ -33,6 +33,31 @@
   --warning: #d9a441;
   --success: #3fb950;
 
+  /* code surface and syntax colors (editor) */
+  --code-bg: #0a0b0d;
+  --code-text: #d6dbe1;
+  --code-key: #8ab4ff;
+  --code-string: #a5d6a7;
+  --code-number: #f0b27a;
+  --code-punct: #6f7782;
+
+  --scrollbar: rgba(255, 255, 255, 0.14);
+  --glow: rgba(90, 146, 255, 0.1);
+  --warn-bg: rgba(217, 164, 65, 0.08);
+  --warn-bg-strong: rgba(217, 164, 65, 0.16);
+  --warn-line: rgba(217, 164, 65, 0.35);
+  --warn-text: #e8c27a;
+  --accent-text: #cfe0ff;
+  --danger-text: #ff8a8e;
+  --danger-text-soft: #f2b8ba;
+  --danger-bg: rgba(229, 72, 77, 0.08);
+  --danger-line: rgba(229, 72, 77, 0.7);
+  --info-bg: rgba(90, 146, 255, 0.07);
+  --info-text: #b9cff5;
+  --dock-bg: rgba(19, 22, 26, 0.82);
+  --toast-bg: #f2f4f7;
+  --toast-text: #0b0d10;
+
   --r-xs: 6px;
   --r-sm: 8px;
   --r-md: 12px;
@@ -43,6 +68,92 @@
   --shadow-pop: 0 16px 40px rgba(0, 0, 0, 0.55), 0 0 0 1px var(--border);
   --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
   --t-fast: 140ms;
+}
+
+/* Light studio: follows the system setting unless the theme toggle pins it (data-theme on <html>). */
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg: #f4f5f8;
+  --surface-1: #ffffff;
+  --surface-2: #f6f7f9;
+  --surface-3: #eceef2;
+  --surface-hover: #e6e9ee;
+  --hairline: rgba(0, 0, 0, 0.07);
+  --border: rgba(0, 0, 0, 0.11);
+  --border-strong: rgba(0, 0, 0, 0.2);
+  --text: #16181c;
+  --text-2: #484f59;
+  --text-dim: #5a626d;
+  --text-3: #6c7480;
+  --studio-accent: #2f6bf0;
+  --studio-accent-soft: rgba(47, 107, 240, 0.1);
+  --studio-accent-line: rgba(47, 107, 240, 0.4);
+  --code-bg: #f7f8fa;
+  --code-text: #24292f;
+  --code-key: #0550ae;
+  --code-string: #0a6b38;
+  --code-number: #a14d00;
+  --code-punct: #7d8590;
+  --glow: rgba(47, 107, 240, 0.08);
+  --warn-bg: rgba(176, 120, 0, 0.08);
+  --warn-bg-strong: rgba(176, 120, 0, 0.14);
+  --warn-line: rgba(176, 120, 0, 0.35);
+  --warn-text: #7a5300;
+  --accent-text: #1f4fa8;
+  --danger-text: #b4232a;
+  --danger-text-soft: #8a1f24;
+  --danger-bg: rgba(229, 72, 77, 0.07);
+  --danger-line: rgba(229, 72, 77, 0.6);
+  --info-bg: rgba(47, 107, 240, 0.07);
+  --info-text: #1f4fa8;
+  --dock-bg: rgba(255, 255, 255, 0.85);
+  --toast-bg: #16181c;
+  --toast-text: #f4f5f8;
+  --shadow-pop: 0 16px 40px rgba(20, 24, 32, 0.18), 0 0 0 1px var(--border);
+  --scrollbar: rgba(0, 0, 0, 0.22);
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    color-scheme: light;
+    --bg: #f4f5f8;
+    --surface-1: #ffffff;
+    --surface-2: #f6f7f9;
+    --surface-3: #eceef2;
+    --surface-hover: #e6e9ee;
+    --hairline: rgba(0, 0, 0, 0.07);
+    --border: rgba(0, 0, 0, 0.11);
+    --border-strong: rgba(0, 0, 0, 0.2);
+    --text: #16181c;
+    --text-2: #484f59;
+    --text-dim: #5a626d;
+    --text-3: #6c7480;
+    --studio-accent: #2f6bf0;
+    --studio-accent-soft: rgba(47, 107, 240, 0.1);
+    --studio-accent-line: rgba(47, 107, 240, 0.4);
+    --code-bg: #f7f8fa;
+    --code-text: #24292f;
+    --code-key: #0550ae;
+    --code-string: #0a6b38;
+    --code-number: #a14d00;
+    --code-punct: #7d8590;
+    --glow: rgba(47, 107, 240, 0.08);
+    --warn-bg: rgba(176, 120, 0, 0.08);
+    --warn-bg-strong: rgba(176, 120, 0, 0.14);
+    --warn-line: rgba(176, 120, 0, 0.35);
+    --warn-text: #7a5300;
+    --accent-text: #1f4fa8;
+    --danger-text: #b4232a;
+    --danger-text-soft: #8a1f24;
+    --danger-bg: rgba(229, 72, 77, 0.07);
+    --danger-line: rgba(229, 72, 77, 0.6);
+    --info-bg: rgba(47, 107, 240, 0.07);
+    --info-text: #1f4fa8;
+    --dock-bg: rgba(255, 255, 255, 0.85);
+    --toast-bg: #16181c;
+    --toast-text: #f4f5f8;
+    --shadow-pop: 0 16px 40px rgba(20, 24, 32, 0.18), 0 0 0 1px var(--border);
+    --scrollbar: rgba(0, 0, 0, 0.22);
+  }
 }
 
 * {
@@ -104,7 +215,7 @@ textarea {
 /* Slim, quiet scrollbars. */
 * {
   scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.14) transparent;
+  scrollbar-color: var(--scrollbar) transparent;
 }
 
 @media (prefers-reduced-motion: reduce) {

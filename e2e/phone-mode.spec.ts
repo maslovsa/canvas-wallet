@@ -135,3 +135,70 @@ test("token rows are keyboard-operable: Tab to a row, Enter opens it (sidebar an
   await page.keyboard.press("Space");
   await expect(page.locator(".card-header-name")).toContainText("(TRX)");
 });
+
+test("wallet home: the Send shortcut asks which asset, then opens its Send screen; Receive does the same", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/?list=aegis-super-list&network=Tron");
+  await expect(page.locator(".wallet-hero-amount")).toBeVisible();
+  await page.locator(".wallet-action", { hasText: "Send" }).click();
+  await expect(page.locator(".phone-dialog .phone-dialog-title")).toHaveText("Send");
+  await page.locator(".pick-row", { hasText: "USDT" }).click();
+  await expect(page.locator(".send-nav-title")).toHaveText("Send USDT");
+  await page.locator(".send-back").click();
+  await page.locator(".card-back-btn").click();
+  await page.locator(".wallet-action", { hasText: "Receive" }).click();
+  await page.locator(".pick-row", { hasText: "TRX" }).click();
+  await expect(page.locator(".phone-dialog .phone-dialog-title")).toHaveText("Receive TRX");
+});
+
+test("scrolling the wallet home and a token card turns their bars into compact blurred bars", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/?list=aegis-super-list&network=Tron");
+  const bar = page.locator(".phone-list-bar");
+  await expect(bar).not.toHaveClass(/is-scrolled/);
+  await page.locator(".phone-screen").evaluate((el) => el.scrollTo(0, 400));
+  await expect(bar).toHaveClass(/is-scrolled/);
+  await expect(page.locator(".phone-list-bar-title")).toHaveCSS("opacity", "1");
+  await page.goto("/?list=aegis-super-list&network=Tron&token=USDT");
+  const nav = page.locator(".card-nav-bar");
+  await expect(nav).not.toHaveClass(/is-scrolled/);
+  await page.locator(".phone-screen").evaluate((el) => el.scrollTo(0, 600));
+  await expect(nav).toHaveClass(/is-scrolled/);
+  await expect(page.locator(".card-nav-title")).toHaveText("USDT");
+});
+
+test("the studio follows a light system setting, and the theme toggle pins and remembers a choice", async ({ page }) => {
+  await page.emulateMedia({ colorScheme: "light" });
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto(LINK);
+  await expect(page.locator(".topbar")).toBeVisible();
+  const bg = () => page.evaluate(() => getComputedStyle(document.body).backgroundColor);
+  expect(await bg()).toBe("rgb(244, 245, 248)"); // light, from the system setting
+  const toggle = page.locator(".topbar .theme-toggle");
+  await expect(toggle).toHaveAttribute("aria-label", "Theme: follow system");
+  await toggle.click(); // auto -> light
+  await expect(toggle).toHaveAttribute("aria-label", "Theme: light");
+  await toggle.click(); // light -> dark
+  await expect(toggle).toHaveAttribute("aria-label", "Theme: dark");
+  expect(await bg()).toBe("rgb(8, 9, 11)");
+  await page.reload();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark"); // remembered
+  expect(await bg()).toBe("rgb(8, 9, 11)");
+});
+
+test("the sidebar filter narrows a long token list and keeps typing focus", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/?list=aegis-super-list&network=Ethereum");
+  const rows = page.locator(".sidebar .token-row");
+  await expect(rows.first()).toBeVisible();
+  const all = await rows.count();
+  await page.getByLabel("Filter tokens").fill("usd");
+  await expect(page.getByLabel("Filter tokens")).toBeFocused();
+  expect(await rows.count()).toBeLessThan(all);
+  await expect(rows.first()).toContainText("USD");
+  await page.keyboard.type("x"); // typing continues in the same box
+  await expect(page.getByLabel("Filter tokens")).toHaveValue("usdx");
+  await expect(page.locator(".sidebar-empty-state")).toContainText('No token matches "usdx"');
+  await page.keyboard.press("Escape");
+  expect(await rows.count()).toBe(all);
+});

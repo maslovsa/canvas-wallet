@@ -5,6 +5,8 @@ import AxeBuilder from "@axe-core/playwright";
 const { defaultBrowserType: _ignored, ...iphone } = devices["iPhone 14"];
 
 async function seriousViolations(page: Page): Promise<string[]> {
+  // Let entrance animations finish: axe would otherwise measure the contrast of half-transparent text.
+  await page.evaluate(() => Promise.all(document.getAnimations().filter((a) => a.effect?.getComputedTiming().iterations !== Infinity).map((a) => a.finished.catch(() => undefined))));
   const results = await new AxeBuilder({ page }).analyze();
   return results.violations
     .filter((v) => v.impact === "serious" || v.impact === "critical")
@@ -44,4 +46,17 @@ test.describe("phone mode on an iPhone", () => {
     await expect(page.locator(".phone-dialog")).toBeVisible();
     expect(await seriousViolations(page)).toEqual([]);
   });
+});
+
+test("the light studio (system setting) has no serious accessibility violations either", async ({ page }) => {
+  await page.emulateMedia({ colorScheme: "light" });
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/");
+  await expect(page.locator(".gallery-card").first()).toBeVisible();
+  expect(await seriousViolations(page)).toEqual([]);
+  await page.goto("/?list=aegis-super-list&network=Tron&token=USDT");
+  await expect(page.locator(".card-header-name")).toContainText("(USDT)");
+  expect(await seriousViolations(page)).toEqual([]);
+  await page.locator(".json-editor").fill('{ "name": ');
+  expect(await seriousViolations(page)).toEqual([]);
 });

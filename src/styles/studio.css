@@ -95,11 +95,11 @@
   margin: 12px auto 0;
   max-width: 720px;
   padding: 10px 14px;
-  border: 1px solid rgba(217, 164, 65, 0.35);
+  border: 1px solid var(--warn-line);
   border-radius: var(--r-md);
-  background: rgba(217, 164, 65, 0.08);
+  background: var(--warn-bg);
   font-size: 13px;
-  color: #e8c27a;
+  color: var(--warn-text);
 }
 .status-banner:empty {
   display: none;
@@ -175,21 +175,81 @@
   opacity: 0.6;
   cursor: not-allowed;
 }
-.gallery-card-networks {
+/* A cropped mini phone: the product's own output is the card's picture. */
+.gallery-card-preview {
+  display: flex;
+  justify-content: center;
+  height: 150px;
+  margin: -4px -4px 4px;
+  overflow: hidden;
+  border-radius: var(--r-md);
+  background: radial-gradient(260px 120px at 50% 0%, rgba(90, 146, 255, 0.14), transparent 70%), var(--surface-1);
+  box-shadow: inset 0 0 0 1px var(--hairline);
+  -webkit-mask-image: linear-gradient(180deg, #000 70%, transparent);
+  mask-image: linear-gradient(180deg, #000 70%, transparent);
+}
+.mini-phone {
+  width: 196px;
+  margin-top: 16px;
+  padding: 12px 10px;
+  border-radius: 20px 20px 0 0;
+  background: #0b0c0e;
+  box-shadow: 0 0 0 1px var(--border), 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+.mini-phone-chips {
+  display: flex;
+  gap: 5px;
+  margin-bottom: 8px;
+}
+.mini-phone-chip {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: var(--r-pill);
+  background: rgba(255, 255, 255, 0.08);
+}
+.mini-phone-chip.active {
+  background: #3375bb;
+}
+.mini-phone-chip-logo {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  overflow: hidden;
+  font-size: 8px;
+}
+.mini-phone-chip-logo img,
+.mini-phone-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.mini-phone-row {
   display: flex;
   align-items: center;
-  height: 28px;
+  gap: 8px;
+  padding: 5px 0;
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
 }
-.gallery-card-networks .network-logo,
-.gallery-card-networks .logo-badge-fallback {
-  width: 28px;
-  height: 28px;
-  margin-left: -8px;
-  border: 2px solid var(--surface-2);
-  font-size: 12px;
+.mini-phone-row + .mini-phone-row {
+  border-top: 0.5px solid rgba(255, 255, 255, 0.08);
 }
-.gallery-card-networks > :first-child {
-  margin-left: 0;
+.mini-phone-logo {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  overflow: hidden;
+  font-size: 10px;
+}
+.mini-phone-symbol {
+  flex: 1;
+  font-weight: 600;
+  color: #f2f3f5;
+}
+.mini-phone-usd {
+  color: #9aa1ab;
 }
 .gallery-card-open {
   position: absolute;
@@ -301,8 +361,8 @@
   color: var(--text-2);
 }
 .registry-source-banner.preview-only {
-  background: rgba(217, 164, 65, 0.16);
-  color: #f0cd86;
+  background: var(--warn-bg-strong);
+  color: var(--warn-text);
   font-weight: 600;
 }
 .topbar-actions {
@@ -375,9 +435,37 @@
 .network-tab.active {
   border-color: var(--studio-accent-line);
   background: var(--studio-accent-soft);
-  color: #cfe0ff;
+  color: var(--accent-text);
 }
 
+.sidebar-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  margin-bottom: 8px;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
+  color: var(--text-dim);
+}
+.sidebar-search:focus-within {
+  border-color: var(--studio-accent-line);
+  box-shadow: 0 0 0 3px var(--studio-accent-soft);
+}
+.sidebar-search input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--text);
+  font-size: 13px;
+}
+.sidebar-search input::placeholder {
+  color: var(--text-dim);
+}
 .token-list {
   display: flex;
   flex-direction: column;
@@ -435,24 +523,80 @@
 }
 
 /* ---- editor ----------------------------------------------------------------------------------------- */
-.json-editor {
+.json-editor-wrap {
+  position: relative;
   flex: 1;
   min-height: 280px;
-  padding: 12px 14px;
   border: 1px solid var(--hairline);
   border-radius: var(--r-md);
-  background: #0a0b0d;
-  color: #d6dbe1;
+  background: var(--code-bg);
+}
+.json-editor-wrap:focus-within {
+  border-color: var(--studio-accent-line);
+  box-shadow: 0 0 0 3px var(--studio-accent-soft);
+}
+/* The textarea and the colored <pre> share every metric so each character lands exactly on its colored twin. */
+.json-highlight,
+.json-editor {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  padding: 12px 14px;
   font-family: var(--font-mono);
   font-size: 12px;
   line-height: 1.65;
+  letter-spacing: 0;
   tab-size: 2;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+.json-highlight {
+  overflow: hidden;
+  color: var(--code-text);
+  pointer-events: none;
+}
+.json-highlight code {
+  font: inherit;
+}
+.json-editor {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: transparent;
+  color: transparent;
+  caret-color: var(--text);
   resize: none;
+  overflow: auto;
+  scrollbar-width: none; /* a scrollbar would narrow the text and break the line wraps that match the colored layer */
+}
+.json-editor::-webkit-scrollbar {
+  display: none;
 }
 .json-editor:focus {
   outline: none;
-  border-color: var(--studio-accent-line);
-  box-shadow: 0 0 0 3px var(--studio-accent-soft);
+}
+.json-editor::selection {
+  background: var(--studio-accent-soft);
+  color: transparent;
+}
+.tok-key {
+  color: var(--code-key);
+}
+.tok-string {
+  color: var(--code-string);
+}
+.tok-number,
+.tok-literal {
+  color: var(--code-number);
+}
+.tok-punct {
+  color: var(--code-punct);
+}
+.tok-error {
+  background: rgba(229, 72, 77, 0.28);
+  text-decoration: underline wavy #ff6b70;
+  text-underline-offset: 3px;
 }
 .editor-diagnostics {
   margin-top: 8px;
@@ -460,7 +604,7 @@
   color: var(--text-dim);
 }
 .editor-diagnostics.has-errors {
-  color: #ff8a8e;
+  color: var(--danger-text);
 }
 .trust-score-panel {
   margin-top: 14px;
@@ -474,6 +618,38 @@
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
+.trust-score-group {
+  margin-bottom: 8px;
+}
+.trust-score-group > summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 2px;
+  color: var(--text-2);
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+}
+.trust-score-group > summary::-webkit-details-marker {
+  display: none;
+}
+.trust-score-group > summary::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(-45deg);
+  transition: transform var(--t-fast) var(--ease);
+}
+.trust-score-group[open] > summary::before {
+  transform: rotate(45deg);
+}
+.trust-score-group-warning > summary {
+  color: var(--danger-text-soft);
+}
 .trust-score-finding {
   margin-bottom: 6px;
   padding: 8px 10px 8px 12px;
@@ -482,14 +658,14 @@
   line-height: 1.5;
 }
 .trust-score-warning {
-  background: rgba(229, 72, 77, 0.08);
-  border-left-color: rgba(229, 72, 77, 0.7);
-  color: #f2b8ba;
+  background: var(--danger-bg);
+  border-left-color: var(--danger-line);
+  color: var(--danger-text-soft);
 }
 .trust-score-info {
-  background: rgba(90, 146, 255, 0.07);
-  border-left-color: rgba(90, 146, 255, 0.55);
-  color: #b9cff5;
+  background: var(--info-bg);
+  border-left-color: var(--studio-accent-line);
+  color: var(--info-text);
 }
 
 /* ---- simulator column + device dock ----------------------------------------------------------------- */
@@ -521,7 +697,7 @@
   padding: 6px;
   border: 1px solid var(--border);
   border-radius: var(--r-lg);
-  background: rgba(19, 22, 26, 0.82);
+  background: var(--dock-bg);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
@@ -593,8 +769,8 @@
 .toast {
   padding: 10px 16px;
   border-radius: var(--r-pill);
-  background: #f2f4f7;
-  color: #0b0d10;
+  background: var(--toast-bg);
+  color: var(--toast-text);
   font-size: 13px;
   font-weight: 500;
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
@@ -642,7 +818,7 @@ html[data-mode="phone"][data-view="studio"] .simulator-column {
 }
 html[data-mode="phone"][data-view="studio"][data-fullscreen="false"] body {
   background:
-    radial-gradient(900px 420px at 50% -120px, rgba(90, 146, 255, 0.1), transparent 70%),
+    radial-gradient(900px 420px at 50% -120px, var(--glow), transparent 70%),
     var(--bg);
 }
 html[data-mode="phone"][data-view="studio"][data-fullscreen="false"] .simulator-column {
@@ -694,4 +870,11 @@ html[data-fullscreen="true"][data-view="studio"] .phone-overlay.chrome-android {
   .gallery-cards {
     grid-template-columns: 1fr;
   }
+}
+
+.theme-corner {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 20;
 }

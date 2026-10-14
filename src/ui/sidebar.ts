@@ -17,6 +17,19 @@ export interface SidebarCallbacks {
   onAddToken: () => void;
 }
 
+/** A network with more tokens than this gets a filter box above its list. */
+export const SEARCH_THRESHOLD = 12;
+
+// The filter text survives the sidebar's re-renders (the whole panel is rebuilt on every state change) and is cleared
+// when the network changes.
+let filterText = "";
+let filterNetwork = "";
+
+export function matchesFilter(token: Token, query: string): boolean {
+  const needle = query.trim().toLowerCase();
+  return needle === "" || token.symbol.toLowerCase().includes(needle) || token.name.toLowerCase().includes(needle);
+}
+
 export function renderSidebar(
   container: HTMLElement,
   registry: Registry,
@@ -25,6 +38,10 @@ export function renderSidebar(
   selectedTokenSymbol: string | undefined,
   callbacks: SidebarCallbacks,
 ): void {
+  if (filterNetwork !== selectedNetwork) {
+    filterNetwork = selectedNetwork;
+    filterText = "";
+  }
   container.innerHTML = "";
   container.className = "sidebar";
 
@@ -49,11 +66,47 @@ export function renderSidebar(
 
   const tokensHeader = document.createElement("h3");
   const network = registry.networks.find((n) => n.name === selectedNetwork);
-  const tokens = network?.tokens ?? [];
+  const allTokens = network?.tokens ?? [];
+  const tokens = allTokens.filter((t) => matchesFilter(t, filterText));
   tokensHeader.textContent = `Tokens (${selectedNetwork})`;
   container.append(tokensHeader);
 
-  if (tokens.length === 0) {
+  if (allTokens.length > SEARCH_THRESHOLD) {
+    const wrap = document.createElement("label");
+    wrap.className = "sidebar-search";
+    wrap.append(icon("search", { size: 15 }));
+    const input = document.createElement("input");
+    input.type = "search";
+    input.placeholder = `Filter ${allTokens.length} tokens`;
+    input.setAttribute("aria-label", "Filter tokens");
+    input.autocomplete = "off";
+    input.spellcheck = false;
+    input.value = filterText;
+    input.addEventListener("input", () => {
+      filterText = input.value;
+      const caret = input.selectionStart;
+      renderSidebar(container, registry, networks, selectedNetwork, selectedTokenSymbol, callbacks);
+      const again = container.querySelector<HTMLInputElement>(".sidebar-search input");
+      again?.focus();
+      if (caret !== null) again?.setSelectionRange(caret, caret);
+    });
+    input.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && input.value !== "") {
+        event.preventDefault();
+        input.value = "";
+        input.dispatchEvent(new Event("input"));
+      }
+    });
+    wrap.append(input);
+    container.append(wrap);
+  }
+
+  if (allTokens.length > 0 && tokens.length === 0) {
+    const none = document.createElement("div");
+    none.className = "sidebar-empty-state";
+    none.textContent = `No token matches "${filterText.trim()}".`;
+    container.append(none);
+  } else if (tokens.length === 0) {
     const empty = document.createElement("div");
     empty.className = "sidebar-empty-state";
     empty.textContent = "No tokens on this network yet.";

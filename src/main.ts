@@ -20,6 +20,7 @@ import { icon, iconButton } from "./ui/icons.ts";
 import { showToast } from "./ui/toast.ts";
 import { attachMenu } from "./ui/menu.ts";
 import { copyText } from "./receive/copy-text.ts";
+import { readStudioTheme, nextStudioTheme, applyStudioTheme, THEME_LABEL, THEME_ICON, type StudioTheme } from "./ui/studio-theme.ts";
 import { resolvePhoneMode, detectChromeStyle, withViewParam, type PhoneModeResolution } from "./share-link/phone-mode.ts";
 
 type ViewMode = "gallery" | "studio";
@@ -342,6 +343,48 @@ function buildDock(): void {
   syncDock();
 }
 
+// ---------------------------------------------------------------------------
+// Studio theme toggle (system / light / dark): one button in the gallery corner, one in the studio top bar.
+// ---------------------------------------------------------------------------
+
+let studioTheme: StudioTheme = "auto";
+
+function themeButtonContent(): { icon: SVGElement; label: string } {
+  return { icon: icon(THEME_ICON[studioTheme], { size: 16 }), label: THEME_LABEL[studioTheme] };
+}
+
+function syncThemeButtons(): void {
+  for (const button of document.querySelectorAll<HTMLButtonElement>(".theme-toggle")) {
+    const { icon: glyph, label } = themeButtonContent();
+    button.replaceChildren(glyph);
+    button.title = label;
+    button.setAttribute("aria-label", label);
+  }
+}
+
+function initThemeToggle(): void {
+  studioTheme = readStudioTheme();
+  applyStudioTheme(studioTheme);
+  const make = (): HTMLButtonElement => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "icon-btn theme-toggle";
+    button.addEventListener("click", () => {
+      studioTheme = nextStudioTheme(studioTheme);
+      applyStudioTheme(studioTheme);
+      syncThemeButtons();
+    });
+    return button;
+  };
+  const corner = document.createElement("div");
+  corner.className = "theme-corner";
+  corner.append(make());
+  el("gallery-view").append(corner);
+  const actions = document.querySelector(".topbar-actions");
+  actions?.prepend(make());
+  syncThemeButtons();
+}
+
 function syncDock(): void {
   for (const [id, active] of [
     ["chrome-style-ios", state.chromeStyle === "ios"],
@@ -524,6 +567,7 @@ async function init(): Promise<void> {
   downloadBtn.setAttribute("aria-label", "Export list");
   downloadBtn.title = "Download list JSON";
   buildDock();
+  initThemeToggle();
 
   // A real phone looks like the device it is: iOS or Android chrome, and the system light/dark setting.
   const detected = detectChromeStyle(navigator.userAgent, navigator.maxTouchPoints);

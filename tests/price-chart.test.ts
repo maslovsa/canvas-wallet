@@ -82,3 +82,26 @@ describe("buildSparkline", () => {
     expect(result.pathD.split("L").length).toBe(4);
   });
 });
+
+describe("fetchPriceHistory through the Worker", () => {
+  it("asks the Worker's /price (not CoinGecko) when a Worker URL is configured, and returns its prices", async () => {
+    const fetchImpl = vi.fn(async () => new Response(JSON.stringify({ prices: [1, 1.1, 1.2] }))) as unknown as typeof fetch;
+    const prices = await fetchPriceHistory("proxy-test-a", 1, fetchImpl, "https://worker.example/");
+    expect(prices).toEqual([1, 1.1, 1.2]);
+    expect(String((fetchImpl as unknown as { mock: { calls: unknown[][] } }).mock.calls[0]![0])).toBe("https://worker.example/price?id=proxy-test-a");
+  });
+
+  it("a Worker error or junk answer is null (the placeholder chart), without falling back to a direct CoinGecko call", async () => {
+    const down = vi.fn(async () => new Response("", { status: 502 })) as unknown as typeof fetch;
+    expect(await fetchPriceHistory("proxy-test-b", 1, down, "https://worker.example")).toBeNull();
+    const junk = vi.fn(async () => new Response(JSON.stringify({ prices: ["x", null] }))) as unknown as typeof fetch;
+    expect(await fetchPriceHistory("proxy-test-c", 1, junk, "https://worker.example")).toBeNull();
+    expect(down).toHaveBeenCalledTimes(1);
+  });
+
+  it("only the 1-day chart goes through the Worker; other ranges keep calling CoinGecko directly", async () => {
+    const fetchImpl = vi.fn(async () => new Response(JSON.stringify({ prices: [[0, 5], [1, 6]] }))) as unknown as typeof fetch;
+    expect(await fetchPriceHistory("proxy-test-d", 7, fetchImpl, "https://worker.example")).toEqual([5, 6]);
+    expect(String((fetchImpl as unknown as { mock: { calls: unknown[][] } }).mock.calls[0]![0])).toContain("api.coingecko.com");
+  });
+});
