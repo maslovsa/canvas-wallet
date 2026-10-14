@@ -116,6 +116,8 @@ const SPARKLINE_HEIGHT = 56;
 
 function renderSparklineInto(container: HTMLElement, prices: number[], isPlaceholder: boolean): void {
   container.innerHTML = "";
+  container.removeAttribute("aria-busy");
+  container.removeAttribute("aria-label");
   const { pathD, latest, changePct, isRising } = buildSparkline(prices, SPARKLINE_WIDTH, SPARKLINE_HEIGHT);
 
   const stats = document.createElement("div");
@@ -161,7 +163,14 @@ const renderPriceChart: WidgetRenderer<Extract<Widget, { type: "price_chart" }>>
 
   const body = document.createElement("div");
   body.className = "price-chart-body";
-  body.textContent = "Loading price…";
+  // A skeleton in the shape of the result (price + chart) instead of a line of text: no layout jump when it lands.
+  body.setAttribute("aria-busy", "true");
+  body.setAttribute("aria-label", "Loading price");
+  for (const shape of ["price-skeleton-price", "price-skeleton-chart"]) {
+    const bar = document.createElement("div");
+    bar.className = `skeleton ${shape}`;
+    body.append(bar);
+  }
   el.append(body);
 
   const days = widget.days ?? 1;

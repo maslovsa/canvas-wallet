@@ -61,13 +61,21 @@ export function setPhoneNavScreen(mode: "list" | "detail"): void {
   resetSendSession(); // main.ts only ever moves to list/detail; leaving Send always starts the next one fresh
 }
 
+const MODE_ORDER = { list: 0, detail: 1, send: 2 } as const;
+let lastRenderedMode: keyof typeof MODE_ORDER | null = null;
+
 export function renderPhoneFrame(container: HTMLElement, token: Token | undefined, options: PhoneFrameOptions): void {
   unmountSendScreen(); // drop the live Send subscription/dialog before the DOM is wiped; the session itself survives
+  // Moving to another screen slides the new one in (forward = deeper, back = shallower); re-rendering the SAME screen
+  // (a live edit in the editor) neither animates nor loses the scroll position.
+  const previousScroll = container.querySelector<HTMLElement>(".phone-screen")?.scrollTop ?? 0;
+  const direction = lastRenderedMode === null || lastRenderedMode === screenMode ? null : MODE_ORDER[screenMode] > MODE_ORDER[lastRenderedMode] ? "forward" : "back";
+  lastRenderedMode = screenMode;
   container.innerHTML = "";
   container.className = `phone-frame chrome-${options.chromeStyle} theme-${options.chromeTheme}`;
 
   const screen = document.createElement("div");
-  screen.className = "phone-screen";
+  screen.className = "phone-screen" + (direction ? ` enter-${direction}` : "");
   container.append(screen);
   container.append(homeIndicator());
   // A decorative overlay on the chassis itself (like .phone-home-indicator
@@ -144,6 +152,7 @@ export function renderPhoneFrame(container: HTMLElement, token: Token | undefine
   } else {
     renderListScreen(screen, options);
   }
+  if (!direction && previousScroll > 0) screen.scrollTop = previousScroll;
   options.onScreenChange?.();
 }
 

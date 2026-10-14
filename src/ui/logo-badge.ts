@@ -17,6 +17,7 @@ export function createLogoBadge(url: string | undefined, fallbackLetter: string,
       const img = document.createElement("img");
       img.src = src;
       img.alt = "";
+      img.className = "logo-fade-in"; // the letter avatar gives way to the image with a short fade, not a hard swap
       el.replaceChildren(img);
     });
   }
