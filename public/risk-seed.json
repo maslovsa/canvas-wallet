@@ -126,6 +126,52 @@
       "level": "clear",
       "label": "SunSwap",
       "checkedAt": "2026-10-14"
+    },
+    {
+      "network": "TRON",
+      "address": "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t",
+      "level": "clear",
+      "label": "Tether",
+      "logo": "https://cdn.jsdelivr.net/gh/maslovsa/kyt-entity-registry@main/logos/psp/tether.png",
+      "checkedAt": "2026-10-14"
+    },
+    {
+      "network": "TRON",
+      "address": "TEkxiTehnzSmSe2XqrBj4w32RUN966rdz8",
+      "level": "clear",
+      "label": "Circle",
+      "logo": "https://cdn.jsdelivr.net/gh/maslovsa/kyt-entity-registry@main/logos/stablecoin_issuer/usd-coin.png",
+      "checkedAt": "2026-10-14"
+    },
+    {
+      "network": "TRON",
+      "address": "TCFLL5dx5ZJdKnWuesXxi1VPwjLVmWZZy9",
+      "level": "clear",
+      "label": "JustLend DAO",
+      "logo": "https://cdn.jsdelivr.net/gh/maslovsa/kyt-entity-registry@main/logos/defi/justlend.png",
+      "checkedAt": "2026-10-14"
+    },
+    {
+      "network": "TRON",
+      "address": "TNUC9Qb1rRpS5CbWLmNMxXBjyFoydXjWFR",
+      "level": "clear",
+      "checkedAt": "2026-10-14"
+    },
+    {
+      "network": "TRON",
+      "address": "TSSMHYeV2uE9qYH95DqyoCuNCzEL1NvU3S",
+      "level": "clear",
+      "label": "Sun",
+      "logo": "https://cdn.jsdelivr.net/gh/maslovsa/kyt-entity-registry@main/logos/dex/sun-io.png",
+      "checkedAt": "2026-10-14"
+    },
+    {
+      "network": "TRON",
+      "address": "TXDk8mbtRbXeYuMNS83CfKPaYYT8XWv9Hz",
+      "level": "clear",
+      "label": "USDD",
+      "logo": "https://cdn.jsdelivr.net/gh/maslovsa/kyt-entity-registry@main/logos/dex/usdd.png",
+      "checkedAt": "2026-10-14"
     }
   ]
 }
