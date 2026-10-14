@@ -47,3 +47,16 @@ test.describe("phone mode on an iPhone", () => {
     expect(await seriousViolations(page)).toEqual([]);
   });
 });
+
+test("the light studio (system setting) has no serious accessibility violations either", async ({ page }) => {
+  await page.emulateMedia({ colorScheme: "light" });
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/");
+  await expect(page.locator(".gallery-card").first()).toBeVisible();
+  expect(await seriousViolations(page)).toEqual([]);
+  await page.goto("/?list=aegis-super-list&network=Tron&token=USDT");
+  await expect(page.locator(".card-header-name")).toContainText("(USDT)");
+  expect(await seriousViolations(page)).toEqual([]);
+  await page.locator(".json-editor").fill('{ "name": ');
+  expect(await seriousViolations(page)).toEqual([]);
+});

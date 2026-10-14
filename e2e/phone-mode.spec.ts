@@ -166,3 +166,22 @@ test("scrolling the wallet home and a token card turns their bars into compact b
   await expect(nav).toHaveClass(/is-scrolled/);
   await expect(page.locator(".card-nav-title")).toHaveText("USDT");
 });
+
+test("the studio follows a light system setting, and the theme toggle pins and remembers a choice", async ({ page }) => {
+  await page.emulateMedia({ colorScheme: "light" });
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto(LINK);
+  await expect(page.locator(".topbar")).toBeVisible();
+  const bg = () => page.evaluate(() => getComputedStyle(document.body).backgroundColor);
+  expect(await bg()).toBe("rgb(244, 245, 248)"); // light, from the system setting
+  const toggle = page.locator(".topbar .theme-toggle");
+  await expect(toggle).toHaveAttribute("aria-label", "Theme: follow system");
+  await toggle.click(); // auto -> light
+  await expect(toggle).toHaveAttribute("aria-label", "Theme: light");
+  await toggle.click(); // light -> dark
+  await expect(toggle).toHaveAttribute("aria-label", "Theme: dark");
+  expect(await bg()).toBe("rgb(8, 9, 11)");
+  await page.reload();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark"); // remembered
+  expect(await bg()).toBe("rgb(8, 9, 11)");
+});
