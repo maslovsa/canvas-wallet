@@ -10,8 +10,8 @@ const CLEAR = "TMuA6YqfCeX8EhbfYEg5y7S4DqzSJireY9";
 const RISKY = "THJUJFyTnrBWb1ijWav7qfRBrjUuKgP49Z";
 
 const USDT: SendTokenInfo = {
-  key: "Tron:TR7NHq", symbol: "USDT", name: "Tether USD", decimals: 6, isNative: false,
-  contract: "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t", balanceUnits: 120_000_000n, trxBalanceUnits: 250_000_000n,
+  key: "TRON:TR7NHq", network: "TRON", symbol: "USDT", name: "Tether USD", decimals: 6, isNative: false,
+  contract: "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t", balanceUnits: 120_000_000n, nativeBalanceUnits: 250_000_000n,
 };
 
 const LOGO_ADDR = "TJDENsfBJs4RFETt1X1W8wMDc8M5XnJhCe";
@@ -24,7 +24,7 @@ const SEED: Record<string, RiskResult> = {
   [NAMED_ADDR]: { state: "clear", label: "Åland Exchange" }, [CLEAR]: { state: "clear", label: "Binance" }, [RISKY]: { state: "caution" } };
 const deps: SendDeps = {
   validateAddress: (a) => validateTronAddress(a, webcrypto.subtle as SubtleCrypto),
-  estimateFee: async () => ({ kind: "live", newRecipient: false, sun: 6_400_000n }),
+  estimateFee: async () => ({ kind: "live", newRecipient: false, units: 6_400_000n }),
   checkRisk: async (a) => SEED[a] ?? { state: "unavailable" },
   now: () => Date.now(),
   setTimeout: (fn, ms) => setTimeout(fn, ms),

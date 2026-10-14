@@ -4,6 +4,8 @@
 import type { ChromeStyle } from "./phone-frame.ts";
 import { openOverlay, type OpenOverlay } from "./phone-overlay.ts";
 import { icon } from "./icons.ts";
+import { createAvatar } from "./avatar.ts";
+import { SEND_NETWORKS } from "../send/send-network.ts";
 import { openAddressBookSheet } from "./address-book-sheet.ts";
 import { bookNetworkFor, entriesForNetwork, loadAddressBook, type AddressBookEntry } from "../send/address-book.ts";
 import type { SendController, SendView, Tone } from "../send/send-session.ts";
@@ -68,6 +70,17 @@ function fillOwnerBadge(badge: HTMLElement, name: string, logo: string | null): 
   badge.append(img);
 }
 
+type Verdict = "checking" | "known" | "clear" | "caution" | "contract" | "unverified";
+
+/** Which look the risk answer gets: derived from the status the controller already built (text and facts unchanged). */
+function verdictOf(s: SendView["address"]["status"]): Verdict | null {
+  if (!s) return null;
+  if (s.spinner) return "checking";
+  if (s.tone === "caution") return s.contract ? "contract" : "caution";
+  if (s.tone === "success") return "known";
+  return s.checkAgain ? "unverified" : "clear";
+}
+
 const ICONS = { check: "✓", alert: "⚠", help: "?", none: "" } as const;
 
 export function mountSendScreen(options: SendScreenOptions): void {
@@ -114,7 +127,7 @@ export function mountSendScreen(options: SendScreenOptions): void {
   addrInput.setAttribute("autocorrect", "off");
   addrInput.setAttribute("autocomplete", "off");
   addrInput.spellcheck = false;
-  addrInput.placeholder = "Tron address (starts with T)"; // a hint only: the visible "To" label stays
+  addrInput.placeholder = SEND_NETWORKS[controller.token.network].addressHint; // a hint only: the visible "To" label stays
   addrInput.setAttribute("aria-describedby", "send-address-status");
   const bookBtn = el("button", "send-book-btn");
   bookBtn.type = "button";
@@ -201,7 +214,10 @@ export function mountSendScreen(options: SendScreenOptions): void {
   screen.append(root);
 
   // --- events
-  addrInput.addEventListener("input", () => void controller.setAddress(addrInput.value));
+  addrInput.addEventListener("input", () => {
+    fitAddress();
+    void controller.setAddress(addrInput.value);
+  });
   amountInput.addEventListener("input", () => controller.setAmount(amountInput.value));
   paste.addEventListener("click", async () => {
     try {
@@ -239,6 +255,17 @@ export function mountSendScreen(options: SendScreenOptions): void {
     if (root.isConnected) patch(controller.view());
   });
 
+  // A long address (EVM 42 characters, TON 48) must never be cut off in the field: the end of an address matters. The text
+  // shrinks just enough to fit on one line (never below 9 px); a Tron address (34) fits at the normal size.
+  const BASE_ADDRESS_PX = 14;
+  function fitAddress(): void {
+    addrInput.style.fontSize = "";
+    const room = addrInput.clientWidth;
+    if (room > 0 && addrInput.scrollWidth > room) {
+      addrInput.style.fontSize = `${Math.max(9, Math.floor(BASE_ADDRESS_PX * (room / addrInput.scrollWidth) * 10) / 10)}px`;
+    }
+  }
+
   // --- patching
   let seenFocusRequests = controller.state.focusAddressRequests;
 
@@ -248,9 +275,14 @@ export function mountSendScreen(options: SendScreenOptions): void {
     title.textContent = view.title;
     // The name shows only while the field holds exactly a saved address: type or paste any other and it goes away.
     const saved = bookEntries.find((e) => e.address === view.address.value);
-    addrLabelName.textContent = saved ? `: ${saved.comment}` : "";
+    const savedKey = saved ? `${saved.comment}\n${saved.avatar ?? ""}` : "";
+    if (addrLabelName.dataset.key !== savedKey) {
+      addrLabelName.dataset.key = savedKey;
+      addrLabelName.replaceChildren(...(saved ? [document.createTextNode(": "), ...(saved.avatar ? [createAvatar(saved.comment, saved.avatar, "send-label-avatar", false)] : []), document.createTextNode(saved.comment)] : []));
+    }
     addrLabelName.hidden = !saved;
     if (addrInput.value !== view.address.value && document.activeElement !== addrInput) addrInput.value = view.address.value;
+    fitAddress();
     if (amountInput.value !== view.amount.value && document.activeElement !== amountInput) amountInput.value = view.amount.value;
     addrInput.disabled = view.phase !== "form";
     bookBtn.disabled = view.phase !== "form";
@@ -258,11 +290,15 @@ export function mountSendScreen(options: SendScreenOptions): void {
     addrInput.setAttribute("aria-invalid", String(view.address.error !== null));
     amountInput.setAttribute("aria-invalid", String(view.amount.error !== null));
     addrField.classList.toggle("is-invalid", view.address.error !== null);
-    addrField.classList.toggle("is-caution", view.address.status?.tone === "caution");
+    const verdict = verdictOf(view.address.status);
+    addrField.classList.toggle("is-caution", verdict === "caution");
+    addrField.classList.toggle("is-contract", verdict === "contract");
+    addrField.classList.toggle("is-known", verdict === "known");
+    addrField.classList.toggle("is-clear", verdict === "clear");
     amountField.classList.toggle("is-invalid", view.amount.error !== null);
 
     const s = view.address.status;
-    status.className = "send-status" + (s ? ` ${toneClass(s.tone)}` : "");
+    status.className = "send-status" + (s ? ` ${toneClass(s.tone)} send-v-${verdict}` : "");
     // A risky address that is a known VASP: its name and logo, above the risk line.
     const identity = s?.identity ?? null;
     identityRow.hidden = identity === null;
@@ -274,7 +310,8 @@ export function mountSendScreen(options: SendScreenOptions): void {
     identityName.textContent = identity ? identity.name : "";
     const owner = s?.owner ?? null;
     const emoji = s?.emoji ?? null;
-    statusIcon.textContent = s && !owner && !emoji ? ICONS[s.icon] : "";
+    // "nothing found" has no glyph of its own in the model; the verdict card gives it a check in a teal badge
+    statusIcon.textContent = s && !owner && !emoji ? (verdict === "clear" ? ICONS.check : ICONS[s.icon]) : "";
     ownerBadge.hidden = owner === null && emoji === null;
     const ownerKey = emoji ? `emoji:${emoji}` : owner && s ? `${s.text}\n${owner.logo ?? ""}` : "";
     if (ownerBadge.dataset.key !== ownerKey) {
@@ -316,14 +353,17 @@ export function mountSendScreen(options: SendScreenOptions): void {
     }
 
     // Caution popup: opens only on a Send press (controller sets popup), closes on Cancel / Send anyway.
+    const contractPopup = view.popupKind === "contract";
     if (view.popup && !activeOverlay) {
       activeOverlay = openOverlay({
         frame,
         screen,
         chromeStyle: options.chromeStyle,
         tone: "caution",
-        title: "Risk signals found for this address",
-        body: "Aegis data at the time of the check shows risk signals. This is information, not advice, and details aren't shown. The decision is yours.",
+        title: contractPopup ? "This is a token smart contract" : "Risk signals found for this address",
+        body: contractPopup
+          ? "You're sending to a token's smart contract, not to a person's wallet. Funds sent here are lost and can't be returned. Is this really what you want to do?"
+          : "Aegis data at the time of the check shows risk signals. This is information, not advice, and details aren't shown. The decision is yours.",
         buttons: [
           { label: "Cancel", primary: true, onClick: () => controller.popupCancel() },
           { label: "Continue", onClick: () => controller.popupSendAnyway() },

@@ -30,6 +30,11 @@
       "canonicalName": "Plasma",
       "synonyms": ["plasma", "xpl"],
       "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/plasma/info/logo.png"
+    },
+    {
+      "canonicalName": "TON",
+      "synonyms": ["ton", "toncoin", "gram", "the open network"],
+      "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ton/info/logo.png"
     }
   ]
 }

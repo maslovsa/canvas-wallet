@@ -37,6 +37,10 @@
               "type": "action_group",
               "items": [
                 {
+                  "label": "Send",
+                  "action": "send"
+                },
+                {
                   "label": "Receive",
                   "action": "receive"
                 }
@@ -64,6 +68,9 @@
           "actions": {
             "receive": {
               "type": "receive"
+            },
+            "send": {
+              "type": "send"
             }
           }
         },
@@ -95,6 +102,19 @@
           },
           "widgets": [
             {
+              "type": "action_group",
+              "items": [
+                {
+                  "label": "Send",
+                  "action": "send"
+                },
+                {
+                  "label": "Receive",
+                  "action": "receive"
+                }
+              ]
+            },
+            {
               "type": "key_value",
               "title": "Wrapping",
               "items": [
@@ -112,7 +132,15 @@
             {
               "type": "history"
             }
-          ]
+          ],
+          "actions": {
+            "send": {
+              "type": "send"
+            },
+            "receive": {
+              "type": "receive"
+            }
+          }
         },
         {
           "name": "Tether USD",
@@ -159,12 +187,19 @@
             },
             "receive": {
               "type": "receive"
+            },
+            "send": {
+              "type": "send"
             }
           },
           "widgets": [
             {
               "type": "action_group",
               "items": [
+                {
+                  "label": "Send",
+                  "action": "send"
+                },
                 {
                   "label": "Receive",
                   "action": "receive"
@@ -243,9 +278,28 @@
               "type": "external_url",
               "url": "https://app.example.com/redeem?token=USDC",
               "openIn": "in_app_browser"
+            },
+            "send": {
+              "type": "send"
+            },
+            "receive": {
+              "type": "receive"
             }
           },
           "widgets": [
+            {
+              "type": "action_group",
+              "items": [
+                {
+                  "label": "Send",
+                  "action": "send"
+                },
+                {
+                  "label": "Receive",
+                  "action": "receive"
+                }
+              ]
+            },
             {
               "type": "banner",
               "title": "Mint & Redeem",
@@ -317,9 +371,28 @@
               "type": "external_url",
               "url": "https://app.example.com/redeem?token=DAI",
               "openIn": "in_app_browser"
+            },
+            "send": {
+              "type": "send"
+            },
+            "receive": {
+              "type": "receive"
             }
           },
           "widgets": [
+            {
+              "type": "action_group",
+              "items": [
+                {
+                  "label": "Send",
+                  "action": "send"
+                },
+                {
+                  "label": "Receive",
+                  "action": "receive"
+                }
+              ]
+            },
             {
               "type": "banner",
               "title": "Mint & Redeem",
@@ -388,9 +461,28 @@
               "type": "external_url",
               "url": "https://app.example.com/redeem?token=WBTC",
               "openIn": "in_app_browser"
+            },
+            "send": {
+              "type": "send"
+            },
+            "receive": {
+              "type": "receive"
             }
           },
           "widgets": [
+            {
+              "type": "action_group",
+              "items": [
+                {
+                  "label": "Send",
+                  "action": "send"
+                },
+                {
+                  "label": "Receive",
+                  "action": "receive"
+                }
+              ]
+            },
             {
               "type": "banner",
               "title": "Mint & Redeem",
@@ -458,6 +550,12 @@
             "protocol_dapp": {
               "type": "wallet_connect",
               "dappUrl": "https://stake.example.com/link"
+            },
+            "send": {
+              "type": "send"
+            },
+            "receive": {
+              "type": "receive"
             }
           },
           "widgets": [
@@ -465,6 +563,10 @@
               "type": "action_group",
               "title": "Protocol Actions",
               "items": [
+                {
+                  "label": "Send",
+                  "action": "send"
+                },
                 {
                   "label": "Swap for LINK",
                   "action": "swap_dapp"
@@ -523,6 +625,12 @@
             "protocol_dapp": {
               "type": "wallet_connect",
               "dappUrl": "https://stake.example.com/uni"
+            },
+            "send": {
+              "type": "send"
+            },
+            "receive": {
+              "type": "receive"
             }
           },
           "widgets": [
@@ -530,6 +638,10 @@
               "type": "action_group",
               "title": "Protocol Actions",
               "items": [
+                {
+                  "label": "Send",
+                  "action": "send"
+                },
                 {
                   "label": "Swap for UNI",
                   "action": "swap_dapp"
@@ -588,6 +700,12 @@
             "protocol_dapp": {
               "type": "wallet_connect",
               "dappUrl": "https://stake.example.com/aave"
+            },
+            "send": {
+              "type": "send"
+            },
+            "receive": {
+              "type": "receive"
             }
           },
           "widgets": [
@@ -595,6 +713,10 @@
               "type": "action_group",
               "title": "Protocol Actions",
               "items": [
+                {
+                  "label": "Send",
+                  "action": "send"
+                },
                 {
                   "label": "Swap for AAVE",
                   "action": "swap_dapp"
@@ -653,6 +775,12 @@
             "protocol_dapp": {
               "type": "wallet_connect",
               "dappUrl": "https://stake.example.com/mkr"
+            },
+            "send": {
+              "type": "send"
+            },
+            "receive": {
+              "type": "receive"
             }
           },
           "widgets": [
@@ -660,6 +788,10 @@
               "type": "action_group",
               "title": "Protocol Actions",
               "items": [
+                {
+                  "label": "Send",
+                  "action": "send"
+                },
                 {
                   "label": "Swap for MKR",
                   "action": "swap_dapp"
@@ -718,6 +850,12 @@
             "protocol_dapp": {
               "type": "wallet_connect",
               "dappUrl": "https://stake.example.com/comp"
+            },
+            "send": {
+              "type": "send"
+            },
+            "receive": {
+              "type": "receive"
             }
           },
           "widgets": [
@@ -725,6 +863,10 @@
               "type": "action_group",
               "title": "Protocol Actions",
               "items": [
+                {
+                  "label": "Send",
+                  "action": "send"
+                },
                 {
                   "label": "Swap for COMP",
                   "action": "swap_dapp"
@@ -783,6 +925,12 @@
             "protocol_dapp": {
               "type": "wallet_connect",
               "dappUrl": "https://stake.example.com/sushi"
+            },
+            "send": {
+              "type": "send"
+            },
+            "receive": {
+              "type": "receive"
             }
           },
           "widgets": [
@@ -790,6 +938,10 @@
               "type": "action_group",
               "title": "Protocol Actions",
               "items": [
+                {
+                  "label": "Send",
+                  "action": "send"
+                },
                 {
                   "label": "Swap for SUSHI",
                   "action": "swap_dapp"
@@ -848,6 +1000,12 @@
             "protocol_dapp": {
               "type": "wallet_connect",
               "dappUrl": "https://stake.example.com/crv"
+            },
+            "send": {
+              "type": "send"
+            },
+            "receive": {
+              "type": "receive"
             }
           },
           "widgets": [
@@ -855,6 +1013,10 @@
               "type": "action_group",
               "title": "Protocol Actions",
               "items": [
+                {
+                  "label": "Send",
+                  "action": "send"
+                },
                 {
                   "label": "Swap for CRV",
                   "action": "swap_dapp"
@@ -913,6 +1075,12 @@
             "protocol_dapp": {
               "type": "wallet_connect",
               "dappUrl": "https://stake.example.com/snx"
+            },
+            "send": {
+              "type": "send"
+            },
+            "receive": {
+              "type": "receive"
             }
           },
           "widgets": [
@@ -920,6 +1088,10 @@
               "type": "action_group",
               "title": "Protocol Actions",
               "items": [
+                {
+                  "label": "Send",
+                  "action": "send"
+                },
                 {
                   "label": "Swap for SNX",
                   "action": "swap_dapp"
@@ -970,6 +1142,19 @@
           },
           "widgets": [
             {
+              "type": "action_group",
+              "items": [
+                {
+                  "label": "Send",
+                  "action": "send"
+                },
+                {
+                  "label": "Receive",
+                  "action": "receive"
+                }
+              ]
+            },
+            {
               "type": "notice",
               "message": "No intrinsic value. DYOR.",
               "severity": "warning"
@@ -994,6 +1179,12 @@
               "type": "external_url",
               "url": "https://app.example.com/swap?output=SHIB",
               "openIn": "external_browser"
+            },
+            "send": {
+              "type": "send"
+            },
+            "receive": {
+              "type": "receive"
             }
           }
         },
@@ -1026,6 +1217,19 @@
           },
           "widgets": [
             {
+              "type": "action_group",
+              "items": [
+                {
+                  "label": "Send",
+                  "action": "send"
+                },
+                {
+                  "label": "Receive",
+                  "action": "receive"
+                }
+              ]
+            },
+            {
               "type": "notice",
               "message": "No intrinsic value. DYOR.",
               "severity": "warning"
@@ -1050,6 +1254,12 @@
               "type": "external_url",
               "url": "https://app.example.com/swap?output=PEPE",
               "openIn": "external_browser"
+            },
+            "send": {
+              "type": "send"
+            },
+            "receive": {
+              "type": "receive"
             }
           }
         },
@@ -1090,6 +1300,12 @@
             "protocol_dapp": {
               "type": "wallet_connect",
               "dappUrl": "https://stake.example.com/grt"
+            },
+            "send": {
+              "type": "send"
+            },
+            "receive": {
+              "type": "receive"
             }
           },
           "widgets": [
@@ -1097,6 +1313,10 @@
               "type": "action_group",
               "title": "Protocol Actions",
               "items": [
+                {
+                  "label": "Send",
+                  "action": "send"
+                },
                 {
                   "label": "Swap for GRT",
                   "action": "swap_dapp"
@@ -1155,6 +1375,12 @@
             "protocol_dapp": {
               "type": "wallet_connect",
               "dappUrl": "https://stake.example.com/ens"
+            },
+            "send": {
+              "type": "send"
+            },
+            "receive": {
+              "type": "receive"
             }
           },
           "widgets": [
@@ -1162,6 +1388,10 @@
               "type": "action_group",
               "title": "Protocol Actions",
               "items": [
+                {
+                  "label": "Send",
+                  "action": "send"
+                },
                 {
                   "label": "Swap for ENS",
                   "action": "swap_dapp"
@@ -1220,6 +1450,12 @@
             "protocol_dapp": {
               "type": "wallet_connect",
               "dappUrl": "https://stake.example.com/arb"
+            },
+            "send": {
+              "type": "send"
+            },
+            "receive": {
+              "type": "receive"
             }
           },
           "widgets": [
@@ -1227,6 +1463,10 @@
               "type": "action_group",
               "title": "Protocol Actions",
               "items": [
+                {
+                  "label": "Send",
+                  "action": "send"
+                },
                 {
                   "label": "Swap for ARB",
                   "action": "swap_dapp"
@@ -1285,6 +1525,12 @@
             "protocol_dapp": {
               "type": "wallet_connect",
               "dappUrl": "https://stake.example.com/yfi"
+            },
+            "send": {
+              "type": "send"
+            },
+            "receive": {
+              "type": "receive"
             }
           },
           "widgets": [
@@ -1292,6 +1538,10 @@
               "type": "action_group",
               "title": "Protocol Actions",
               "items": [
+                {
+                  "label": "Send",
+                  "action": "send"
+                },
                 {
                   "label": "Swap for YFI",
                   "action": "swap_dapp"
@@ -1347,6 +1597,19 @@
           },
           "widgets": [
             {
+              "type": "action_group",
+              "items": [
+                {
+                  "label": "Send",
+                  "action": "send"
+                },
+                {
+                  "label": "Receive",
+                  "action": "receive"
+                }
+              ]
+            },
+            {
               "type": "key_value",
               "title": "Network",
               "items": [
@@ -1364,7 +1627,15 @@
             {
               "type": "history"
             }
-          ]
+          ],
+          "actions": {
+            "send": {
+              "type": "send"
+            },
+            "receive": {
+              "type": "receive"
+            }
+          }
         },
         {
           "name": "Wrapped BNB",
@@ -1396,6 +1667,19 @@
           },
           "widgets": [
             {
+              "type": "action_group",
+              "items": [
+                {
+                  "label": "Send",
+                  "action": "send"
+                },
+                {
+                  "label": "Receive",
+                  "action": "receive"
+                }
+              ]
+            },
+            {
               "type": "key_value",
               "title": "Wrapping",
               "items": [
@@ -1413,7 +1697,15 @@
             {
               "type": "history"
             }
-          ]
+          ],
+          "actions": {
+            "send": {
+              "type": "send"
+            },
+            "receive": {
+              "type": "receive"
+            }
+          }
         },
         {
           "name": "Tether USD (BSC)",
@@ -1460,12 +1752,19 @@
             },
             "receive": {
               "type": "receive"
+            },
+            "send": {
+              "type": "send"
             }
           },
           "widgets": [
             {
               "type": "action_group",
               "items": [
+                {
+                  "label": "Send",
+                  "action": "send"
+                },
                 {
                   "label": "Receive",
                   "action": "receive"
@@ -1544,9 +1843,28 @@
               "type": "external_url",
               "url": "https://app.example.com/redeem?token=USDC",
               "openIn": "in_app_browser"
+            },
+            "send": {
+              "type": "send"
+            },
+            "receive": {
+              "type": "receive"
             }
           },
           "widgets": [
+            {
+              "type": "action_group",
+              "items": [
+                {
+                  "label": "Send",
+                  "action": "send"
+                },
+                {
+                  "label": "Receive",
+                  "action": "receive"
+                }
+              ]
+            },
             {
               "type": "banner",
               "title": "Mint & Redeem",
@@ -1618,9 +1936,28 @@
               "type": "external_url",
               "url": "https://app.example.com/redeem?token=DAI",
               "openIn": "in_app_browser"
+            },
+            "send": {
+              "type": "send"
+            },
+            "receive": {
+              "type": "receive"
             }
           },
           "widgets": [
+            {
+              "type": "action_group",
+              "items": [
+                {
+                  "label": "Send",
+                  "action": "send"
+                },
+                {
+                  "label": "Receive",
+                  "action": "receive"
+                }
+              ]
+            },
             {
               "type": "banner",
               "title": "Mint & Redeem",
@@ -1693,9 +2030,28 @@
               "type": "external_url",
               "url": "https://app.example.com/redeem?token=BUSD",
               "openIn": "in_app_browser"
+            },
+            "send": {
+              "type": "send"
+            },
+            "receive": {
+              "type": "receive"
             }
           },
           "widgets": [
+            {
+              "type": "action_group",
+              "items": [
+                {
+                  "label": "Send",
+                  "action": "send"
+                },
+                {
+                  "label": "Receive",
+                  "action": "receive"
+                }
+              ]
+            },
             {
               "type": "banner",
               "title": "Mint & Redeem",
@@ -1756,6 +2112,19 @@
           },
           "widgets": [
             {
+              "type": "action_group",
+              "items": [
+                {
+                  "label": "Send",
+                  "action": "send"
+                },
+                {
+                  "label": "Receive",
+                  "action": "receive"
+                }
+              ]
+            },
+            {
               "type": "key_value",
               "title": "Wrapping",
               "items": [
@@ -1773,7 +2142,15 @@
             {
               "type": "history"
             }
-          ]
+          ],
+          "actions": {
+            "send": {
+              "type": "send"
+            },
+            "receive": {
+              "type": "receive"
+            }
+          }
         },
         {
           "name": "ChainLink Token (BSC)",
@@ -1812,6 +2189,12 @@
             "protocol_dapp": {
               "type": "wallet_connect",
               "dappUrl": "https://stake.example.com/link"
+            },
+            "send": {
+              "type": "send"
+            },
+            "receive": {
+              "type": "receive"
             }
           },
           "widgets": [
@@ -1819,6 +2202,10 @@
               "type": "action_group",
               "title": "Protocol Actions",
               "items": [
+                {
+                  "label": "Send",
+                  "action": "send"
+                },
                 {
                   "label": "Swap for LINK",
                   "action": "swap_dapp"
@@ -1877,6 +2264,12 @@
             "protocol_dapp": {
               "type": "wallet_connect",
               "dappUrl": "https://stake.example.com/uni"
+            },
+            "send": {
+              "type": "send"
+            },
+            "receive": {
+              "type": "receive"
             }
           },
           "widgets": [
@@ -1884,6 +2277,10 @@
               "type": "action_group",
               "title": "Protocol Actions",
               "items": [
+                {
+                  "label": "Send",
+                  "action": "send"
+                },
                 {
                   "label": "Swap for UNI",
                   "action": "swap_dapp"
@@ -1942,6 +2339,12 @@
             "protocol_dapp": {
               "type": "wallet_connect",
               "dappUrl": "https://stake.example.com/aave"
+            },
+            "send": {
+              "type": "send"
+            },
+            "receive": {
+              "type": "receive"
             }
           },
           "widgets": [
@@ -1949,6 +2352,10 @@
               "type": "action_group",
               "title": "Protocol Actions",
               "items": [
+                {
+                  "label": "Send",
+                  "action": "send"
+                },
                 {
                   "label": "Swap for AAVE",
                   "action": "swap_dapp"
@@ -2007,6 +2414,12 @@
             "protocol_dapp": {
               "type": "wallet_connect",
               "dappUrl": "https://stake.example.com/comp"
+            },
+            "send": {
+              "type": "send"
+            },
+            "receive": {
+              "type": "receive"
             }
           },
           "widgets": [
@@ -2014,6 +2427,10 @@
               "type": "action_group",
               "title": "Protocol Actions",
               "items": [
+                {
+                  "label": "Send",
+                  "action": "send"
+                },
                 {
                   "label": "Swap for COMP",
                   "action": "swap_dapp"
@@ -2072,6 +2489,12 @@
             "protocol_dapp": {
               "type": "wallet_connect",
               "dappUrl": "https://stake.example.com/sushi"
+            },
+            "send": {
+              "type": "send"
+            },
+            "receive": {
+              "type": "receive"
             }
           },
           "widgets": [
@@ -2079,6 +2502,10 @@
               "type": "action_group",
               "title": "Protocol Actions",
               "items": [
+                {
+                  "label": "Send",
+                  "action": "send"
+                },
                 {
                   "label": "Swap for SUSHI",
                   "action": "swap_dapp"
@@ -2136,6 +2563,12 @@
             "protocol_dapp": {
               "type": "wallet_connect",
               "dappUrl": "https://stake.example.com/matic"
+            },
+            "send": {
+              "type": "send"
+            },
+            "receive": {
+              "type": "receive"
             }
           },
           "widgets": [
@@ -2143,6 +2576,10 @@
               "type": "action_group",
               "title": "Protocol Actions",
               "items": [
+                {
+                  "label": "Send",
+                  "action": "send"
+                },
                 {
                   "label": "Swap for MATIC",
                   "action": "swap_dapp"
@@ -2196,6 +2633,12 @@
               "type": "external_url",
               "url": "https://app.example.com/marketplace?token=AXS",
               "openIn": "in_app_browser"
+            },
+            "send": {
+              "type": "send"
+            },
+            "receive": {
+              "type": "receive"
             }
           },
           "widgets": [
@@ -2203,6 +2646,10 @@
               "type": "action_group",
               "title": "Axie Infinity",
               "items": [
+                {
+                  "label": "Send",
+                  "action": "send"
+                },
                 {
                   "label": "Play Now",
                   "action": "play_dapp"
@@ -2253,6 +2700,19 @@
           },
           "widgets": [
             {
+              "type": "action_group",
+              "items": [
+                {
+                  "label": "Send",
+                  "action": "send"
+                },
+                {
+                  "label": "Receive",
+                  "action": "receive"
+                }
+              ]
+            },
+            {
               "type": "notice",
               "message": "No intrinsic value. DYOR.",
               "severity": "warning"
@@ -2277,6 +2737,12 @@
               "type": "external_url",
               "url": "https://app.example.com/swap?output=FLOKI",
               "openIn": "external_browser"
+            },
+            "send": {
+              "type": "send"
+            },
+            "receive": {
+              "type": "receive"
             }
           }
         },
@@ -2318,6 +2784,12 @@
             "protocol_dapp": {
               "type": "wallet_connect",
               "dappUrl": "https://stake.example.com/1inch"
+            },
+            "send": {
+              "type": "send"
+            },
+            "receive": {
+              "type": "receive"
             }
           },
           "widgets": [
@@ -2325,6 +2797,10 @@
               "type": "action_group",
               "title": "Protocol Actions",
               "items": [
+                {
+                  "label": "Send",
+                  "action": "send"
+                },
                 {
                   "label": "Swap for 1INCH",
                   "action": "swap_dapp"
@@ -2382,6 +2858,12 @@
             "protocol_dapp": {
               "type": "wallet_connect",
               "dappUrl": "https://stake.example.com/ankr"
+            },
+            "send": {
+              "type": "send"
+            },
+            "receive": {
+              "type": "receive"
             }
           },
           "widgets": [
@@ -2389,6 +2871,10 @@
               "type": "action_group",
               "title": "Protocol Actions",
               "items": [
+                {
+                  "label": "Send",
+                  "action": "send"
+                },
                 {
                   "label": "Swap for ANKR",
                   "action": "swap_dapp"
@@ -2607,9 +3093,28 @@
               "type": "external_url",
               "url": "https://app.example.com/redeem?token=USDC",
               "openIn": "in_app_browser"
+            },
+            "send": {
+              "type": "send"
+            },
+            "receive": {
+              "type": "receive"
             }
           },
           "widgets": [
+            {
+              "type": "action_group",
+              "items": [
+                {
+                  "label": "Send",
+                  "action": "send"
+                },
+                {
+                  "label": "Receive",
+                  "action": "receive"
+                }
+              ]
+            },
             {
               "type": "banner",
               "title": "Mint & Redeem",
@@ -2677,9 +3182,28 @@
               "type": "external_url",
               "url": "https://app.example.com/redeem?token=A7A5",
               "openIn": "in_app_browser"
+            },
+            "send": {
+              "type": "send"
+            },
+            "receive": {
+              "type": "receive"
             }
           },
           "widgets": [
+            {
+              "type": "action_group",
+              "items": [
+                {
+                  "label": "Send",
+                  "action": "send"
+                },
+                {
+                  "label": "Receive",
+                  "action": "receive"
+                }
+              ]
+            },
             {
               "type": "banner",
               "title": "Mint & Redeem",
@@ -2737,6 +3261,12 @@
               "type": "external_url",
               "url": "https://app.example.com/marketplace?token=APENFT",
               "openIn": "in_app_browser"
+            },
+            "send": {
+              "type": "send"
+            },
+            "receive": {
+              "type": "receive"
             }
           },
           "widgets": [
@@ -2744,6 +3274,14 @@
               "type": "action_group",
               "title": "APENFT",
               "items": [
+                {
+                  "label": "Send",
+                  "action": "send"
+                },
+                {
+                  "label": "Receive",
+                  "action": "receive"
+                },
                 {
                   "label": "Browse Marketplace",
                   "action": "marketplace_dapp"
@@ -2797,6 +3335,12 @@
             "farm_dapp": {
               "type": "wallet_connect",
               "dappUrl": "https://stake.example.com/sun"
+            },
+            "send": {
+              "type": "send"
+            },
+            "receive": {
+              "type": "receive"
             }
           },
           "widgets": [
@@ -2804,6 +3348,10 @@
               "type": "action_group",
               "title": "Sun.io",
               "items": [
+                {
+                  "label": "Send",
+                  "action": "send"
+                },
                 {
                   "label": "Swap",
                   "action": "swap_dapp"
@@ -2851,6 +3399,12 @@
               "type": "external_url",
               "url": "https://app.example.com/play?game=wink",
               "openIn": "external_browser"
+            },
+            "send": {
+              "type": "send"
+            },
+            "receive": {
+              "type": "receive"
             }
           },
           "widgets": [
@@ -2858,6 +3412,14 @@
               "type": "action_group",
               "title": "WINk",
               "items": [
+                {
+                  "label": "Send",
+                  "action": "send"
+                },
+                {
+                  "label": "Receive",
+                  "action": "receive"
+                },
                 {
                   "label": "Play Now",
                   "action": "play_dapp"
@@ -2907,6 +3469,12 @@
               "type": "external_url",
               "url": "https://app.example.com/bridge?token=BTT",
               "openIn": "in_app_browser"
+            },
+            "send": {
+              "type": "send"
+            },
+            "receive": {
+              "type": "receive"
             }
           },
           "widgets": [
@@ -2914,6 +3482,14 @@
               "type": "action_group",
               "title": "BitTorrent Chain",
               "items": [
+                {
+                  "label": "Send",
+                  "action": "send"
+                },
+                {
+                  "label": "Receive",
+                  "action": "receive"
+                },
                 {
                   "label": "Bridge Assets",
                   "action": "bridge_dapp"
@@ -2967,6 +3543,12 @@
               "type": "external_url",
               "url": "https://app.example.com/borrow?token=JST",
               "openIn": "in_app_browser"
+            },
+            "send": {
+              "type": "send"
+            },
+            "receive": {
+              "type": "receive"
             }
           },
           "widgets": [
@@ -2974,6 +3556,10 @@
               "type": "action_group",
               "title": "JUST Lending",
               "items": [
+                {
+                  "label": "Send",
+                  "action": "send"
+                },
                 {
                   "label": "Supply",
                   "action": "supply_dapp"
@@ -2983,6 +3569,667 @@
                   "action": "borrow_dapp"
                 }
               ]
+            },
+            {
+              "type": "history"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "TON",
+      "tokens": [
+        {
+          "name": "Gram (Toncoin)",
+          "symbol": "GRAM",
+          "type": "NATIVE",
+          "id": "native",
+          "decimals": 9,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ton/info/logo.png",
+          "website": "https://ton.org",
+          "description": "The native asset of the TON network (formerly Toncoin), used for fees and staking.",
+          "status": "active",
+          "tags": [
+            "native"
+          ],
+          "explorer": "https://tonviewer.com",
+          "ui": {
+            "theme": {
+              "primaryColor": "#0098EA",
+              "badgeText": "Native"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#03101A",
+                "#08304A"
+              ],
+              "angle": 135
+            }
+          },
+          "actions": {
+            "send": {
+              "type": "send"
+            },
+            "receive": {
+              "type": "receive"
+            }
+          },
+          "widgets": [
+            {
+              "type": "action_group",
+              "items": [
+                {
+                  "label": "Send",
+                  "action": "send"
+                },
+                {
+                  "label": "Receive",
+                  "action": "receive"
+                }
+              ]
+            },
+            {
+              "type": "price_chart",
+              "coingeckoId": "the-open-network",
+              "days": 1
+            },
+            {
+              "type": "history"
+            }
+          ]
+        },
+        {
+          "name": "Tether USD (TON)",
+          "symbol": "USDT",
+          "type": "JETTON",
+          "id": "EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs",
+          "decimals": 6,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ton/assets/EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs/logo.png",
+          "website": "https://tether.to",
+          "description": "Tether's native USDT on TON: the network's main stablecoin and the most held jetton by value.",
+          "status": "active",
+          "tags": [
+            "stablecoin"
+          ],
+          "explorer": "https://tonviewer.com/EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs",
+          "issuer": {
+            "name": "Tether Holdings Limited",
+            "country": "VG"
+          },
+          "ui": {
+            "theme": {
+              "primaryColor": "#26A17B",
+              "badgeText": "Stablecoin"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#04100C",
+                "#0B3025"
+              ],
+              "angle": 135
+            }
+          },
+          "actions": {
+            "send": {
+              "type": "send"
+            },
+            "receive": {
+              "type": "receive"
+            }
+          },
+          "widgets": [
+            {
+              "type": "action_group",
+              "items": [
+                {
+                  "label": "Send",
+                  "action": "send"
+                },
+                {
+                  "label": "Receive",
+                  "action": "receive"
+                }
+              ]
+            },
+            {
+              "type": "price_chart",
+              "coingeckoId": "tether",
+              "days": 1
+            },
+            {
+              "type": "history"
+            }
+          ]
+        },
+        {
+          "name": "Notcoin",
+          "symbol": "NOT",
+          "type": "JETTON",
+          "id": "EQAvlWFDxGF2lXm67y4yzC17wYKD9A0guwPkMs1gOsM__NOT",
+          "decimals": 9,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ton/assets/EQAvlWFDxGF2lXm67y4yzC17wYKD9A0guwPkMs1gOsM__NOT/logo.png",
+          "description": "The tap-to-earn game token that brought millions of users to TON.",
+          "status": "active",
+          "tags": [
+            "jetton",
+            "community"
+          ],
+          "explorer": "https://tonviewer.com/EQAvlWFDxGF2lXm67y4yzC17wYKD9A0guwPkMs1gOsM__NOT",
+          "ui": {
+            "theme": {
+              "primaryColor": "#F5C84B",
+              "badgeText": "Community"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#141006",
+                "#33280C"
+              ],
+              "angle": 135
+            }
+          },
+          "actions": {
+            "send": {
+              "type": "send"
+            },
+            "receive": {
+              "type": "receive"
+            }
+          },
+          "widgets": [
+            {
+              "type": "action_group",
+              "items": [
+                {
+                  "label": "Send",
+                  "action": "send"
+                },
+                {
+                  "label": "Receive",
+                  "action": "receive"
+                }
+              ]
+            },
+            {
+              "type": "price_chart",
+              "coingeckoId": "notcoin",
+              "days": 1
+            },
+            {
+              "type": "history"
+            }
+          ]
+        },
+        {
+          "name": "Dogs",
+          "symbol": "DOGS",
+          "type": "JETTON",
+          "id": "EQCvxJy4eG8hyHBFsZ7eePxrRsUQSFE_jpptRAYBmcG_DOGS",
+          "decimals": 9,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ton/assets/EQCvxJy4eG8hyHBFsZ7eePxrRsUQSFE_jpptRAYBmcG_DOGS/logo.png",
+          "description": "A Telegram community token and one of the most widely held jettons on TON.",
+          "status": "active",
+          "tags": [
+            "jetton",
+            "meme"
+          ],
+          "explorer": "https://tonviewer.com/EQCvxJy4eG8hyHBFsZ7eePxrRsUQSFE_jpptRAYBmcG_DOGS",
+          "ui": {
+            "theme": {
+              "primaryColor": "#F2A33A",
+              "badgeText": "Meme"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#160E05",
+                "#3A2410"
+              ],
+              "angle": 135
+            }
+          },
+          "actions": {
+            "send": {
+              "type": "send"
+            },
+            "receive": {
+              "type": "receive"
+            }
+          },
+          "widgets": [
+            {
+              "type": "action_group",
+              "items": [
+                {
+                  "label": "Send",
+                  "action": "send"
+                },
+                {
+                  "label": "Receive",
+                  "action": "receive"
+                }
+              ]
+            },
+            {
+              "type": "price_chart",
+              "coingeckoId": "dogs-2",
+              "days": 1
+            },
+            {
+              "type": "history"
+            }
+          ]
+        },
+        {
+          "name": "Catizen",
+          "symbol": "CATI",
+          "type": "JETTON",
+          "id": "EQD-cvR0Nz6XAyRBvbhz-abTrRC6sI5tvHvvpeQraV9UAAD7",
+          "decimals": 9,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ton/assets/EQD-cvR0Nz6XAyRBvbhz-abTrRC6sI5tvHvvpeQraV9UAAD7/logo.png",
+          "description": "The token of the Catizen Telegram game.",
+          "status": "active",
+          "tags": [
+            "jetton",
+            "gaming"
+          ],
+          "explorer": "https://tonviewer.com/EQD-cvR0Nz6XAyRBvbhz-abTrRC6sI5tvHvvpeQraV9UAAD7",
+          "ui": {
+            "theme": {
+              "primaryColor": "#FF8A3D",
+              "badgeText": "Gaming"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#160A05",
+                "#3A1D0E"
+              ],
+              "angle": 135
+            }
+          },
+          "actions": {
+            "send": {
+              "type": "send"
+            },
+            "receive": {
+              "type": "receive"
+            }
+          },
+          "widgets": [
+            {
+              "type": "action_group",
+              "items": [
+                {
+                  "label": "Send",
+                  "action": "send"
+                },
+                {
+                  "label": "Receive",
+                  "action": "receive"
+                }
+              ]
+            },
+            {
+              "type": "price_chart",
+              "coingeckoId": "catizen",
+              "days": 1
+            },
+            {
+              "type": "history"
+            }
+          ]
+        },
+        {
+          "name": "Major",
+          "symbol": "MAJOR",
+          "type": "JETTON",
+          "id": "EQCuPm01HldiduQ55xaBF_1kaW_WAUy5DHey8suqzU_MAJOR",
+          "decimals": 9,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ton/assets/EQCuPm01HldiduQ55xaBF_1kaW_WAUy5DHey8suqzU_MAJOR/logo.png",
+          "description": "The token of the Major Telegram mini-app community.",
+          "status": "active",
+          "tags": [
+            "jetton",
+            "community"
+          ],
+          "explorer": "https://tonviewer.com/EQCuPm01HldiduQ55xaBF_1kaW_WAUy5DHey8suqzU_MAJOR",
+          "ui": {
+            "theme": {
+              "primaryColor": "#E4E4E7",
+              "badgeText": "Community"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#0B0B0D",
+                "#26262B"
+              ],
+              "angle": 135
+            }
+          },
+          "actions": {
+            "send": {
+              "type": "send"
+            },
+            "receive": {
+              "type": "receive"
+            }
+          },
+          "widgets": [
+            {
+              "type": "action_group",
+              "items": [
+                {
+                  "label": "Send",
+                  "action": "send"
+                },
+                {
+                  "label": "Receive",
+                  "action": "receive"
+                }
+              ]
+            },
+            {
+              "type": "price_chart",
+              "coingeckoId": "major",
+              "days": 1
+            },
+            {
+              "type": "history"
+            }
+          ]
+        },
+        {
+          "name": "STON.fi",
+          "symbol": "STON",
+          "type": "JETTON",
+          "id": "EQA2kCVNwVsil2EM2mB0SkXytxCqQjS4mttjDpnXmwG9T6bO",
+          "decimals": 9,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ton/assets/EQA2kCVNwVsil2EM2mB0SkXytxCqQjS4mttjDpnXmwG9T6bO/logo.png",
+          "website": "https://ston.fi",
+          "description": "The governance token of STON.fi, a decentralized exchange on TON.",
+          "status": "active",
+          "tags": [
+            "jetton",
+            "defi"
+          ],
+          "explorer": "https://tonviewer.com/EQA2kCVNwVsil2EM2mB0SkXytxCqQjS4mttjDpnXmwG9T6bO",
+          "ui": {
+            "theme": {
+              "primaryColor": "#4C8DFF",
+              "badgeText": "DeFi"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#050B18",
+                "#10264F"
+              ],
+              "angle": 135
+            }
+          },
+          "actions": {
+            "send": {
+              "type": "send"
+            },
+            "receive": {
+              "type": "receive"
+            }
+          },
+          "widgets": [
+            {
+              "type": "action_group",
+              "items": [
+                {
+                  "label": "Send",
+                  "action": "send"
+                },
+                {
+                  "label": "Receive",
+                  "action": "receive"
+                }
+              ]
+            },
+            {
+              "type": "price_chart",
+              "coingeckoId": "ston-2",
+              "days": 1
+            },
+            {
+              "type": "history"
+            }
+          ]
+        },
+        {
+          "name": "DeDust",
+          "symbol": "DUST",
+          "type": "JETTON",
+          "id": "EQBlqsm144Dq6SjbPI4jjZvA1hqTIP3CvHovbIfW_t-SCALE",
+          "decimals": 9,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ton/assets/EQBlqsm144Dq6SjbPI4jjZvA1hqTIP3CvHovbIfW_t-SCALE/logo.png",
+          "website": "https://dedust.io",
+          "description": "The token of DeDust, a decentralized exchange and liquidity protocol on TON.",
+          "status": "active",
+          "tags": [
+            "jetton",
+            "defi"
+          ],
+          "explorer": "https://tonviewer.com/EQBlqsm144Dq6SjbPI4jjZvA1hqTIP3CvHovbIfW_t-SCALE",
+          "ui": {
+            "theme": {
+              "primaryColor": "#25C2A0",
+              "badgeText": "DeFi"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#041412",
+                "#0B3A33"
+              ],
+              "angle": 135
+            }
+          },
+          "actions": {
+            "send": {
+              "type": "send"
+            },
+            "receive": {
+              "type": "receive"
+            }
+          },
+          "widgets": [
+            {
+              "type": "action_group",
+              "items": [
+                {
+                  "label": "Send",
+                  "action": "send"
+                },
+                {
+                  "label": "Receive",
+                  "action": "receive"
+                }
+              ]
+            },
+            {
+              "type": "history"
+            }
+          ]
+        },
+        {
+          "name": "Bridged Tether USD (jUSDT)",
+          "symbol": "jUSDT",
+          "type": "JETTON",
+          "id": "EQBynBO23ywHy_CgarY9NK9FTz0yDsG82PtcbSTQgGoXwiuA",
+          "decimals": 6,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ton/assets/EQBynBO23ywHy_CgarY9NK9FTz0yDsG82PtcbSTQgGoXwiuA/logo.png",
+          "description": "USDT bridged to TON from Ethereum through the TON Bridge; 6 decimals, like the Ethereum original.",
+          "status": "active",
+          "tags": [
+            "stablecoin",
+            "bridged"
+          ],
+          "explorer": "https://tonviewer.com/EQBynBO23ywHy_CgarY9NK9FTz0yDsG82PtcbSTQgGoXwiuA",
+          "ui": {
+            "theme": {
+              "primaryColor": "#26A17B",
+              "badgeText": "Bridged"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#04100C",
+                "#0B3025"
+              ],
+              "angle": 135
+            }
+          },
+          "actions": {
+            "send": {
+              "type": "send"
+            },
+            "receive": {
+              "type": "receive"
+            }
+          },
+          "widgets": [
+            {
+              "type": "action_group",
+              "items": [
+                {
+                  "label": "Send",
+                  "action": "send"
+                },
+                {
+                  "label": "Receive",
+                  "action": "receive"
+                }
+              ]
+            },
+            {
+              "type": "price_chart",
+              "coingeckoId": "tether",
+              "days": 1
+            },
+            {
+              "type": "history"
+            }
+          ]
+        },
+        {
+          "name": "Bitget Wallet Token",
+          "symbol": "jBWB",
+          "type": "JETTON",
+          "id": "EQBaWrUZwQMcCEHZHf-dAFVhAWInbA7KJciM1W1aQxg4YT8I",
+          "decimals": 18,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ton/assets/EQBaWrUZwQMcCEHZHf-dAFVhAWInbA7KJciM1W1aQxg4YT8I/logo.png",
+          "description": "Bitget Wallet's token, bridged to TON; note the 18 decimals, unlike most jettons (9).",
+          "status": "active",
+          "tags": [
+            "jetton",
+            "bridged"
+          ],
+          "explorer": "https://tonviewer.com/EQBaWrUZwQMcCEHZHf-dAFVhAWInbA7KJciM1W1aQxg4YT8I",
+          "ui": {
+            "theme": {
+              "primaryColor": "#19D3C5",
+              "badgeText": "Bridged"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#04130F",
+                "#0A3B34"
+              ],
+              "angle": 135
+            }
+          },
+          "actions": {
+            "send": {
+              "type": "send"
+            },
+            "receive": {
+              "type": "receive"
+            }
+          },
+          "widgets": [
+            {
+              "type": "action_group",
+              "items": [
+                {
+                  "label": "Send",
+                  "action": "send"
+                },
+                {
+                  "label": "Receive",
+                  "action": "receive"
+                }
+              ]
+            },
+            {
+              "type": "history"
+            }
+          ]
+        },
+        {
+          "name": "Resistance Dog",
+          "symbol": "REDO",
+          "type": "JETTON",
+          "id": "EQBZ_cafPyDr5KUTs0aNxh0ZTDhkpEZONmLJA2SNGlLm4Cko",
+          "decimals": 9,
+          "logo": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ton/assets/EQBZ_cafPyDr5KUTs0aNxh0ZTDhkpEZONmLJA2SNGlLm4Cko/logo.png",
+          "description": "A community meme token on TON.",
+          "status": "active",
+          "tags": [
+            "jetton",
+            "meme"
+          ],
+          "explorer": "https://tonviewer.com/EQBZ_cafPyDr5KUTs0aNxh0ZTDhkpEZONmLJA2SNGlLm4Cko",
+          "ui": {
+            "theme": {
+              "primaryColor": "#E8554D",
+              "badgeText": "Meme"
+            },
+            "background": {
+              "type": "gradient",
+              "colors": [
+                "#160706",
+                "#3A1411"
+              ],
+              "angle": 135
+            }
+          },
+          "actions": {
+            "send": {
+              "type": "send"
+            },
+            "receive": {
+              "type": "receive"
+            }
+          },
+          "widgets": [
+            {
+              "type": "action_group",
+              "items": [
+                {
+                  "label": "Send",
+                  "action": "send"
+                },
+                {
+                  "label": "Receive",
+                  "action": "receive"
+                }
+              ]
+            },
+            {
+              "type": "price_chart",
+              "coingeckoId": "resistance-dog",
+              "days": 1
             },
             {
               "type": "history"

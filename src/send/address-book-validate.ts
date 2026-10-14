@@ -1,17 +1,10 @@
-// Strict validation of public/address-book.json for CI (scripts/validate-fixtures.ts). Not part of the site bundle:
-// it needs keccak (EIP-55) and runs only in Node.
-import { keccak256 } from "js-sha3";
+// Strict validation of public/address-book.json for CI (scripts/validate-fixtures.ts). Not part of the site bundle.
 import { validateTronAddress } from "./tron-address.ts";
-import { BOOK_NETWORKS, MAX_BOOK_ENTRIES, MAX_COMMENT_LENGTH } from "./address-book.ts";
+import { isValidEvmAddress, isValidTonAddress } from "./address-checks.ts";
 
-/** An EVM address is 0x + 40 hex. All-lowercase or all-uppercase carry no checksum; mixed case must be a valid EIP-55 checksum. */
-export function isValidEvmAddress(address: string): boolean {
-  if (!/^0x[0-9a-fA-F]{40}$/.test(address)) return false;
-  const hex = address.slice(2);
-  if (hex === hex.toLowerCase() || hex === hex.toUpperCase()) return true;
-  const hash = keccak256(hex.toLowerCase());
-  return [...hex].every((c, i) => /\d/.test(c) || (parseInt(hash[i]!, 16) >= 8 ? c === c.toUpperCase() : c === c.toLowerCase()));
-}
+export { isValidEvmAddress, isValidTonAddress };
+import { sanitizeAvatarUrl } from "./avatar-url.ts";
+import { BOOK_NETWORKS, MAX_BOOK_ENTRIES, MAX_COMMENT_LENGTH } from "./address-book.ts";
 
 /**
  * A saved name says WHO an address is, never WHY it might be risky: the Send screen's rule is that a reason is not
@@ -28,7 +21,7 @@ export async function validateAddressBook(json: unknown, subtle: SubtleCrypto | 
   for (const [i, raw] of root.entries.entries()) {
     const e = raw as Record<string, unknown>;
     const where = `entries[${i}]`;
-    for (const key of Object.keys(e)) if (!["network", "address", "comment"].includes(key)) errors.push(`${where}: unexpected key "${key}"`);
+    for (const key of Object.keys(e)) if (!["network", "address", "comment", "avatar"].includes(key)) errors.push(`${where}: unexpected key "${key}"`);
     if (!BOOK_NETWORKS.includes(e.network as never)) errors.push(`${where}: network must be one of ${BOOK_NETWORKS.join(", ")}`);
     if (typeof e.address !== "string" || e.address !== e.address.trim() || e.address === "") {
       errors.push(`${where}: address must be a non-empty string without surrounding spaces`);
@@ -39,9 +32,14 @@ export async function validateAddressBook(json: unknown, subtle: SubtleCrypto | 
       if (e.network === "TRON") {
         const check = await validateTronAddress(e.address, subtle);
         if (!check.ok) errors.push(`${where}: not a valid Tron address (${check.reason})`);
+      } else if (e.network === "TON") {
+        if (!isValidTonAddress(e.address)) errors.push(`${where}: not a valid TON address (48-character user-friendly form with a correct checksum)`);
       } else if ((e.network === "ETH" || e.network === "BSC") && !isValidEvmAddress(e.address)) {
         errors.push(`${where}: not a valid EVM address (0x + 40 hex, EIP-55 when mixed case)`);
       }
+    }
+    if (e.avatar !== undefined && sanitizeAvatarUrl(e.avatar) === undefined) {
+      errors.push(`${where}: avatar must be an https image URL on cdn.jsdelivr.net, upload.wikimedia.org (.png/.jpg/.jpeg/.webp) or api.dicebear.com (/<v>.x/<style>/png?seed=)`);
     }
     if (typeof e.comment !== "string" || e.comment.trim() === "" || e.comment.length > MAX_COMMENT_LENGTH) {
       errors.push(`${where}: comment must be 1-${MAX_COMMENT_LENGTH} characters`);

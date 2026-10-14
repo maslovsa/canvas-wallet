@@ -131,6 +131,17 @@
   --send-dialog-bg: #ffffff;
   --send-dialog-text: #111111;
   --send-touch: 44px;
+  /* risk answer (verdict line): vivid ink colors, checked >= 4.5:1 on the phone screen */
+  --v-known-ink: #0d5c28;
+  --v-known-fill: #1fb85a;
+  --v-clear-ink: #0a5a66;
+  --v-clear-fill: #0e9fb5;
+  --v-caution-ink: #6b3a00;
+  --v-caution-fill: #ff7a00;
+  --v-unknown-ink: #4a4f5a;
+  --v-unknown-fill: #8a91a0;
+  --v-contract-ink: #a4161a;
+  --v-contract-fill: #e5484d;
 }
 .phone-frame.chrome-android {
   --send-touch: 48px;
@@ -148,6 +159,16 @@
   --send-disabled-text: rgba(255, 255, 255, 0.4);
   --send-dialog-bg: #2a2c33;
   --send-dialog-text: #eeeeee;
+  --v-known-ink: #8df0ae;
+  --v-known-fill: #22c55e;
+  --v-clear-ink: #8eeaf6;
+  --v-clear-fill: #1cc0d8;
+  --v-caution-ink: #ffd089;
+  --v-caution-fill: #ff8a00;
+  --v-unknown-ink: #c4c9d4;
+  --v-unknown-fill: #7d8493;
+  --v-contract-ink: #ff9a9d;
+  --v-contract-fill: #ff5a5f;
 }
 
 .send-screen {
@@ -221,6 +242,17 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   font-size: 12px;
+}
+.send-label-avatar {
+  display: inline-block;
+  position: relative;
+  width: 18px;
+  height: 18px;
+  margin-right: 5px;
+  vertical-align: -4px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: hsl(var(--book-hue, 210) 45% 42%);
 }
 .send-label-name {
   color: var(--send-dialog-text, inherit);
@@ -473,6 +505,7 @@
   font-size: 30px;
   line-height: 1;
   color: var(--send-caution);
+  animation: send-pop 0.5s 0.1s cubic-bezier(0.2, 1.6, 0.4, 1) both, send-wiggle 0.6s 0.6s ease-in-out 2;
 }
 .phone-dialog-title {
   margin: 8px 0 6px;
@@ -560,6 +593,198 @@
   background: transparent;
   color: var(--send-accent);
   font-weight: 600;
+}
+
+/* ---------------------------------------------------------------------------
+   Risk answer ("verdict card"). Same text and same facts as before, only louder:
+   known name -> green, nothing found -> teal scan, risk signals -> orange,
+   could not verify -> grey. The card bleeds into the gap with a negative margin,
+   so the reserved 20 px line never shifts the layout. All animations are finite
+   (so a screenshot or an a11y scan settles) and switched off by reduced motion.
+   --------------------------------------------------------------------------- */
+.send-status[class*="send-v-"] {
+  position: relative;
+  overflow: hidden;
+  padding: 6px 0;
+  margin-block: -6px;
+  border-radius: 12px;
+  color: var(--v-ink);
+  font-weight: 600;
+  animation: send-card-in 0.38s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+}
+.send-status.send-v-known {
+  --v-ink: var(--v-known-ink);
+  --v-fill: var(--v-known-fill);
+}
+.send-status.send-v-clear {
+  --v-ink: var(--v-clear-ink);
+  --v-fill: var(--v-clear-fill);
+}
+.send-status.send-v-caution {
+  --v-ink: var(--v-caution-ink);
+  --v-fill: var(--v-caution-fill);
+  animation: send-card-in 0.38s cubic-bezier(0.2, 0.9, 0.3, 1.2) both, send-shake 0.5s 0.3s ease-in-out both;
+}
+.send-status.send-v-contract {
+  --v-ink: var(--v-contract-ink);
+  --v-fill: var(--v-contract-fill);
+  animation: send-card-in 0.38s cubic-bezier(0.2, 0.9, 0.3, 1.2) both, send-shake 0.6s 0.3s ease-in-out both;
+}
+.send-status.send-v-unverified {
+  --v-ink: var(--v-unknown-ink);
+  --v-fill: var(--v-unknown-fill);
+}
+.send-status.send-v-checking {
+  --v-ink: var(--phone-dim);
+  animation: send-card-in 0.25s ease-out both;
+}
+/* a light sweep over the card once, like a scanner passing over it */
+.send-status.send-v-known::after,
+.send-status.send-v-clear::after,
+.send-status.send-v-caution::after,
+.send-status.send-v-contract::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, transparent 25%, color-mix(in srgb, var(--v-fill) 42%, transparent) 50%, transparent 75%);
+  transform: translateX(-120%);
+  animation: send-sweep 0.9s 0.2s ease-out forwards;
+  pointer-events: none;
+}
+.send-status[class*="send-v-"] .send-status-icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  position: relative;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--v-fill);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1;
+  animation: send-pop 0.5s 0.12s cubic-bezier(0.2, 1.6, 0.4, 1) both;
+}
+.send-status[class*="send-v-"] .send-status-icon:empty {
+  display: none; /* a named owner shows its logo instead of a glyph: no empty colored disc */
+}
+.send-status[class*="send-v-"] .send-status-icon::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid var(--v-fill);
+  animation: send-ring 0.9s 0.2s ease-out both;
+}
+.send-status.send-v-caution .send-status-icon {
+  color: #1a0f00;
+  animation: send-pop 0.5s 0.12s cubic-bezier(0.2, 1.6, 0.4, 1) both, send-wiggle 0.6s 0.5s ease-in-out 2;
+}
+.send-status[class*="send-v-"] .send-link {
+  color: var(--v-ink);
+  text-decoration: underline;
+}
+.send-status[class*="send-v-"] .send-owner-emoji {
+  animation: send-wobble 0.7s 0.2s ease-in-out both;
+}
+/* only the alarming answers touch the field's own border (orange for risk signals, red for a token contract) */
+.send-field.is-contract {
+  border-color: var(--send-error);
+}
+.send-identity:not([hidden]) {
+  margin-bottom: 4px;
+  animation: send-card-in 0.35s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+}
+@keyframes send-card-in {
+  from {
+    transform: translateY(6px) scale(0.97);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+@keyframes send-pop {
+  0% {
+    transform: scale(0) rotate(-40deg);
+  }
+  100% {
+    transform: scale(1) rotate(0);
+  }
+}
+@keyframes send-ring {
+  from {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  to {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+}
+@keyframes send-sweep {
+  to {
+    transform: translateX(120%);
+  }
+}
+@keyframes send-shake {
+  0%,
+  100% {
+    translate: 0;
+  }
+  20% {
+    translate: -5px;
+  }
+  40% {
+    translate: 5px;
+  }
+  60% {
+    translate: -3px;
+  }
+  80% {
+    translate: 3px;
+  }
+}
+@keyframes send-wiggle {
+  0%,
+  100% {
+    rotate: 0deg;
+  }
+  25% {
+    rotate: -14deg;
+  }
+  75% {
+    rotate: 14deg;
+  }
+}
+@keyframes send-wobble {
+  0%,
+  100% {
+    rotate: 0deg;
+  }
+  30% {
+    rotate: -18deg;
+  }
+  70% {
+    rotate: 18deg;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .send-status[class*="send-v-"],
+  .send-status[class*="send-v-"] *,
+  .send-status[class*="send-v-"]::after,
+  .send-identity,
+  .phone-dialog-icon {
+    animation: none !important;
+  }
+  .send-status.send-v-known::after,
+  .send-status.send-v-clear::after,
+  .send-status.send-v-caution::after,
+  .send-status.send-v-contract::after {
+    display: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

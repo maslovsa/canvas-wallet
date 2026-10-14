@@ -18,7 +18,7 @@
     {
       "id": "aegis-super-list",
       "name": "Aegis Super List",
-      "description": "46 real tokens across Ethereum, BSC and TRON, sourced from the Aegis Platform's own network whitelists. Every contract address, decimals value and logo was verified live on-chain before shipping — including catching Binance-Peg USDT/USDC's 18-decimal BSC contracts (vs 6 on Ethereum).",
+      "description": "57 real tokens across Ethereum, BSC, TRON and TON. The first three come from the Aegis Platform's own network whitelists; TON's native coin and 10 jettons come from TON's own verified (whitelist) status. Every contract address, decimals value and logo was verified live on-chain before shipping — including catching Binance-Peg USDT/USDC's 18-decimal BSC contracts (vs 6 on Ethereum).",
       "file": "aegis-super-list.json",
       "logo": "list-logos/aegis.png"
     },
