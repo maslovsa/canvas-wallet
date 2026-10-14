@@ -123,3 +123,37 @@ describe("wallet home", () => {
     host.remove();
   });
 });
+
+describe("Android look", () => {
+  const press = (el: Element) => el.dispatchEvent(new MouseEvent("pointerdown", { bubbles: true, clientX: 10, clientY: 10 }));
+  it("a press on a button spawns a Material ripple that cleans itself up; iOS gets none", () => {
+    const host = document.createElement("div");
+    document.body.append(host);
+    setPhoneNavScreen("list");
+    renderPhoneFrame(host, undefined, options({ chromeStyle: "android" }));
+    expect(host.className).toContain("chrome-android");
+    const chip = host.querySelector(".phone-network-chip")!;
+    press(chip);
+    const wave = chip.querySelector(".ripple")!;
+    expect(wave).not.toBeNull();
+    wave.dispatchEvent(new Event("animationend"));
+    expect(chip.querySelector(".ripple")).toBeNull();
+
+    renderPhoneFrame(host, undefined, options({ chromeStyle: "ios" }));
+    press(host.querySelector(".phone-network-chip")!);
+    expect(host.querySelector(".ripple")).toBeNull();
+    host.remove();
+  });
+
+  it("every back control carries both the iOS chevron + label and the Android arrow (CSS shows one)", () => {
+    const host = document.createElement("div");
+    document.body.append(host);
+    setPhoneNavScreen("detail");
+    renderPhoneFrame(host, token, options({ chromeStyle: "android" }));
+    const back = host.querySelector(".card-back-btn")!;
+    expect(back.getAttribute("aria-label")).toBe("Back to wallet");
+    expect(back.querySelector(".back-arrow")).not.toBeNull();
+    expect(back.querySelector(".card-back-label")!.textContent).toBe("Back");
+    host.remove();
+  });
+});

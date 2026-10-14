@@ -850,3 +850,183 @@
   font-size: 15px;
   color: inherit;
 }
+
+/* ==== Android: Material 3 ==================================================================================
+   Not iOS with a punch-hole: tonal surfaces, a top app bar with an arrow, pill buttons, filter chips, rounded-square
+   action tiles, regular-weight headlines and a press ripple. The wallet blue (--accent) seeds the tonal palette. */
+.back-arrow {
+  display: none;
+}
+.phone-frame.chrome-android {
+  --ph-bg: #fbfbff;
+  --ph-card: color-mix(in srgb, var(--accent) 7%, #fbfbff);
+  --ph-line: rgba(60, 60, 70, 0.1);
+  --ph-fill: color-mix(in srgb, var(--accent) 12%, transparent);
+  --phone-dim: #4a5160;
+}
+.phone-frame.chrome-android.theme-dark {
+  --ph-bg: #111317;
+  --ph-card: color-mix(in srgb, var(--accent) 11%, #1b1d22);
+  --ph-line: rgba(255, 255, 255, 0.08);
+  --ph-fill: color-mix(in srgb, var(--accent) 22%, transparent);
+  --phone-dim: #aeb4c0;
+}
+.chrome-android .back-arrow {
+  display: block;
+}
+.chrome-android .card-back-chevron,
+.chrome-android .card-back-label,
+.chrome-android .send-back-chevron,
+.chrome-android .send-back-label,
+.chrome-android .exit-chevron,
+.chrome-android .exit-label {
+  display: none;
+}
+.chrome-android .card-back-btn,
+.chrome-android .phone-list-exit,
+.chrome-android .send-back {
+  min-width: 48px;
+  justify-content: center;
+  border-radius: 50%;
+  padding: 0;
+}
+.chrome-android .phone-list-bar,
+.chrome-android .card-nav-bar {
+  grid-template-columns: 48px 1fr auto;
+  padding-left: 4px;
+}
+.chrome-android .card-nav-title,
+.chrome-android .phone-list-bar-title {
+  justify-self: start;
+  margin-left: 8px;
+  font-size: 22px;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+.chrome-android .card-nav-bar.is-scrolled,
+.chrome-android .phone-list-bar.is-scrolled {
+  /* Material raises a scrolled app bar by tinting it, not by blurring */
+  background: var(--ph-card);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: none;
+}
+.chrome-android .phone-list-title {
+  font-size: 30px;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+.chrome-android .phone-list-desc {
+  font-size: 14px;
+  letter-spacing: 0.1px;
+}
+.chrome-android .wallet-hero {
+  border-radius: 28px;
+}
+.chrome-android .wallet-hero-amount {
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+.chrome-android .wallet-hero-actions {
+  border-top: 0;
+  padding-top: 8px;
+}
+.chrome-android .wallet-action-disc {
+  width: 56px;
+  height: 56px;
+  border-radius: 18px;
+  background: var(--ph-fill);
+  color: var(--accent);
+}
+.phone-frame.chrome-android.theme-dark .wallet-action-disc {
+  color: #9cc3f2;
+}
+.chrome-android .phone-network-filter {
+  padding-top: 12px;
+}
+.chrome-android .phone-network-chip {
+  height: 32px;
+  padding: 0 14px 0 8px;
+  border-radius: 8px;
+  box-shadow: inset 0 0 0 1px var(--ph-line);
+  background: transparent;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.1px;
+}
+.chrome-android .phone-network-chip.active {
+  background: var(--ph-fill);
+  color: inherit;
+  box-shadow: none;
+}
+.chrome-android .phone-token-list {
+  margin: 8px 0 calc(24px + var(--safe-bottom, 0px));
+  border-radius: 0;
+  background: transparent;
+}
+.chrome-android .phone-token-row {
+  padding: 10px 20px;
+}
+.chrome-android .phone-token-row + .phone-token-row::before {
+  display: none; /* Material lists breathe instead of drawing separators */
+}
+.chrome-android .widget {
+  border-radius: 16px;
+}
+.chrome-android .action-group-btn {
+  min-height: 48px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.1px;
+}
+.chrome-android .action-group-btn.action-primary,
+.chrome-android .action-group-btn.action-secondary {
+  min-height: 56px;
+  border-radius: 999px;
+  font-size: 16px;
+}
+.chrome-android .action-group-btn.action-primary {
+  box-shadow: none; /* Material filled buttons are flat */
+}
+.chrome-android .widget-action-btn {
+  height: 40px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 500;
+}
+.chrome-android .card-header {
+  border-radius: 0 0 28px 28px;
+}
+.chrome-android .send-field {
+  border-radius: 12px;
+}
+.chrome-android .send-submit {
+  border-radius: 999px;
+}
+.chrome-android .badge-chip {
+  border-radius: 8px;
+}
+
+/* Press ripple (Android): the circle is appended by phone-frame.ts on pointerdown. */
+.chrome-android button,
+.chrome-android [role="button"] {
+  position: relative;
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+.ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.16;
+  transform: scale(0);
+  pointer-events: none;
+  animation: ph-ripple 480ms ease-out forwards;
+}
+@keyframes ph-ripple {
+  to {
+    transform: scale(1);
+    opacity: 0;
+  }
+}

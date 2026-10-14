@@ -179,7 +179,7 @@
 .gallery-card-preview {
   display: flex;
   justify-content: center;
-  height: 132px;
+  height: 150px;
   margin: -4px -4px 4px;
   overflow: hidden;
   border-radius: var(--r-md);

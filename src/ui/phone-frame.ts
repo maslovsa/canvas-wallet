@@ -61,6 +61,24 @@ export function setPhoneNavScreen(mode: "list" | "detail"): void {
   resetSendSession(); // main.ts only ever moves to list/detail; leaving Send always starts the next one fresh
 }
 
+/** Material press feedback: a circle grows from the touch point on buttons and rows (Android look only). */
+const rippleBound = new WeakSet<HTMLElement>();
+function spawnRipple(event: PointerEvent): void {
+  const frame = event.currentTarget as HTMLElement;
+  if (!frame.classList.contains("chrome-android")) return;
+  const target = (event.target as HTMLElement).closest<HTMLElement>("button, [role=button]");
+  if (!target || (target instanceof HTMLButtonElement && target.disabled)) return;
+  const rect = target.getBoundingClientRect();
+  const size = Math.max(rect.width, rect.height) * 2;
+  const wave = document.createElement("span");
+  wave.className = "ripple";
+  wave.style.width = wave.style.height = `${size}px`;
+  wave.style.left = `${event.clientX - rect.left - size / 2}px`;
+  wave.style.top = `${event.clientY - rect.top - size / 2}px`;
+  target.append(wave);
+  wave.addEventListener("animationend", () => wave.remove(), { once: true });
+}
+
 const MODE_ORDER = { list: 0, detail: 1, send: 2 } as const;
 let lastRenderedMode: keyof typeof MODE_ORDER | null = null;
 
@@ -73,6 +91,10 @@ export function renderPhoneFrame(container: HTMLElement, token: Token | undefine
   lastRenderedMode = screenMode;
   container.innerHTML = "";
   container.className = `phone-frame chrome-${options.chromeStyle} theme-${options.chromeTheme}`;
+  if (options.chromeStyle === "android" && !rippleBound.has(container)) {
+    rippleBound.add(container);
+    container.addEventListener("pointerdown", spawnRipple);
+  }
 
   const screen = document.createElement("div");
   screen.className = "phone-screen" + (direction ? ` enter-${direction}` : "");
@@ -196,7 +218,11 @@ function renderListScreen(container: HTMLElement, screen: HTMLElement, options: 
     const exit = document.createElement("button");
     exit.type = "button";
     exit.className = "phone-list-exit";
-    exit.append(icon("chevron-left", { size: 18, strokeWidth: 2.25 }), document.createTextNode(options.onExit.label));
+    exit.setAttribute("aria-label", options.onExit.label);
+    const exitLabel = document.createElement("span");
+    exitLabel.className = "exit-label";
+    exitLabel.textContent = options.onExit.label;
+    exit.append(icon("chevron-left", { size: 18, strokeWidth: 2.25, className: "exit-chevron" }), exitLabel, icon("arrow-left", { size: 24, strokeWidth: 2, className: "back-arrow" }));
     exit.addEventListener("click", options.onExit.run);
     bar.append(exit);
   } else {
@@ -440,7 +466,8 @@ function renderDetailScreen(
   const label = document.createElement("span");
   label.className = "card-back-label";
   label.textContent = "Back";
-  backBtn.append(chevron, label);
+  const arrow = icon("arrow-left", { size: 24, strokeWidth: 2, className: "back-arrow" }); // Android shows this instead
+  backBtn.append(chevron, label, arrow);
   backBtn.addEventListener("click", onBack);
   navBar.append(backBtn);
   const navTitle = document.createElement("div");
