@@ -284,23 +284,50 @@ async function handlePrice(url: URL, cors: Record<string, string>): Promise<Resp
   } catch {
     // the miss path below still works
   }
+  // CoinGecko first; some of its public rate limits hit shared cloud egress addresses, so DefiLlama (keyless, same ids
+  // under "coingecko:<id>") is the fallback.
+  const series = (await fromCoinGecko(id)) ?? (await fromDefiLlama(id));
+  if (!series) return json({ error: "upstream" }, 502, cors);
+  const stride = Math.max(1, Math.ceil(series.length / PRICE_MAX_POINTS));
+  const body = { prices: series.filter((_, i) => i % stride === 0) };
   try {
-    const res = await fetch(`${COINGECKO_MARKET_CHART}/${id}/market_chart?vs_currency=usd&days=1`, { headers: { Accept: "application/json" }, signal: AbortSignal.timeout(6000) });
-    if (!res.ok) return json({ error: "upstream" }, 502, cors);
-    const data = (await res.json()) as { prices?: unknown };
-    const series = Array.isArray(data.prices) ? data.prices.map((p) => (Array.isArray(p) ? Number(p[1]) : NaN)).filter((n) => Number.isFinite(n)) : [];
-    if (series.length === 0) return json({ error: "upstream" }, 502, cors);
-    const stride = Math.max(1, Math.ceil(series.length / PRICE_MAX_POINTS));
-    const prices = series.filter((_, i) => i % stride === 0);
-    const body = { prices };
-    try {
-      await cache?.put(cacheRequest, new Response(JSON.stringify(body), { headers: { "Content-Type": "application/json", "Cache-Control": `public, max-age=${PRICE_TTL_S}` } }));
-    } catch {
-      // not cached this time; the answer is still good
-    }
-    return json(body, 200, { ...cors, "Cache-Control": `public, max-age=${PRICE_TTL_S}` });
+    await cache?.put(cacheRequest, new Response(JSON.stringify(body), { headers: { "Content-Type": "application/json", "Cache-Control": `public, max-age=${PRICE_TTL_S}` } }));
   } catch {
-    return json({ error: "upstream" }, 502, cors);
+    // not cached this time; the answer is still good
+  }
+  return json(body, 200, { ...cors, "Cache-Control": `public, max-age=${PRICE_TTL_S}` });
+}
+
+async function fromCoinGecko(id: string): Promise<number[] | null> {
+  try {
+    const res = await fetch(`${COINGECKO_MARKET_CHART}/${id}/market_chart?vs_currency=usd&days=1`, { headers: { Accept: "application/json", "User-Agent": "canvas-wallet-price-proxy" }, signal: AbortSignal.timeout(6000) });
+    if (!res.ok) {
+      log({ event: "price_upstream", provider: "coingecko", status: res.status });
+      return null;
+    }
+    const data = (await res.json()) as { prices?: unknown };
+    const prices = Array.isArray(data.prices) ? data.prices.map((p) => (Array.isArray(p) ? Number(p[1]) : NaN)).filter((n) => Number.isFinite(n)) : [];
+    return prices.length > 0 ? prices : null;
+  } catch {
+    log({ event: "price_upstream", provider: "coingecko", status: "error" });
+    return null;
+  }
+}
+
+async function fromDefiLlama(id: string): Promise<number[] | null> {
+  try {
+    const res = await fetch(`https://coins.llama.fi/chart/coingecko:${id}?span=${PRICE_MAX_POINTS}&period=15m`, { headers: { Accept: "application/json" }, signal: AbortSignal.timeout(6000) });
+    if (!res.ok) {
+      log({ event: "price_upstream", provider: "defillama", status: res.status });
+      return null;
+    }
+    const data = (await res.json()) as { coins?: Record<string, { prices?: Array<{ price?: unknown }> }> };
+    const points = data.coins?.[`coingecko:${id}`]?.prices;
+    const prices = Array.isArray(points) ? points.map((p) => Number(p?.price)).filter((n) => Number.isFinite(n)) : [];
+    return prices.length > 0 ? prices : null;
+  } catch {
+    log({ event: "price_upstream", provider: "defillama", status: "error" });
+    return null;
   }
 }
 
