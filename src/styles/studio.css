@@ -495,24 +495,80 @@
 }
 
 /* ---- editor ----------------------------------------------------------------------------------------- */
-.json-editor {
+.json-editor-wrap {
+  position: relative;
   flex: 1;
   min-height: 280px;
-  padding: 12px 14px;
   border: 1px solid var(--hairline);
   border-radius: var(--r-md);
-  background: #0a0b0d;
-  color: #d6dbe1;
+  background: var(--code-bg);
+}
+.json-editor-wrap:focus-within {
+  border-color: var(--studio-accent-line);
+  box-shadow: 0 0 0 3px var(--studio-accent-soft);
+}
+/* The textarea and the colored <pre> share every metric so each character lands exactly on its colored twin. */
+.json-highlight,
+.json-editor {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  padding: 12px 14px;
   font-family: var(--font-mono);
   font-size: 12px;
   line-height: 1.65;
+  letter-spacing: 0;
   tab-size: 2;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+.json-highlight {
+  overflow: hidden;
+  color: var(--code-text);
+  pointer-events: none;
+}
+.json-highlight code {
+  font: inherit;
+}
+.json-editor {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: transparent;
+  color: transparent;
+  caret-color: var(--text);
   resize: none;
+  overflow: auto;
+  scrollbar-width: none; /* a scrollbar would narrow the text and break the line wraps that match the colored layer */
+}
+.json-editor::-webkit-scrollbar {
+  display: none;
 }
 .json-editor:focus {
   outline: none;
-  border-color: var(--studio-accent-line);
-  box-shadow: 0 0 0 3px var(--studio-accent-soft);
+}
+.json-editor::selection {
+  background: var(--studio-accent-soft);
+  color: transparent;
+}
+.tok-key {
+  color: var(--code-key);
+}
+.tok-string {
+  color: var(--code-string);
+}
+.tok-number,
+.tok-literal {
+  color: var(--code-number);
+}
+.tok-punct {
+  color: var(--code-punct);
+}
+.tok-error {
+  background: rgba(229, 72, 77, 0.28);
+  text-decoration: underline wavy #ff6b70;
+  text-underline-offset: 3px;
 }
 .editor-diagnostics {
   margin-top: 8px;
@@ -533,6 +589,38 @@
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+}
+.trust-score-group {
+  margin-bottom: 8px;
+}
+.trust-score-group > summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 2px;
+  color: var(--text-2);
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+}
+.trust-score-group > summary::-webkit-details-marker {
+  display: none;
+}
+.trust-score-group > summary::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(-45deg);
+  transition: transform var(--t-fast) var(--ease);
+}
+.trust-score-group[open] > summary::before {
+  transform: rotate(45deg);
+}
+.trust-score-group-warning > summary {
+  color: #f2b8ba;
 }
 .trust-score-finding {
   margin-bottom: 6px;

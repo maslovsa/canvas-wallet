@@ -33,6 +33,14 @@
   --warning: #d9a441;
   --success: #3fb950;
 
+  /* code surface and syntax colors (editor) */
+  --code-bg: #0a0b0d;
+  --code-text: #d6dbe1;
+  --code-key: #8ab4ff;
+  --code-string: #a5d6a7;
+  --code-number: #f0b27a;
+  --code-punct: #6f7782;
+
   --r-xs: 6px;
   --r-sm: 8px;
   --r-md: 12px;
