@@ -438,6 +438,34 @@
   color: var(--accent-text);
 }
 
+.sidebar-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  margin-bottom: 8px;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
+  color: var(--text-dim);
+}
+.sidebar-search:focus-within {
+  border-color: var(--studio-accent-line);
+  box-shadow: 0 0 0 3px var(--studio-accent-soft);
+}
+.sidebar-search input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--text);
+  font-size: 13px;
+}
+.sidebar-search input::placeholder {
+  color: var(--text-dim);
+}
 .token-list {
   display: flex;
   flex-direction: column;

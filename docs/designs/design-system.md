@@ -19,6 +19,11 @@ tool. **The phone** renders a wallet, so it has its own light and dark palettes 
 - Device dock: one panel under the phone: platform (iOS / Android), appearance (light / dark), Share menu, Deploy.
 - Menu (`src/ui/menu.ts`): arrow keys, Enter, Esc, outside click; focus returns to the trigger. Toast (`toast.ts`)
   replaces `alert()` for confirmations.
+- Studio theme: dark by default, light when the system asks (`prefers-color-scheme`), or pinned with the toggle
+  (`src/ui/studio-theme.ts`, `data-theme` on `<html>`). All studio colors are tokens in `tokens.css`.
+- Motion: screens slide in 280 ms (ease-out), dialogs rise 240 ms, logos fade 220 ms, skeletons shimmer; all off under
+  `prefers-reduced-motion`. Android adds a Material press ripple.
+- Editor: transparent textarea over a colored `<pre>` (`json-highlight.ts`); errors are located by an own JSON scanner.
 - Phone: cards on a quiet canvas (`--ph-bg`, `--ph-card`, `--ph-line`), large title, grouped token list, Send (filled with
   the token accent) and Receive (outlined) with arrow icons, 54 px high.
 

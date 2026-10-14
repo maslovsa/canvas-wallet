@@ -185,3 +185,20 @@ test("the studio follows a light system setting, and the theme toggle pins and r
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark"); // remembered
   expect(await bg()).toBe("rgb(8, 9, 11)");
 });
+
+test("the sidebar filter narrows a long token list and keeps typing focus", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/?list=aegis-super-list&network=Ethereum");
+  const rows = page.locator(".sidebar .token-row");
+  await expect(rows.first()).toBeVisible();
+  const all = await rows.count();
+  await page.getByLabel("Filter tokens").fill("usd");
+  await expect(page.getByLabel("Filter tokens")).toBeFocused();
+  expect(await rows.count()).toBeLessThan(all);
+  await expect(rows.first()).toContainText("USD");
+  await page.keyboard.type("x"); // typing continues in the same box
+  await expect(page.getByLabel("Filter tokens")).toHaveValue("usdx");
+  await expect(page.locator(".sidebar-empty-state")).toContainText('No token matches "usdx"');
+  await page.keyboard.press("Escape");
+  expect(await rows.count()).toBe(all);
+});
