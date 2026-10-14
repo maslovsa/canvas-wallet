@@ -232,6 +232,37 @@ describe("clear and caution flows", () => {
       vi.unstubAllGlobals();
     });
 
+    it("the To label shows the saved name of the address in the field, and drops it for any other address", async () => {
+      withBook();
+      const { q, type, frame } = mount();
+      const label = () => q<HTMLLabelElement>("label[for=send-address]");
+      await vi.waitFor(() => expect(frame).toBeTruthy());
+      expect(label().textContent).toBe("To");
+      q<HTMLButtonElement>(".send-book-btn").click();
+      await vi.waitFor(() => expect(frame.querySelector(".book-row")).not.toBeNull());
+      frame.querySelector<HTMLButtonElement>(".book-row")!.click(); // Binance hot wallet
+      await vi.waitFor(() => expect(label().textContent).toBe("To: Binance hot wallet"));
+      expect(label().querySelector(".send-label-name")!.hasAttribute("hidden")).toBe(false);
+      await type(q("#send-address"), "TJDENsfBJs4RFETt1X1W8wMDc8M5XnJhCe"); // another address, typed: not in the book
+      expect(label().textContent).toBe("To");
+      await type(q("#send-address"), "THJUJFyTnrBWb1ijWav7qfRBrjUuKgP49Z"); // typed, but it IS a saved address: its name shows
+      expect(label().textContent).toBe("To: Saved contact");
+      const input = q<HTMLInputElement>("#send-address");
+      input.value = "";
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+      await vi.waitFor(() => expect(label().textContent).toBe("To"));
+      vi.unstubAllGlobals();
+    });
+
+    it("an address of another network in the book never names the field", async () => {
+      withBook();
+      const { q, type } = mount();
+      await vi.waitFor(() => expect(q<HTMLLabelElement>("label[for=send-address]")).not.toBeNull());
+      await type(q("#send-address"), "0x28c6c06298d514db089934071355e5743bf21d60"); // an ETH entry
+      expect(q<HTMLLabelElement>("label[for=send-address]").textContent).toBe("To");
+      vi.unstubAllGlobals();
+    });
+
     it("a risky saved address goes through the same check as a typed one", async () => {
       withBook();
       const { q, frame } = mount();

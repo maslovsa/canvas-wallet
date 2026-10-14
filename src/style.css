@@ -216,7 +216,15 @@
   color: var(--phone-dim);
 }
 .send-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font-size: 12px;
+}
+.send-label-name {
+  color: var(--send-dialog-text, inherit);
+  font-weight: 600;
 }
 .send-link {
   min-height: var(--send-touch);

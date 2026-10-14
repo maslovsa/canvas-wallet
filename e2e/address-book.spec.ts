@@ -117,6 +117,8 @@ async function clipOf(page: Page, selector: string) {
 
 // ---- every Tron address of the book is answered (from the risk seed), none ends in "Couldn't verify"
 import { readFileSync, mkdirSync } from "node:fs";
+const BOOK = JSON.parse(readFileSync("public/address-book.json", "utf8")).entries as Array<{ network: string; address: string; comment: string }>;
+const nameOf = (address: string) => BOOK.find((e) => e.address === address)!.comment;
 
 test("every Tron address in the address book gets a real answer, matching the risk seed", async ({ page }) => {
   const book = (JSON.parse(readFileSync("public/address-book.json", "utf8")).entries as Array<{ network: string; address: string; comment: string }>).filter((e) => e.network === "TRON");
@@ -198,4 +200,33 @@ test("when the check cannot complete the status shows an emoji badge the size of
   expect([Math.round(box.width), Math.round(box.height)]).toEqual([24, 24]);
   await expect(page.locator(".send-status-icon")).toHaveText(""); // no "?" glyph any more
   await page.locator("#phone-frame").screenshot({ path: `${SHOTS}/couldnt-verify-emoji.png` });
+});
+
+// ---- "To: NAME": the saved name of the address in the field
+test("the To label carries the saved name after a pick, and loses it when another address is typed", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await mockWorker(page, { level: "caution" });
+  await openSend(page);
+  const label = page.locator("label[for=send-address]");
+  await expect(label).toHaveText("To");
+  const HTX = "TNaRAoLUyYEV2uF7GUrzSjRQTU8v5ZJ5VR";
+  await page.locator(".send-book-btn").click();
+  await page.locator(`.book-row[aria-label$="${HTX}"]`).click();
+  await expect(label).toHaveText(`To: ${nameOf(HTX)}`);
+  await page.screenshot({ path: `${SHOTS}/book-6-to-name.png`, clip: await clipOf(page, "#phone-frame") });
+  await page.locator("#send-address").fill("TLa2f6VPqDgRE67v1736s7bJ8Ray5wYjU7"); // not in the book
+  await expect(label).toHaveText("To");
+  await page.locator("#send-address").fill("TAzsQ9Gx8eqFNFSKbeXrbi45CuVPHzA8wr"); // typed, but it is a saved address
+  await expect(label).toHaveText(`To: ${nameOf("TAzsQ9Gx8eqFNFSKbeXrbi45CuVPHzA8wr")}`);
+  await page.locator("#send-address").fill("");
+  await expect(label).toHaveText("To");
+});
+
+test("a ?to= link with a saved address shows its name; with an unknown one it does not", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await mockWorker(page, { level: "caution" });
+  await page.goto("/?list=aegis-super-list&network=Tron&token=USDT&to=TU4vEruvZwLLkSfV9bNw12EJTPvNr7Pvaa");
+  await expect(page.locator("label[for=send-address]")).toHaveText(`To: ${nameOf("TU4vEruvZwLLkSfV9bNw12EJTPvNr7Pvaa")}`);
+  await page.goto("/?list=aegis-super-list&network=Tron&token=USDT&to=TLa2f6VPqDgRE67v1736s7bJ8Ray5wYjU7");
+  await expect(page.locator("label[for=send-address]")).toHaveText("To");
 });

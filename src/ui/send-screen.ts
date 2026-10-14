@@ -5,7 +5,7 @@ import type { ChromeStyle } from "./phone-frame.ts";
 import { openOverlay, type OpenOverlay } from "./phone-overlay.ts";
 import { icon } from "./icons.ts";
 import { openAddressBookSheet } from "./address-book-sheet.ts";
-import { bookNetworkFor, type AddressBookEntry } from "../send/address-book.ts";
+import { bookNetworkFor, entriesForNetwork, loadAddressBook, type AddressBookEntry } from "../send/address-book.ts";
 import type { SendController, SendView, Tone } from "../send/send-session.ts";
 
 export interface SendScreenOptions {
@@ -94,6 +94,9 @@ export function mountSendScreen(options: SendScreenOptions): void {
   const addrRow = el("div", "send-label-row");
   const addrLabel = el("label", "send-label", "To");
   addrLabel.htmlFor = "send-address";
+  // "To: NAME": the saved name of the address in the field, when it is one of the address book's (see patch()).
+  const addrLabelName = el("span", "send-label-name");
+  addrLabel.append(addrLabelName);
   const paste = el("button", "send-link", "Paste");
   paste.type = "button";
   addrRow.append(addrLabel, paste);
@@ -223,6 +226,13 @@ export function mountSendScreen(options: SendScreenOptions): void {
   submit.addEventListener("click", () => controller.pressSend());
   done.addEventListener("click", options.onDone);
 
+  // --- address book names for the "To: NAME" label (this network's saved addresses; loaded once, cached)
+  let bookEntries: AddressBookEntry[] = [];
+  void loadAddressBook().then((entries) => {
+    bookEntries = entriesForNetwork(entries, bookNetworkFor(options.networkLabel));
+    if (root.isConnected) patch(controller.view());
+  });
+
   // --- patching
   let seenFocusRequests = controller.state.focusAddressRequests;
 
@@ -230,6 +240,10 @@ export function mountSendScreen(options: SendScreenOptions): void {
 
   function patch(view: SendView): void {
     title.textContent = view.title;
+    // The name shows only while the field holds exactly a saved address: type or paste any other and it goes away.
+    const saved = bookEntries.find((e) => e.address === view.address.value);
+    addrLabelName.textContent = saved ? `: ${saved.comment}` : "";
+    addrLabelName.hidden = !saved;
     if (addrInput.value !== view.address.value && document.activeElement !== addrInput) addrInput.value = view.address.value;
     if (amountInput.value !== view.amount.value && document.activeElement !== amountInput) amountInput.value = view.amount.value;
     addrInput.disabled = view.phase !== "form";
