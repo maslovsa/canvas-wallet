@@ -33,6 +33,82 @@
       "label": "Binance",
       "logo": "https://cdn.jsdelivr.net/gh/maslovsa/kyt-entity-registry@main/logos/exchanges/binance-com.png",
       "checkedAt": "2026-10-13"
+    },
+    {
+      "network": "TRON",
+      "address": "TAzsQ9Gx8eqFNFSKbeXrbi45CuVPHzA8wr",
+      "level": "clear",
+      "checkedAt": "2026-10-14"
+    },
+    {
+      "network": "TRON",
+      "address": "TU4vEruvZwLLkSfV9bNw12EJTPvNr7Pvaa",
+      "level": "clear",
+      "label": "Bybit",
+      "logo": "https://cdn.jsdelivr.net/gh/maslovsa/kyt-entity-registry@main/logos/exchanges/bybit-com.png",
+      "checkedAt": "2026-10-14"
+    },
+    {
+      "network": "TRON",
+      "address": "TM1zzNDZD2DPASbKcgdVoTYhfmYgtfwx9R",
+      "level": "clear",
+      "checkedAt": "2026-10-14"
+    },
+    {
+      "network": "TRON",
+      "address": "TJ7hhYhVhaxNx6BPyq7yFpqZrQULL3JSdb",
+      "level": "clear",
+      "checkedAt": "2026-10-14"
+    },
+    {
+      "network": "TRON",
+      "address": "TDZiHNjB3gDu8Zu23i7HE4M5sPkBcsvPTJ",
+      "level": "caution",
+      "checkedAt": "2026-10-14"
+    },
+    {
+      "network": "TRON",
+      "address": "TXSmtNhgRN1kMHUE9ZXvwg9Ew7CWu1WbLv",
+      "level": "caution",
+      "checkedAt": "2026-10-14"
+    },
+    {
+      "network": "TRON",
+      "address": "TNaRAoLUyYEV2uF7GUrzSjRQTU8v5ZJ5VR",
+      "level": "caution",
+      "checkedAt": "2026-10-14"
+    },
+    {
+      "network": "TRON",
+      "address": "TLo45PfTdDuQjfJg7uSbG9UNaFokiDCd3k",
+      "level": "caution",
+      "checkedAt": "2026-10-14"
+    },
+    {
+      "network": "TRON",
+      "address": "TMuCgBejD5RsNANZdjGtaM3YyKGNgDoy7N",
+      "level": "caution",
+      "label": "Grinex",
+      "checkedAt": "2026-10-14"
+    },
+    {
+      "network": "TRON",
+      "address": "TU4tDFRvcKhAZ1jdihojmBWZqvJhQCnJ4F",
+      "level": "caution",
+      "label": "Aeza Group LLC",
+      "checkedAt": "2026-10-14"
+    },
+    {
+      "network": "TRON",
+      "address": "TNNcaQDVuE5xYqEcZs6XCn66asGShvbZ3y",
+      "level": "caution",
+      "checkedAt": "2026-10-14"
+    },
+    {
+      "network": "TRON",
+      "address": "TKzxdSv2FZKQrEqkKVgp5DcwEXBEKMg2Ax",
+      "level": "clear",
+      "checkedAt": "2026-10-14"
     }
   ]
 }

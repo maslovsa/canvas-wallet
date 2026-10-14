@@ -126,7 +126,7 @@ export function mapAegisVerdict(body: unknown): Verdict {
   const entity = verdict?.entity;
   const withIdentity = (base: "clear" | "caution", name: string | undefined): Verdict => {
     if (!name) return { level: base };
-    const logo = sanitizeLogoUrl(entity?.logo_url);
+    const logo = sanitizeLogoUrl(entity?.logo_url, base === "caution");
     return logo ? { level: base, label: name, logo } : { level: base, label: name };
   };
   const caution = (): Verdict => withIdentity("caution", sanitizeLabel(entity?.name));

@@ -8,7 +8,7 @@ import { loadIcon } from "../icon/icon-loader.ts";
 import { findNetworkInfo, type NetworkInfo } from "../networks/network-registry.ts";
 import { countryFlagAssetUrl, countryFlagEmoji } from "../country/country-flag.ts";
 import { prepareSend } from "../send/send-token.ts";
-import { getSendController, resetSendSession } from "../send/send-session.ts";
+import { getSendController, resetSendSession, setPendingDestination, takePendingDestination } from "../send/send-session.ts";
 import { mountSendScreen, unmountSendScreen } from "./send-screen.ts";
 import { openOverlay } from "./phone-overlay.ts";
 import { icon } from "./icons.ts";
@@ -54,6 +54,12 @@ let screenMode: "list" | "detail" | "send" = "list";
 
 export function getPhoneNavScreen(): "list" | "detail" | "send" {
   return screenMode;
+}
+
+/** Opens the Send screen for the current token with `address` already in the To field (the ?to= demo link). */
+export function openSendWithDestination(address: string): void {
+  setPendingDestination(address);
+  screenMode = "send";
 }
 
 export function setPhoneNavScreen(mode: "list" | "detail"): void {
@@ -112,9 +118,16 @@ export function renderPhoneFrame(container: HTMLElement, token: Token | undefine
     prepareSend(token, options.networkInfo?.canonicalName).then((prepared) => {
       if (screenMode !== "send" || !container.isConnected) return;
       if (!prepared.ok) {
+        takePendingDestination(); // a link's destination is dropped when this token cannot be sent
         screenMode = "detail"; // the token cannot be sent (e.g. edited in the editor while on this screen)
         renderPhoneFrame(container, token, options);
         return;
+      }
+      const controller = getSendController(prepared.info);
+      const destination = takePendingDestination();
+      if (destination) {
+        void controller.setAddress(destination); // validated and risk-checked exactly like typing
+        options.onScreenChange?.(); // the session now exists: let the URL follow the field
       }
       const leave = () => {
         screenMode = "detail";
@@ -125,7 +138,7 @@ export function renderPhoneFrame(container: HTMLElement, token: Token | undefine
         frame: container,
         screen,
         chromeStyle: options.chromeStyle,
-        controller: getSendController(prepared.info),
+        controller,
         networkLabel: options.networkInfo?.canonicalName ?? options.networkName,
         onBack: leave,
         onDone: leave,

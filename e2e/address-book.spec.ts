@@ -32,9 +32,10 @@ test("the book button opens a sheet with the Tron addresses only; picking one fi
   await expect(sheet).toBeVisible();
   await expect(page.locator(".phone-sheet-title")).toHaveText("Address book");
   await expect(page.locator(".phone-sheet-subtitle")).toHaveText("Tron · 12 saved");
-  const names = await page.locator(".book-name").allTextContents();
-  expect(names).toContain("Binance hot wallet");
-  expect(names.join()).not.toContain("Uniswap"); // an Ethereum contract: not shown for a Tron send
+  // only Tron addresses: every row's address starts with T; no 0x (Ethereum / BSC) address appears
+  const labels = await page.locator(".book-row").evaluateAll((els) => els.map((e) => e.getAttribute("aria-label") ?? ""));
+  expect(labels).toHaveLength(12);
+  expect(labels.every((l) => /, T[1-9A-HJ-NP-Za-km-z]{33}$/.test(l))).toBe(true);
   // about two thirds of the screen
   const sheetBox = (await sheet.boundingBox())!;
   const screenBox = (await page.locator(".phone-screen").boundingBox())!;
@@ -43,7 +44,7 @@ test("the book button opens a sheet with the Tron addresses only; picking one fi
   await page.waitForTimeout(500);
   await page.screenshot({ path: `${SHOTS}/book-2-sheet.png`, clip: await clipOf(page, "#phone-frame") });
 
-  await page.locator(".book-row", { hasText: "HTX hot wallet" }).click();
+  await page.locator('.book-row[aria-label$="TNaRAoLUyYEV2uF7GUrzSjRQTU8v5ZJ5VR"]').click();
   await expect(page.locator("#send-address")).toHaveValue("TNaRAoLUyYEV2uF7GUrzSjRQTU8v5ZJ5VR");
   await expect(page.locator(".phone-sheet")).toHaveCount(0);
   await expect(page.locator(".send-status-text")).toHaveText("Risk signals found for this address");
@@ -113,3 +114,88 @@ async function clipOf(page: Page, selector: string) {
   const box = (await page.locator(selector).boundingBox())!;
   return { x: box.x, y: box.y, width: box.width, height: box.height };
 }
+
+// ---- every Tron address of the book is answered (from the risk seed), none ends in "Couldn't verify"
+import { readFileSync, mkdirSync } from "node:fs";
+
+test("every Tron address in the address book gets a real answer, matching the risk seed", async ({ page }) => {
+  const book = (JSON.parse(readFileSync("public/address-book.json", "utf8")).entries as Array<{ network: string; address: string; comment: string }>).filter((e) => e.network === "TRON");
+  const seed = new Map((JSON.parse(readFileSync("public/risk-seed.json", "utf8")).entries as Array<{ address: string; level: string; label?: string }>).map((e) => [e.address, e]));
+  await page.clock.install({ time: new Date("2026-10-20T12:00:00Z") }); // the seed's 90-day freshness is measured from "now"
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await openSend(page);
+  const outDir = process.env.SHOT_DIR;
+  if (outDir) mkdirSync(outDir, { recursive: true });
+  const table: string[] = [];
+  for (const [i, entry] of book.entries()) {
+    await page.locator("#send-address").fill("");
+    await page.locator(".send-book-btn").click();
+    await page.locator(".book-row").nth(i).click();
+    await expect(page.locator("#send-address")).toHaveValue(entry.address);
+    const status = page.locator(".send-status-text");
+    await expect(status).not.toHaveText("", { timeout: 5000 });
+    await expect(status).not.toHaveText("Checking address…");
+    const text = (await status.textContent())!;
+    const expected = seed.get(entry.address)!;
+    expect(text, `${entry.comment} (${entry.address})`).not.toBe("Couldn't verify this address.");
+    if (expected.level === "caution") expect(text).toBe("Risk signals found for this address");
+    else expect(text).toBe(expected.label ?? "No risk signals found");
+    table.push(`${String(i + 1).padStart(2)}. ${entry.comment.padEnd(30)} ${entry.address.slice(0, 8)}…  ->  ${text}`);
+    if (outDir) await page.locator("#phone-frame").screenshot({ path: `${outDir}/${String(i + 1).padStart(2, "0")}.png` });
+  }
+  console.log(`\nADDRESS BOOK RUN (${book.length} Tron addresses)\n${table.join("\n")}`);
+});
+
+// ---- the destination in the link: ?to=<address> opens Send with the recipient filled in
+test("?to= opens Send for the token with the recipient filled in and checked; the link keeps it while on Send", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/?list=aegis-super-list&network=Tron&token=USDT&to=TMuA6YqfCeX8EhbfYEg5y7S4DqzSJireY9");
+  await expect(page.locator(".send-nav-title")).toHaveText("Send USDT");
+  await expect(page.locator("#send-address")).toHaveValue("TMuA6YqfCeX8EhbfYEg5y7S4DqzSJireY9");
+  await expect(page.locator(".send-status-text")).toHaveText("Binance");
+  expect(new URL(page.url()).searchParams.get("to")).toBe("TMuA6YqfCeX8EhbfYEg5y7S4DqzSJireY9");
+  await page.locator(".send-back").click(); // leaving Send drops the recipient from the link
+  await expect(page.locator(".card-header-name")).toContainText("(USDT)");
+  expect(new URL(page.url()).searchParams.has("to")).toBe(false);
+  expect(new URL(page.url()).searchParams.get("token")).toBe("USDT");
+});
+
+test("Copy link from the Send screen carries the recipient currently in the field", async ({ page, context }) => {
+  await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await openSend(page);
+  await page.locator("#send-address").fill("TJDENsfBJs4RFETt1X1W8wMDc8M5XnJhCe");
+  await page.locator("#share-menu-btn").click();
+  await page.getByRole("menuitem", { name: /^Copy link/ }).click();
+  const copied = new URL(await page.evaluate(() => navigator.clipboard.readText()));
+  expect(copied.searchParams.get("to")).toBe("TJDENsfBJs4RFETt1X1W8wMDc8M5XnJhCe");
+  expect(copied.searchParams.get("token")).toBe("USDT");
+});
+
+test("?to= with a bad address shows the field's own error; for a token that cannot be sent (or no token) it is ignored", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/?list=aegis-super-list&network=Tron&token=USDT&to=not-an-address");
+  await expect(page.locator("#send-address")).toHaveValue("not-an-address");
+  await expect(page.locator(".send-error").first()).not.toHaveText("");
+  await page.goto("/?list=aegis-super-list&network=Ethereum&token=ETH&to=TMuA6YqfCeX8EhbfYEg5y7S4DqzSJireY9");
+  await expect(page.locator(".card-header-name")).toContainText("(ETH)"); // not a Tron token: stays on the card
+  await expect(page.locator(".send-nav-title")).toHaveCount(0);
+  await expect.poll(() => new URL(page.url()).searchParams.has("to")).toBe(false);
+  await page.goto("/?list=aegis-super-list&network=Tron&to=TMuA6YqfCeX8EhbfYEg5y7S4DqzSJireY9");
+  await expect(page.locator(".phone-list-title")).toBeVisible(); // no token: the list, no Send
+});
+
+// ---- the "could not verify" badge is an emoji in the logo's slot, not a bare "?"
+test("when the check cannot complete the status shows an emoji badge the size of an owner logo", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 1200 }); // tall enough that the phone is shown at its real size
+  await page.route(`${WORKER}/check`, (route) => route.abort());
+  await openSend(page);
+  await page.locator("#send-address").fill("TLa2f6VPqDgRE67v1736s7bJ8Ray5wYjU7"); // not in the seed: goes to the (down) Worker
+  await expect(page.locator(".send-status-text")).toHaveText("Couldn't verify this address.");
+  const emoji = page.locator(".send-status .send-owner-emoji");
+  await expect(emoji).toHaveText("❓");
+  const box = (await emoji.boundingBox())!; // 24 px: the size of an owner logo
+  expect([Math.round(box.width), Math.round(box.height)]).toEqual([24, 24]);
+  await expect(page.locator(".send-status-icon")).toHaveText(""); // no "?" glyph any more
+  await page.locator("#phone-frame").screenshot({ path: `${SHOTS}/couldnt-verify-emoji.png` });
+});

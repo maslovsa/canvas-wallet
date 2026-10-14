@@ -190,6 +190,15 @@ try {
   const bookPath = join(ROOT, "public", "address-book.json");
   const bookErrors = await validateAddressBook(JSON.parse(readFileSync(bookPath, "utf-8")), webcrypto.subtle as SubtleCrypto);
   log(bookErrors.length === 0, bookPath, bookErrors.length === 0 ? "address book valid" : bookErrors.join("; "));
+
+  // Every Tron address in the book must have a risk-seed answer, or picking it in the Send screen ends in
+  // "Couldn't verify this address" (no Worker needed for the demo addresses). A stale entry is only warned about.
+  const seedEntries = parseSeed(JSON.parse(readFileSync(join(ROOT, "public", "risk-seed.json"), "utf-8")));
+  const tronBook = (JSON.parse(readFileSync(bookPath, "utf-8")).entries as Array<{ network: string; address: string }>).filter((e) => e.network === "TRON");
+  const unseeded = tronBook.filter((e) => !seedEntries.some((s) => s.address === e.address));
+  log(unseeded.length === 0, `${bookPath} x risk-seed.json`, unseeded.length === 0 ? "every Tron book address has a risk-seed entry" : `no risk-seed entry for: ${unseeded.map((e) => e.address).join(", ")}`);
+  const staleBook = tronBook.filter((e) => seedEntries.some((s) => s.address === e.address) && seedLookup(seedEntries, e.address, new Date()) === null);
+  if (staleBook.length > 0) console.warn(`[WARN] ${staleBook.length} address-book entr${staleBook.length === 1 ? "y has a" : "ies have a"} risk-seed entry older than ${SEED_MAX_AGE_DAYS} days: re-check with Aegis.`);
 }
 
 if (failed) {

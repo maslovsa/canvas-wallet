@@ -43,3 +43,16 @@ describe("findByName", () => {
     expect(findByName(items, undefined, (i) => i.name)).toBeUndefined();
   });
 });
+
+describe("the to (destination) parameter", () => {
+  it("is read, trimmed, and capped in length; empty counts as absent", () => {
+    expect(parseStudioQuery("?list=a&token=USDT&to=TMuA6YqfCeX8EhbfYEg5y7S4DqzSJireY9")).toEqual({ list: "a", token: "USDT", to: "TMuA6YqfCeX8EhbfYEg5y7S4DqzSJireY9" });
+    expect(parseStudioQuery("?to=%20T123%20").to).toBe("T123");
+    expect(parseStudioQuery("?to=").to).toBeUndefined();
+    expect(parseStudioQuery(`?to=${"a".repeat(129)}`).to).toBeUndefined();
+  });
+  it("is written and removed with the rest, and unrelated parameters survive", () => {
+    expect(buildStudioQuery("?x=1", { list: "a", network: "Tron", token: "USDT", to: "TMuA6Y" })).toBe("?x=1&list=a&network=Tron&token=USDT&to=TMuA6Y");
+    expect(buildStudioQuery("?list=a&token=USDT&to=TMuA6Y&view=phone", { list: "a", token: "USDT" })).toBe("?list=a&token=USDT&view=phone");
+  });
+});

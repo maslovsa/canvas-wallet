@@ -23,7 +23,7 @@ describe("the shipped address book (public/address-book.json)", () => {
     expect(entriesForNetwork(entries, "TRON").length).toBeGreaterThan(5);
     expect(entriesForNetwork(entries, "ETH").length).toBeGreaterThan(5);
     expect(entriesForNetwork(entries, "BSC")).toHaveLength(1);
-    expect(entries.find((e) => e.address === TRON)!.comment).toBe("Binance hot wallet");
+    expect(entries.find((e) => e.address === TRON)!.comment.length).toBeGreaterThan(0); // the names are the owner's to edit
   });
 });
 

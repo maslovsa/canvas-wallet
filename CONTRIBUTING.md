@@ -28,6 +28,12 @@ case-insensitively; an unknown list shows a message and the gallery, an unknown 
 back to the default. Other query parameters are preserved. Example:
 `?list=aegis-super-list&network=Tron&token=USDT`.
 
+**Destination for a demo.** Add `&to=<address>` and the link opens the Send screen for that token with the recipient
+already in the To field (validated and risk-checked exactly as if typed), e.g.
+`?list=aegis-super-list&network=Tron&token=USDT&to=TMuA6YqfCeX8EhbfYEg5y7S4DqzSJireY9`. While you are on Send the address
+bar keeps the recipient currently in the field (and Share > Copy link copies it); leaving Send drops it. A token that
+cannot be sent, or a link with no token, ignores `to`.
+
 **Phone mode.** On a phone the same link opens as the bare phone interface: no sidebar, editor or toolbar, edge to
 edge, with iOS or Android chrome and light or dark taken from the device. A desktop can ask for it with
 `&view=phone` (the phone drawn as a device, centred; Share > Copy phone link adds it), and `&view=studio` forces the
@@ -265,7 +271,7 @@ in-phone notice for anything else. Address risk answers come from `public/risk-s
 of demo addresses produced from Aegis `POST /v2/screen` results. An entry stores only `network`,
 `address`, `level` (`clear` or `caution`), an optional `label` (allowed on `clear` entries only, because
 an owner name on a risky address can reveal the reason) and `checkedAt`. Never store scores, reasons or
-flags: `npm run validate:fixtures` rejects them. A `clear` entry with a label may also carry `logo` (an https `cdn.jsdelivr.net` `.png` URL, the VASP logo from Aegis `verdict.entity.logo_url`). Entries older than 90 days are ignored at runtime, so
+flags: `npm run validate:fixtures` rejects them. On a `caution` entry only the VASP identity may appear (the name from `verdict.entity`, and a logo whose URL path does not name a risk reason), never the raw `verdict.label`. Every Tron address of the address book must have an entry here, or picking it ends in "Couldn't verify": CI fails if one is missing and warns when one is older than 90 days. A `clear` entry with a label may also carry `logo` (an https `cdn.jsdelivr.net` `.png` URL, the VASP logo from Aegis `verdict.entity.logo_url`). Entries older than 90 days are ignored at runtime, so
 re-check them with Aegis before they expire. **Alert threshold.** The risk-check Worker answers `caution` when Aegis `risk_score` is 50 or more, when the level is `sanctioned`, or on any sanctions-list match; below 50 the address is `clear`. The reason is never shown or sent to the browser.
 
 **Wording rule for risk results: no advice.** The Send screen only states what the screening data shows

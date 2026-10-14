@@ -3,6 +3,16 @@ import { sanitizeLogoUrl, MAX_LOGO_URL_LENGTH } from "../src/send/entity-logo.ts
 
 const GOOD = "https://cdn.jsdelivr.net/gh/example/kyt-entity-registry@main/logos/example.png";
 
+describe("sanitizeLogoUrl for a risky address", () => {
+  it("refuses a logo whose path names a risk reason (it would show in the network tab and the DOM); a neutral path passes", () => {
+    const risky = "https://cdn.jsdelivr.net/gh/example/kyt-entity-registry@main/logos/sanctioned/grinex.png";
+    expect(sanitizeLogoUrl(risky)).toBe(risky); // on a clear address the path is not a reason
+    expect(sanitizeLogoUrl(risky, true)).toBeUndefined();
+    expect(sanitizeLogoUrl("https://cdn.jsdelivr.net/gh/example/r@main/logos/OFAC/x.png", true)).toBeUndefined();
+    expect(sanitizeLogoUrl("https://cdn.jsdelivr.net/gh/example/r@main/logos/exchanges/bybit-com.png", true)).toBe("https://cdn.jsdelivr.net/gh/example/r@main/logos/exchanges/bybit-com.png");
+  });
+});
+
 describe("sanitizeLogoUrl", () => {
   it("accepts an https jsDelivr PNG and returns it normalized", () => {
     expect(sanitizeLogoUrl(GOOD)).toBe(GOOD);

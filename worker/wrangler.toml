@@ -16,7 +16,7 @@ enabled = false
 
 [vars]
 # Exact browser origins allowed to call the Worker (comma-separated; GitHub Pages origin has no path).
-ALLOWED_ORIGIN = "https://maslovsa.github.io"
+ALLOWED_ORIGIN = "https://maslovsa.github.io,http://localhost:5173,http://127.0.0.1:5173" # the site, and a local `npm run dev`
 AEGIS_BASE_URL = "https://api.aegis-kyt.com"
 # Abuse limits (plan R4 / E3): live Aegis calls per day for the whole demo, and per visitor per hour.
 DAILY_BUDGET = "30"

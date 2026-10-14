@@ -253,12 +253,18 @@ export function mountSendScreen(options: SendScreenOptions): void {
     }
     identityName.textContent = identity ? identity.name : "";
     const owner = s?.owner ?? null;
-    statusIcon.textContent = s && !owner ? ICONS[s.icon] : "";
-    ownerBadge.hidden = owner === null;
-    const ownerKey = owner && s ? `${s.text}\n${owner.logo ?? ""}` : "";
+    const emoji = s?.emoji ?? null;
+    statusIcon.textContent = s && !owner && !emoji ? ICONS[s.icon] : "";
+    ownerBadge.hidden = owner === null && emoji === null;
+    const ownerKey = emoji ? `emoji:${emoji}` : owner && s ? `${s.text}\n${owner.logo ?? ""}` : "";
     if (ownerBadge.dataset.key !== ownerKey) {
       ownerBadge.dataset.key = ownerKey;
-      if (owner && s) fillOwnerBadge(ownerBadge, s.text, owner.logo);
+      if (emoji) {
+        // an emoji in the same 24 px slot an owner logo uses
+        ownerBadge.replaceChildren(el("span", "send-owner-emoji", emoji));
+      } else if (owner && s) {
+        fillOwnerBadge(ownerBadge, s.text, owner.logo);
+      }
     }
     spinner.hidden = !s?.spinner;
     statusText.textContent = s ? s.text : "";
