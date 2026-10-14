@@ -95,7 +95,7 @@ describe("address -> risk status", () => {
     await c.setAddress(CLEAR_LABELED);
     await settle();
     const v = c.view();
-    expect(v.address.status).toEqual({ tone: "success", icon: "check", text: "Binance", spinner: false, checkAgain: false, checkAgainWaitSec: 0, owner: { logo: null }, identity: null });
+    expect(v.address.status).toEqual({ tone: "success", icon: "check", text: "Binance", spinner: false, checkAgain: false, checkAgainWaitSec: 0, owner: { logo: null }, emoji: null, identity: null });
     expect(feeCalls).toEqual([CLEAR_LABELED]);
     expect(v.fee).toEqual({ label: "Network fee (estimate)", value: "~6.4 TRX", note: null });
   });
@@ -120,7 +120,7 @@ describe("address -> risk status", () => {
     const { c, clock } = setup({ checkRisk: async () => answer });
     await c.setAddress(UNKNOWN);
     await settle();
-    expect(c.view().address.status).toMatchObject({ text: "Couldn't verify this address.", checkAgain: true, icon: "help" });
+    expect(c.view().address.status).toMatchObject({ text: "Couldn't verify this address.", checkAgain: true, icon: "none", emoji: "❓" });
     answer = { state: "clear" };
     clock.advance(CHECK_AGAIN_COOLDOWN_MS); // Check again is throttled: wait out the cooldown
     c.checkAgain();

@@ -4,122 +4,122 @@
     {
       "network": "ETH",
       "address": "0x56eddb7aa87536c09ccc2793473599fd21a8b17f",
-      "comment": "Binance hot wallet"
+      "comment": "Changpeng Zhao (CZ)"
     },
     {
       "network": "TRON",
       "address": "TAzsQ9Gx8eqFNFSKbeXrbi45CuVPHzA8wr",
-      "comment": "Binance hot wallet"
+      "comment": "Changpeng Zhao (CZ)"
     },
     {
       "network": "BSC",
       "address": "0x28c6c06298d514db089934071355e5743bf21d60",
-      "comment": "Binance hot wallet"
+      "comment": "Changpeng Zhao (CZ)"
     },
     {
       "network": "TRON",
       "address": "TU4vEruvZwLLkSfV9bNw12EJTPvNr7Pvaa",
-      "comment": "Bybit hot wallet"
+      "comment": "Justin Sun"
     },
     {
       "network": "ETH",
       "address": "0xf89d7b9c864f589bbf53a82105107622b35eaa40",
-      "comment": "Bybit hot wallet"
+      "comment": "Vitalik Buterin"
     },
     {
       "network": "ETH",
       "address": "0xa9d1e08c7793af67e9d92fe308d5697fb81d3e43",
-      "comment": "Coinbase hot wallet"
+      "comment": "Vitalik Buterin"
     },
     {
       "network": "TRON",
       "address": "TM1zzNDZD2DPASbKcgdVoTYhfmYgtfwx9R",
-      "comment": "OKX hot wallet"
+      "comment": "Justin Sun"
     },
     {
       "network": "ETH",
       "address": "0x51e3d44172868acc60d68ca99591ce4230bc75e0",
-      "comment": "MEXC hot wallet"
+      "comment": "Elon Musk"
     },
     {
       "network": "TRON",
       "address": "TJ7hhYhVhaxNx6BPyq7yFpqZrQULL3JSdb",
-      "comment": "Bitget hot wallet"
+      "comment": "Justin Sun"
     },
     {
       "network": "TRON",
       "address": "TDZiHNjB3gDu8Zu23i7HE4M5sPkBcsvPTJ",
-      "comment": "Rapira hot wallet"
+      "comment": "Roger Ver"
     },
     {
       "network": "ETH",
       "address": "0x6b7dc81758483ecf91a14ba263831bfe6989716e",
-      "comment": "Rapira hot wallet"
+      "comment": "Gavin Wood"
     },
     {
       "network": "TRON",
       "address": "TXSmtNhgRN1kMHUE9ZXvwg9Ew7CWu1WbLv",
-      "comment": "ABCEX hot wallet"
+      "comment": "Contact 1"
     },
     {
       "network": "TRON",
       "address": "TNaRAoLUyYEV2uF7GUrzSjRQTU8v5ZJ5VR",
-      "comment": "HTX hot wallet"
+      "comment": "Contact 2"
     },
     {
       "network": "ETH",
       "address": "0xa03400e098f4421b34a3a44a1b4e571419517687",
-      "comment": "HTX hot wallet"
+      "comment": "Joseph Lubin"
     },
     {
       "network": "TRON",
       "address": "TLo45PfTdDuQjfJg7uSbG9UNaFokiDCd3k",
-      "comment": "Garantex hot wallet"
+      "comment": "Contact 3"
     },
     {
       "network": "TRON",
       "address": "TMuCgBejD5RsNANZdjGtaM3YyKGNgDoy7N",
-      "comment": "Grinex hot wallet"
+      "comment": "Contact 4"
     },
     {
       "network": "ETH",
       "address": "0x2f389ce8bd8ff92de3402ffce4691d17fc4f6535",
-      "comment": "SUEX OTC"
+      "comment": "Contact 5"
     },
     {
       "network": "TRON",
       "address": "TU4tDFRvcKhAZ1jdihojmBWZqvJhQCnJ4F",
-      "comment": "Aeza Group"
+      "comment": "Contact 6"
     },
     {
       "network": "TRON",
       "address": "TNNcaQDVuE5xYqEcZs6XCn66asGShvbZ3y",
-      "comment": "USDT wallet"
+      "comment": "Contact 7"
     },
     {
       "network": "ETH",
       "address": "0xaf5d53b9682119d0b3fb2afa8bd10a28192dcd91",
-      "comment": "USDT wallet"
+      "comment": "Contact 8"
     },
     {
       "network": "ETH",
       "address": "0x905b63fff465b9ffbf41dea908ceb12478ec7601",
-      "comment": "Tornado Cash contract"
+      "comment": "Contact 9"
     },
     {
       "network": "ETH",
       "address": "0x7a250d5630b4cf539739df2c5dacb4c659f2488d",
-      "comment": "Uniswap V2 Router (smart contract)"
+      "comment": "Hayden Adams"
     },
     {
       "network": "TRON",
       "address": "TKzxdSv2FZKQrEqkKVgp5DcwEXBEKMg2Ax",
-      "comment": "SunSwap (TRON DEX contract)"
+      "comment": "Justin Sun"
     },
     {
       "network": "ETH",
       "address": "0x11111112542d85b3ef69ae05771c2dccff4faa26",
-      "comment": "1inch Router (smart contract)"
+      "comment": "Jed McCaleb"
     }
   ]
 }

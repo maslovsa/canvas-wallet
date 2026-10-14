@@ -128,6 +128,7 @@ describe("response contract: exactly {level, label?}", () => {
   });
 });
 
+const makeEnvOnce = () => makeEnv().env;
 const LOGO = "https://cdn.jsdelivr.net/gh/example/kyt-entity-registry@main/logos/example-exchange.png";
 const entity = (over: Record<string, unknown> = {}) => ({ slug: "example-exchange", name: "Example Exchange", category: "centralized_exchange", logo_url: LOGO, logo_source: "registry", ...over });
 
@@ -194,6 +195,16 @@ describe("risk: what leaves the Worker", () => {
     const text = await (await post(makeEnv().env, ADDRESS)).text();
     expect(JSON.parse(text)).toEqual({ level: "caution", label: "Example Exchange", logo: LOGO });
     expect(text).not.toMatch(/Raw Label|ofac|sdn|exposure|mixer|scam|score|categor/i);
+  });
+
+  it("a logo whose path names a risk reason is dropped on caution (the name stays), but kept on a clear address", async () => {
+    const risky = "https://cdn.jsdelivr.net/gh/example/kyt-entity-registry@main/logos/sanctioned/example-exchange.png";
+    aegisAnswer = () => aegisBody("sanctioned", null, true, { entity: entity({ logo_url: risky }) });
+    const text = await (await post(makeEnvOnce(), ADDRESS)).text();
+    expect(JSON.parse(text)).toEqual({ level: "caution", label: "Example Exchange" });
+    expect(text).not.toMatch(/sanction/i);
+    aegisAnswer = () => aegisBody("low", null, true, { entity: entity({ logo_url: risky }) });
+    expect(await (await post(makeEnvOnce(), OTHER)).json()).toEqual({ level: "clear", label: "Example Exchange", logo: risky });
   });
 
   it("a VASP name without a logo is still shown on caution; a bad logo URL is dropped", async () => {

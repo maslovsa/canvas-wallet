@@ -18,8 +18,9 @@ export interface SeedEntry {
   address: string;
   level: "clear" | "caution";
   /** Owner label from Aegis; only allowed on a clear entry (a label on a risky address can reveal the reason). */
+  /** The VASP's name from Aegis `verdict.entity` (never the raw `verdict.label`, which can name a sanctioned person). */
   label?: string;
-  /** Logo URL of the labelled VASP (jsDelivr PNG, see entity-logo.ts); only with a label on a clear entry. */
+  /** Logo URL of the labelled VASP (jsDelivr PNG, see entity-logo.ts); only with a label. */
   logo?: string;
   /** ISO date (YYYY-MM-DD) the entry was checked; entries older than SEED_MAX_AGE_DAYS count as a miss. */
   checkedAt: string;
@@ -54,13 +55,12 @@ export function validateSeedShape(json: unknown): string[] {
     else seen.add(e.address);
     if (e.level !== "clear" && e.level !== "caution") errors.push(`${where}: level must be "clear" or "caution"`);
     if (e.label !== undefined) {
-      if (e.level !== "clear") errors.push(`${where}: a caution entry must not carry a label`);
       if (typeof e.label !== "string" || e.label.length === 0 || e.label.length > MAX_LABEL_LENGTH) {
         errors.push(`${where}: label must be 1-${MAX_LABEL_LENGTH} characters`);
       }
     }
-    if (e.logo !== undefined && (e.level !== "clear" || e.label === undefined || sanitizeLogoUrl(e.logo) === undefined)) {
-      errors.push(`${where}: logo must be an acceptable https jsDelivr .png URL, and only on a clear entry that has a label`);
+    if (e.logo !== undefined && (e.label === undefined || sanitizeLogoUrl(e.logo, e.level === "caution") === undefined)) {
+      errors.push(`${where}: logo must be an acceptable https jsDelivr .png URL (on a caution entry its path must not name a risk reason), and only on an entry that has a label`);
     }
     if (typeof e.checkedAt !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(e.checkedAt) || Number.isNaN(Date.parse(e.checkedAt))) {
       errors.push(`${where}: checkedAt must be a YYYY-MM-DD date`);
@@ -84,9 +84,9 @@ export function seedLookup(entries: SeedEntry[], address: string, now: Date): Ri
   if (!entry) return null;
   const ageDays = (now.getTime() - Date.parse(entry.checkedAt)) / DAY_MS;
   if (!(ageDays <= SEED_MAX_AGE_DAYS)) return null; // also false for NaN/future-dated garbage
-  if (entry.level === "caution") return { state: "caution" };
-  if (!entry.label) return { state: "clear" };
-  return entry.logo ? { state: "clear", label: entry.label, logo: entry.logo } : { state: "clear", label: entry.label };
+  const state = entry.level;
+  if (!entry.label) return { state };
+  return entry.logo ? { state, label: entry.label, logo: entry.logo } : { state, label: entry.label };
 }
 
 let seedPromise: Promise<SeedEntry[]> | undefined;
@@ -138,7 +138,7 @@ export function parseProxyAnswer(body: unknown): RiskResult {
     if (label === undefined && logo === undefined) return { state };
     if (typeof label === "string" && label.length > 0 && label.length <= MAX_LABEL_LENGTH) {
       if (logo === undefined) return { state, label };
-      const safe = sanitizeLogoUrl(logo);
+      const safe = sanitizeLogoUrl(logo, state === "caution");
       if (safe) return { state, label, logo: safe };
     }
   }

@@ -7,7 +7,8 @@ import { StaleFetchGuard } from "./registry-client/stale-fetch-guard.ts";
 import { checkGovernance, governanceWarning } from "./registry-client/governance-check.ts";
 import { loadManifest } from "./registry-client/manifest.ts";
 import { renderSidebar } from "./ui/sidebar.ts";
-import { renderPhoneFrame, setPhoneNavScreen, getPhoneNavScreen, type ChromeStyle, type ChromeTheme, type PhoneFrameOptions } from "./ui/phone-frame.ts";
+import { getSendAddress, hasSendSession } from "./send/send-session.ts";
+import { renderPhoneFrame, setPhoneNavScreen, getPhoneNavScreen, openSendWithDestination, type ChromeStyle, type ChromeTheme, type PhoneFrameOptions } from "./ui/phone-frame.ts";
 import { renderGalleryCards, type GalleryEntry } from "./ui/gallery.ts";
 import { Editor } from "./ui/editor.ts";
 import { buildDeployPlan } from "./deploy-flow/build-deploy-url.ts";
@@ -118,6 +119,11 @@ function syncUrl(): void {
     next.list = state.source.listId;
     if (state.selectedNetwork) next.network = state.selectedNetwork;
     if (getPhoneNavScreen() !== "list" && state.selectedToken) next.token = state.selectedToken.symbol;
+    if (getPhoneNavScreen() === "send") {
+      // Until the session exists the link's own recipient stays in the address; afterwards the field is the truth.
+      const to = hasSendSession() ? getSendAddress() : parseStudioQuery(location.search).to;
+      if (to) next.to = to;
+    }
   }
   const search = buildStudioQuery(location.search, next);
   if (search !== location.search) history.replaceState(null, "", `${location.pathname}${search}${location.hash}`);
@@ -398,6 +404,7 @@ function syncDock(): void {
 
 /** The current address with `view` set (phone) or removed. The query already mirrors the list, network and token. */
 function currentLink(view: "phone" | undefined): string {
+  syncUrl(); // typing on the Send screen does not re-render: refresh the recipient in the address before it is copied
   return withViewParam(`${location.origin}${location.pathname}${location.search}`, view);
 }
 
@@ -517,6 +524,7 @@ async function loadSource(source: RegistrySource, listMeta: ListMeta | undefined
     if (state.selectedToken) editor.loadToken(state.selectedToken);
     else editor.clear();
     setPhoneNavScreen(restoredToken ? "detail" : "list");
+    if (restoredToken && restore?.to) openSendWithDestination(restore.to); // a demo link: straight to Send with the recipient filled in
     renderAll();
 
     if (source.kind === "github") {

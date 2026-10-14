@@ -46,19 +46,26 @@ describe("validateSeedShape / parseSeed", () => {
     expect(validateSeedShape({ version: 1, entries: seed })).toEqual([]);
   });
 
-  it("rejects stored scores or reasons, a label on caution, duplicates and bad dates", () => {
+  it("rejects stored scores or reasons, a logo without a label, a risk-named logo path on caution, duplicates and bad dates", () => {
     const errors = validateSeedShape({
       version: 1,
       entries: [
         { network: "TRON", address: A, level: "clear", checkedAt: "2026-10-13", risk_score: 88 },
-        { network: "TRON", address: B, level: "caution", label: "Mixer X", checkedAt: "2026-10-13" },
+        { network: "TRON", address: B, level: "caution", label: "Exchange X", logo: "https://cdn.jsdelivr.net/gh/x/y@main/logos/sanctioned/x.png", checkedAt: "2026-10-13" },
         { network: "TRON", address: B, level: "clear", checkedAt: "13/10/2026" },
       ],
     });
     expect(errors.join("\n")).toContain("scores and reasons must never be stored");
-    expect(errors.join("\n")).toContain("a caution entry must not carry a label");
+    expect(errors.join("\n")).toContain("on a caution entry its path must not name a risk reason");
     expect(errors.join("\n")).toContain("duplicate address");
     expect(errors.join("\n")).toContain("checkedAt must be a YYYY-MM-DD date");
+  });
+
+  it("a caution entry may carry the VASP identity (name and a neutral logo), and a lookup returns it", () => {
+    const LOGO = "https://cdn.jsdelivr.net/gh/x/y@main/logos/exchanges/x.png";
+    const entries = [{ network: "TRON" as const, address: A, level: "caution" as const, label: "Exchange X", logo: LOGO, checkedAt: "2026-10-13" }];
+    expect(validateSeedShape({ version: 1, entries })).toEqual([]);
+    expect(seedLookup(entries, A, NOW)).toEqual({ state: "caution", label: "Exchange X", logo: LOGO });
   });
 
   it("parseSeed drops malformed entries and never throws", () => {

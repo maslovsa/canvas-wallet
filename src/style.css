@@ -303,6 +303,14 @@
   height: 24px;
   border-radius: 50%;
 }
+.send-owner-emoji {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  font-size: 18px;
+  line-height: 1;
+}
 .send-owner-initial {
   display: flex;
   align-items: center;

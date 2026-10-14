@@ -84,6 +84,8 @@ export interface SendView {
       checkAgainWaitSec: number;
       /** Set when the text is the owner's (VASP's) name: the screen shows its logo, or an initial when there is none. */
       owner: { logo: string | null } | null;
+      /** An emoji drawn in the same 24 px badge slot an owner logo uses (the "couldn't verify" state). */
+      emoji: string | null;
       /** On a risky address that is a known VASP: its name and logo are shown on a row above the risk line. */
       identity: { name: string; logo: string | null } | null;
     } | null;
@@ -126,6 +128,9 @@ function amountIssue(state: SendState, token: SendTokenInfo): { error: string | 
   return { error: null, units: parsed.units, empty: false };
 }
 
+/** Shown where an owner's logo normally is when the check could not be completed. */
+export const UNVERIFIED_EMOJI = "❓";
+
 function cooldownSec(state: SendState, nowMs: number): number {
   if (state.lastCheckAt === null) return 0;
   const left = state.lastCheckAt + CHECK_AGAIN_COOLDOWN_MS - nowMs;
@@ -144,12 +149,12 @@ function addressView(state: SendState, nowMs: number): SendView["address"]["stat
   }
   if (risk.kind === "checking") {
     const slow = nowMs - risk.startedAt >= SPINNER_DELAY_MS; // no flicker for a sub-250 ms check (DR7)
-    return slow ? { tone: "dim", icon: "none", text: "Checking address…", spinner: true, checkAgain: false, checkAgainWaitSec: 0, owner: null, identity: null } : null;
+    return slow ? { tone: "dim", icon: "none", text: "Checking address…", spinner: true, checkAgain: false, checkAgainWaitSec: 0, owner: null, emoji: null, identity: null } : null;
   }
   if (risk.kind === "clear") {
     return risk.label
-      ? { tone: "success", icon: "check", text: risk.label, spinner: false, checkAgain: false, checkAgainWaitSec: 0, owner: { logo: risk.logo ?? null }, identity: null }
-      : { tone: "dim", icon: "none", text: "No risk signals found", spinner: false, checkAgain: false, checkAgainWaitSec: 0, owner: null, identity: null }; // never "Safe" (DR3)
+      ? { tone: "success", icon: "check", text: risk.label, spinner: false, checkAgain: false, checkAgainWaitSec: 0, owner: { logo: risk.logo ?? null }, emoji: null, identity: null }
+      : { tone: "dim", icon: "none", text: "No risk signals found", spinner: false, checkAgain: false, checkAgainWaitSec: 0, owner: null, emoji: null, identity: null }; // never "Safe" (DR3)
   }
   if (risk.kind === "caution") {
     return {
@@ -160,11 +165,12 @@ function addressView(state: SendState, nowMs: number): SendView["address"]["stat
       checkAgain: false,
       checkAgainWaitSec: 0,
       owner: null,
+      emoji: null,
       identity: risk.label ? { name: risk.label, logo: risk.logo ?? null } : null,
     };
   }
   if (risk.kind === "unavailable") {
-    return { tone: "dim", icon: "help", text: "Couldn't verify this address.", spinner: false, checkAgain: true, checkAgainWaitSec: cooldownSec(state, nowMs), owner: null, identity: null };
+    return { tone: "dim", icon: "none", text: "Couldn't verify this address.", spinner: false, checkAgain: true, checkAgainWaitSec: cooldownSec(state, nowMs), owner: null, emoji: UNVERIFIED_EMOJI, identity: null };
   }
   return null;
 }
@@ -441,6 +447,29 @@ export function getSendController(token: SendTokenInfo, deps: SendDeps = default
   current?.dispose();
   current = new SendController(token, deps);
   return current;
+}
+
+/** True once the Send screen has built its session (it is built a moment after the screen is requested). */
+export function hasSendSession(): boolean {
+  return current !== null;
+}
+
+/** The address currently typed on the Send screen ("" when there is no session). Read by the URL sync. */
+export function getSendAddress(): string {
+  return current?.state.address ?? "";
+}
+
+// A destination handed in from outside (the ?to= link): it is put in the field when the Send screen is built.
+let pendingDestination: string | null = null;
+
+export function setPendingDestination(address: string | null): void {
+  pendingDestination = address;
+}
+
+export function takePendingDestination(): string | null {
+  const address = pendingDestination;
+  pendingDestination = null;
+  return address;
 }
 
 export function resetSendSession(): void {
