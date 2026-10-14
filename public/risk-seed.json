@@ -6,25 +6,28 @@
       "address": "TMuA6YqfCeX8EhbfYEg5y7S4DqzSJireY9",
       "level": "clear",
       "label": "Binance",
-      "checkedAt": "2026-10-13"
+      "logo": "https://cdn.jsdelivr.net/gh/maslovsa/kyt-entity-registry@main/logos/exchanges/binance-com.png",
+      "checkedAt": "2026-10-14"
     },
     {
       "network": "TRON",
       "address": "TJDENsfBJs4RFETt1X1W8wMDc8M5XnJhCe",
       "level": "clear",
-      "checkedAt": "2026-10-13"
+      "label": "Binance",
+      "logo": "https://cdn.jsdelivr.net/gh/maslovsa/kyt-entity-registry@main/logos/exchanges/binance-com.png",
+      "checkedAt": "2026-10-14"
     },
     {
       "network": "TRON",
       "address": "THJUJFyTnrBWb1ijWav7qfRBrjUuKgP49Z",
       "level": "caution",
-      "checkedAt": "2026-10-13"
+      "checkedAt": "2026-10-14"
     },
     {
       "network": "TRON",
       "address": "TPyE2oSoaysrXfLzwf9wetBVr9JudLwjtD",
       "level": "caution",
-      "checkedAt": "2026-10-13"
+      "checkedAt": "2026-10-14"
     },
     {
       "network": "TRON",
@@ -32,12 +35,14 @@
       "level": "clear",
       "label": "Binance",
       "logo": "https://cdn.jsdelivr.net/gh/maslovsa/kyt-entity-registry@main/logos/exchanges/binance-com.png",
-      "checkedAt": "2026-10-13"
+      "checkedAt": "2026-10-14"
     },
     {
       "network": "TRON",
       "address": "TAzsQ9Gx8eqFNFSKbeXrbi45CuVPHzA8wr",
       "level": "clear",
+      "label": "Binance",
+      "logo": "https://cdn.jsdelivr.net/gh/maslovsa/kyt-entity-registry@main/logos/exchanges/binance-com.png",
       "checkedAt": "2026-10-14"
     },
     {
@@ -52,12 +57,16 @@
       "network": "TRON",
       "address": "TM1zzNDZD2DPASbKcgdVoTYhfmYgtfwx9R",
       "level": "clear",
+      "label": "OKX",
+      "logo": "https://cdn.jsdelivr.net/gh/maslovsa/kyt-entity-registry@main/logos/exchanges/okx-com.png",
       "checkedAt": "2026-10-14"
     },
     {
       "network": "TRON",
       "address": "TJ7hhYhVhaxNx6BPyq7yFpqZrQULL3JSdb",
       "level": "clear",
+      "label": "Bitget",
+      "logo": "https://cdn.jsdelivr.net/gh/maslovsa/kyt-entity-registry@main/logos/exchanges/bitget-com.png",
       "checkedAt": "2026-10-14"
     },
     {

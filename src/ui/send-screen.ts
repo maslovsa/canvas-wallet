@@ -16,7 +16,12 @@ export interface SendScreenOptions {
   networkLabel: string;
   onBack: () => void;
   onDone: () => void;
+  /** Called (debounced) after the address in the field changes, so the page URL can follow it (?to=). */
+  onAddressChange?: () => void;
 }
+
+const ADDRESS_URL_DEBOUNCE_MS = 350; // the address bar is rewritten once typing pauses, not per keystroke (Safari rate-limits history.replaceState)
+let addressTimer: ReturnType<typeof setTimeout> | undefined;
 
 let unsubscribe: (() => void) | null = null;
 let activeOverlay: OpenOverlay | null = null;
@@ -25,6 +30,7 @@ let activeOverlay: OpenOverlay | null = null;
 export function unmountSendScreen(): void {
   unsubscribe?.();
   unsubscribe = null;
+  clearTimeout(addressTimer);
   activeOverlay?.close();
   activeOverlay = null;
 }
@@ -335,6 +341,14 @@ export function mountSendScreen(options: SendScreenOptions): void {
     }
   }
 
-  unsubscribe = controller.subscribe(() => patch(controller.view()));
+  let lastReportedAddress = controller.state.address;
+  unsubscribe = controller.subscribe(() => {
+    patch(controller.view());
+    if (controller.state.address !== lastReportedAddress) {
+      lastReportedAddress = controller.state.address;
+      clearTimeout(addressTimer);
+      addressTimer = setTimeout(() => options.onAddressChange?.(), ADDRESS_URL_DEBOUNCE_MS);
+    }
+  });
   patch(controller.view());
 }

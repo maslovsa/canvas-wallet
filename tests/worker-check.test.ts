@@ -102,7 +102,7 @@ describe("response contract: exactly {level, label?}", () => {
     const { env } = makeEnv();
     const res = await post(env, ADDRESS);
     expect(res.status).toBe(200);
-    expect(await res.json()).toEqual({ level: "clear", label: "Binance" });
+    expect(await res.json()).toEqual({ level: "clear", label: "Binance", logo: BINANCE_LOGO });
   });
 
   it("clear without a label has no label key", async () => {
@@ -128,6 +128,7 @@ describe("response contract: exactly {level, label?}", () => {
   });
 });
 
+const BINANCE_LOGO = "https://cdn.jsdelivr.net/gh/maslovsa/kyt-entity-registry@main/logos/exchanges/binance-com.png";
 const makeEnvOnce = () => makeEnv().env;
 const LOGO = "https://cdn.jsdelivr.net/gh/example/kyt-entity-registry@main/logos/example-exchange.png";
 const entity = (over: Record<string, unknown> = {}) => ({ slug: "example-exchange", name: "Example Exchange", category: "centralized_exchange", logo_url: LOGO, logo_source: "registry", ...over });
@@ -143,9 +144,9 @@ describe("VASP name and logo (clear results only)", () => {
     expect(await (await post(makeEnv().env, ADDRESS)).json()).toEqual({ level: "clear", label: "Example Exchange" });
   });
 
-  it("falls back to verdict.label when there is no entity, and then has no logo", async () => {
+  it("falls back to verdict.label when there is no entity, with the known-exchange logo for a name in the table", async () => {
     aegisAnswer = () => aegisBody("low", "Binance", true, { entity: null });
-    expect(await (await post(makeEnv().env, ADDRESS)).json()).toEqual({ level: "clear", label: "Binance" });
+    expect(await (await post(makeEnv().env, ADDRESS)).json()).toEqual({ level: "clear", label: "Binance", logo: BINANCE_LOGO });
   });
 
   it("a logo without any name is dropped", async () => {
@@ -212,6 +213,37 @@ describe("risk: what leaves the Worker", () => {
     expect(await (await post(makeEnv().env, ADDRESS)).json()).toEqual({ level: "caution", label: "Example Exchange" });
     aegisAnswer = () => aegisBody("high", null, true, { entity: entity({ logo_url: "https://evil.example/x.png" }) });
     expect(await (await post(makeEnv().env, OTHER)).json()).toEqual({ level: "caution", label: "Example Exchange" });
+  });
+});
+
+describe("exchange named only in labels[] (Aegis often leaves entity empty)", () => {
+  const rows = (...r: Array<[string, string, string]>) => r.map(([source_name, label, category]) => ({ source_name, label, category }));
+  const CURATED: [string, string, string] = ["VASP entity defaults (admin-curated)", "Binance", "exchange"];
+  const COMMUNITY: [string, string, string] = ["GraphSense Community Tagpacks", "GraphSense: Binance reserve wallets", "exchange"];
+  const map = (verdict: Record<string, unknown>) => mapAegisVerdict({ verdict: { risk_level: "low", risk_score: 20, ...verdict }, coverage: { data_available: true } });
+
+  it("a clear address takes the admin-curated VASP name from labels[] and the known-exchange logo", () => {
+    expect(map({ label: null, entity: null, labels: rows(COMMUNITY, CURATED) })).toEqual({
+      level: "clear",
+      label: "Binance",
+      logo: "https://cdn.jsdelivr.net/gh/maslovsa/kyt-entity-registry@main/logos/exchanges/binance-com.png",
+    });
+  });
+  it("community tag packs are never used as the name", () => {
+    expect(map({ label: null, entity: null, labels: rows(COMMUNITY) })).toEqual({ level: "clear" });
+  });
+  it("an exchange that is not in the logo table keeps its name with no logo", () => {
+    expect(map({ label: null, entity: null, labels: rows(["VASP entity defaults (admin-curated)", "Some Small Exchange", "exchange"]) })).toEqual({ level: "clear", label: "Some Small Exchange" });
+  });
+  it("a non-exchange category row is ignored", () => {
+    expect(map({ label: null, entity: null, labels: rows(["VASP entity defaults (admin-curated)", "Some Mixer", "mixer"]) })).toEqual({ level: "clear" });
+  });
+  it("an entity's own logo wins over the table; the entity name wins over labels[]", () => {
+    expect(map({ entity: { name: "Binance", logo_url: LOGO }, labels: rows(CURATED) })).toEqual({ level: "clear", label: "Binance", logo: LOGO });
+    expect(map({ entity: { name: "Entity Name", logo_url: null }, labels: rows(CURATED) })).toEqual({ level: "clear", label: "Entity Name" });
+  });
+  it("a risky address never takes its name from labels[]: caution stays entity-only", () => {
+    expect(mapAegisVerdict({ verdict: { risk_level: "sanctioned", risk_score: 100, entity: null, labels: rows(CURATED) }, coverage: { data_available: true } })).toEqual({ level: "caution" });
   });
 });
 
@@ -403,14 +435,14 @@ describe("cache", () => {
     const { env, kv } = makeEnv({ PER_VISITOR_PER_HOUR: "1" });
     await post(env, ADDRESS);
     expect(await (await post(env, OTHER)).json()).toEqual({ level: "unknown" }); // visitor limit hit
-    expect(kv.store.has(`v3:TRON:${OTHER}`)).toBe(false);
-    expect(await (await post(env, OTHER, { ip: "198.51.100.9" })).json()).toEqual({ level: "clear", label: "Binance" });
+    expect(kv.store.has(`v4:TRON:${OTHER}`)).toBe(false);
+    expect(await (await post(env, OTHER, { ip: "198.51.100.9" })).json()).toEqual({ level: "clear", label: "Binance", logo: BINANCE_LOGO });
   });
 
   it("a cache hit does not use up the visitor's or the daily allowance", async () => {
     const { env } = makeEnv({ PER_VISITOR_PER_HOUR: "1", DAILY_BUDGET: "1" });
     await post(env, ADDRESS);
-    for (let i = 0; i < 5; i += 1) expect(await (await post(env, ADDRESS)).json()).toEqual({ level: "clear", label: "Binance" });
+    for (let i = 0; i < 5; i += 1) expect(await (await post(env, ADDRESS)).json()).toEqual({ level: "clear", label: "Binance", logo: BINANCE_LOGO });
     expect(aegisCalls).toHaveLength(1);
   });
 });
@@ -422,7 +454,7 @@ describe("abuse limits (plan R4, E3)", () => {
     await post(env, OTHER);
     expect(await (await post(env, THIRD)).json()).toEqual({ level: "unknown" });
     expect(aegisCalls).toHaveLength(2);
-    expect(await (await post(env, THIRD, { ip: "198.51.100.9" })).json()).toEqual({ level: "clear", label: "Binance" });
+    expect(await (await post(env, THIRD, { ip: "198.51.100.9" })).json()).toEqual({ level: "clear", label: "Binance", logo: BINANCE_LOGO });
   });
 
   it("daily budget for the whole demo: when spent, even a new visitor gets unknown", async () => {
@@ -440,7 +472,7 @@ describe("abuse limits (plan R4, E3)", () => {
     await post(env, ADDRESS);
     expect(await (await post(env, OTHER)).json()).toEqual({ level: "unknown" });
     vi.setSystemTime(new Date("2026-10-14T00:00:30Z"));
-    expect(await (await post(env, OTHER)).json()).toEqual({ level: "clear", label: "Binance" });
+    expect(await (await post(env, OTHER)).json()).toEqual({ level: "clear", label: "Binance", logo: BINANCE_LOGO });
     vi.useRealTimers();
   });
 
@@ -472,7 +504,7 @@ describe("abuse limits (plan R4, E3)", () => {
       for (let i = 0; i < 20; i += 1) await post(env, OTHER, { ip: "10.0.0.1" });
       expect(counter.calls()).toBe(before);
       // another visitor is unaffected
-      expect(await (await post(env, OTHER, { ip: "10.0.0.2" })).json()).toEqual({ level: "clear", label: "Binance" });
+      expect(await (await post(env, OTHER, { ip: "10.0.0.2" })).json()).toEqual({ level: "clear", label: "Binance", logo: BINANCE_LOGO });
     });
   });
 
