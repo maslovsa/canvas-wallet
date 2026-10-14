@@ -1030,3 +1030,198 @@
     opacity: 0;
   }
 }
+
+/* ==== Address book: the button in the To field and the bottom sheet ====================================== */
+.send-book-btn {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 40px;
+  height: 40px;
+  margin-right: -8px; /* the field has 14px padding; the 40px target hugs the right edge */
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--send-accent, #2a66ab);
+  cursor: pointer;
+  transition: background 140ms ease;
+}
+.send-book-btn:hover:not(:disabled) {
+  background: var(--ph-fill);
+}
+.send-book-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.phone-overlay.is-sheet {
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0;
+  overflow: hidden; /* clip the sheet to the screen's rounded corners */
+}
+.phone-sheet {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 66%; /* about two thirds of the screen: the content behind stays in sight (iOS "medium" detent) */
+  border-radius: 26px 26px 0 0;
+  background: var(--send-dialog-bg);
+  color: var(--send-dialog-text);
+  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.28);
+  animation: ph-sheet-up 320ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition: transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.phone-sheet.is-dragging {
+  transition: none;
+}
+.phone-overlay.is-sheet.is-closing {
+  animation: ph-fade-out 240ms ease forwards;
+}
+.phone-overlay.is-sheet.is-closing .phone-sheet {
+  animation: ph-sheet-down 240ms cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+@keyframes ph-sheet-up {
+  from {
+    transform: translateY(100%);
+  }
+}
+@keyframes ph-sheet-down {
+  to {
+    transform: translateY(100%);
+  }
+}
+@keyframes ph-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+.phone-sheet-grab {
+  flex: none;
+  padding: 8px 8px 0 20px;
+  touch-action: none; /* the drag is ours, not the browser's scroll */
+  cursor: grab;
+}
+.phone-sheet-grabber {
+  width: 36px;
+  height: 5px;
+  margin: 0 auto 6px;
+  border-radius: 3px;
+  background: rgba(127, 127, 127, 0.45);
+}
+.phone-sheet-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 0 12px;
+}
+.phone-sheet-titles {
+  flex: 1;
+  min-width: 0;
+}
+.phone-sheet-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+.phone-sheet-subtitle {
+  margin-top: 1px;
+  font-size: 13px;
+  color: var(--phone-dim);
+}
+.phone-sheet-close {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--phone-dim);
+  cursor: pointer;
+}
+.phone-sheet-close:hover {
+  background: rgba(127, 127, 127, 0.14);
+}
+.phone-sheet-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0 8px calc(16px + var(--safe-bottom, 0px));
+  border-top: 0.5px solid var(--ph-line);
+}
+.book-list {
+  display: flex;
+  flex-direction: column;
+}
+.book-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 64px;
+  padding: 8px 12px;
+  border: 0;
+  border-radius: 14px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.book-row:hover {
+  background: rgba(127, 127, 127, 0.12);
+}
+.book-avatar {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: hsl(var(--book-hue, 210) 45% 42%);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 650;
+}
+.book-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.book-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 15.5px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.book-address {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12.5px;
+  color: var(--phone-dim);
+}
+.book-empty {
+  padding: 40px 16px;
+  text-align: center;
+  color: var(--phone-dim);
+  font-size: 14px;
+}
+.chrome-android .phone-sheet {
+  border-radius: 28px 28px 0 0;
+}
+.chrome-android .phone-sheet-grabber {
+  width: 32px;
+  height: 4px;
+}
+.chrome-android .phone-sheet-title {
+  font-weight: 400;
+  font-size: 22px;
+  letter-spacing: 0;
+}
+.chrome-android .book-row {
+  border-radius: 28px;
+}

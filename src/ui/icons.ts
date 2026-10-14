@@ -6,6 +6,7 @@ import {
   ArrowDownLeft,
   ArrowLeft,
   ArrowUpRight,
+  BookUser,
   Check,
   ChevronDown,
   ChevronLeft,
@@ -26,6 +27,7 @@ import {
   Smartphone,
   Sun,
   Upload,
+  X,
   type IconNode,
 } from "lucide";
 
@@ -33,6 +35,7 @@ const ICONS = {
   "arrow-down-left": ArrowDownLeft,
   "arrow-left": ArrowLeft,
   "arrow-up-right": ArrowUpRight,
+  "book-user": BookUser,
   check: Check,
   "chevron-down": ChevronDown,
   "chevron-left": ChevronLeft,
@@ -53,6 +56,7 @@ const ICONS = {
   smartphone: Smartphone,
   sun: Sun,
   upload: Upload,
+  x: X,
 } satisfies Record<string, IconNode>;
 
 export type IconName = keyof typeof ICONS;

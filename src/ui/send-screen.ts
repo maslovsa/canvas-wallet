@@ -4,6 +4,8 @@
 import type { ChromeStyle } from "./phone-frame.ts";
 import { openOverlay, type OpenOverlay } from "./phone-overlay.ts";
 import { icon } from "./icons.ts";
+import { openAddressBookSheet } from "./address-book-sheet.ts";
+import { bookNetworkFor, type AddressBookEntry } from "../send/address-book.ts";
 import type { SendController, SendView, Tone } from "../send/send-session.ts";
 
 export interface SendScreenOptions {
@@ -105,7 +107,13 @@ export function mountSendScreen(options: SendScreenOptions): void {
   addrInput.spellcheck = false;
   addrInput.placeholder = "Tron address (starts with T)"; // a hint only: the visible "To" label stays
   addrInput.setAttribute("aria-describedby", "send-address-status");
-  addrField.append(addrInput);
+  const bookBtn = el("button", "send-book-btn");
+  bookBtn.type = "button";
+  bookBtn.title = "Address book";
+  bookBtn.setAttribute("aria-label", "Address book");
+  bookBtn.setAttribute("aria-haspopup", "dialog");
+  bookBtn.append(icon("book-user", { size: 20, strokeWidth: 1.75 }));
+  addrField.append(addrInput, bookBtn);
   const identityRow = el("div", "send-identity");
   identityRow.hidden = true;
   const identityBadge = el("span", "send-owner");
@@ -195,6 +203,21 @@ export function mountSendScreen(options: SendScreenOptions): void {
       addrInput.focus(); // clipboard blocked: leave the field ready for a manual paste
     }
   });
+  bookBtn.addEventListener("click", () => {
+    void openAddressBookSheet({
+      frame,
+      screen,
+      chromeStyle: options.chromeStyle,
+      network: bookNetworkFor(options.networkLabel),
+      networkLabel: options.networkLabel,
+      onPick: (entry: AddressBookEntry) => {
+        // Exactly what typing the address would do: the controller validates it and starts the risk check.
+        addrInput.value = entry.address;
+        addrInput.dispatchEvent(new Event("input", { bubbles: true }));
+        amountInput.focus();
+      },
+    });
+  });
   checkAgain.addEventListener("click", () => controller.checkAgain());
   max.addEventListener("click", () => controller.pressMax());
   submit.addEventListener("click", () => controller.pressSend());
@@ -210,6 +233,7 @@ export function mountSendScreen(options: SendScreenOptions): void {
     if (addrInput.value !== view.address.value && document.activeElement !== addrInput) addrInput.value = view.address.value;
     if (amountInput.value !== view.amount.value && document.activeElement !== amountInput) amountInput.value = view.amount.value;
     addrInput.disabled = view.phase !== "form";
+    bookBtn.disabled = view.phase !== "form";
     amountInput.disabled = view.phase !== "form";
     addrInput.setAttribute("aria-invalid", String(view.address.error !== null));
     amountInput.setAttribute("aria-invalid", String(view.amount.error !== null));
