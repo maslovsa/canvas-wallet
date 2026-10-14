@@ -548,6 +548,22 @@ describe("GET /price (CoinGecko proxy for the charts)", () => {
     }
   });
 
+  it("falls back to DefiLlama when CoinGecko refuses (a 429 from a shared cloud address)", async () => {
+    let call = 0;
+    aegisAnswer = () => (++call === 1 ? new Response("", { status: 429 }) : new Response(JSON.stringify({ coins: { "coingecko:tether": { prices: [{ timestamp: 1, price: 0.999 }, { timestamp: 2, price: 1.001 }, { timestamp: 3, price: "x" }] } } })));
+    const res = await getPrice(makeEnv().env, "?id=tether");
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ prices: [0.999, 1.001] });
+    expect(aegisCalls.map((c) => new URL(c.url).host)).toEqual(["api.coingecko.com", "coins.llama.fi"]);
+    expect(aegisCalls[1]?.url).toBe("https://coins.llama.fi/chart/coingecko:tether?span=96&period=15m");
+  });
+
+  it("CoinGecko answering is enough: DefiLlama is not asked", async () => {
+    aegisAnswer = () => new Response(JSON.stringify(series(10)));
+    await getPrice(makeEnv().env, "?id=tether");
+    expect(aegisCalls).toHaveLength(1);
+  });
+
   it("uses the Cache API: the second request for an id does not call CoinGecko again", async () => {
     const store = new Map<string, Response>();
     vi.stubGlobal("caches", { default: { match: async (r: Request) => store.get(r.url)?.clone(), put: async (r: Request, res: Response) => void store.set(r.url, res.clone()) } });
