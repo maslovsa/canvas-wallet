@@ -130,3 +130,23 @@ that solo review has bigger gaps than "no visual preview").
 
 **Depends on / blocked by:** nothing.
 
+
+## P2: Upgrade vitest and vite (dev-tooling advisories)
+
+**What:** Move `vitest` to 5.x and `vite` to a patched major so `npm audit` is clean (tinypool, esbuild, vite-node, @vitest/mocker).
+
+**Why:** Found by /cso (2026-10-14). 6 advisories remain, all dev-only: tinypool prototype pollution (critical) needs attacker-controlled test-worker options; esbuild affects only the local dev server. Nothing reaches the production bundle (`npm audit --omit=dev` was clean after `npm audit fix`).
+
+**Pros:** Clean audit, current tooling. **Cons:** Breaking majors; tests, `vite.config.ts` and the build may need changes.
+
+**Context:** `npm audit fix --force` would do it in one step; run the full `npm test`, `npm run build`, `npm run check:dist` and e2e afterwards.
+
+**Depends on / blocked by:** nothing.
+
+## P2: Check the Cloudflare Worker configuration by hand (CSO follow-up)
+
+**What:** In the Cloudflare dashboard confirm `AEGIS_API_KEY` and `RISK_ENABLED` are Secrets (not plain vars), and that no extra routes or bindings exist. Also look through `docs/designs/**/*.png` for real addresses or keys.
+
+**Why:** /cso (2026-10-14) could only read the source. Gitleaks over all 73 commits found nothing. `DAILY_BUDGET` is now 100 (about 10 Aegis credits a day at worst); the per-visitor limit stays 10/h. A script with a few IPs can still use the budget up, and checks then show "Couldn't verify" (fail closed). If that matters, add Turnstile or a shared secret on `/check`.
+
+**Depends on / blocked by:** dashboard access.
