@@ -7,6 +7,7 @@ import { icon } from "./icons.ts";
 import { createAvatar } from "./avatar.ts";
 import { SEND_NETWORKS } from "../send/send-network.ts";
 import { openAddressBookSheet } from "./address-book-sheet.ts";
+import { hasSeenHint, markHintSeen, resetHints } from "./coach.ts";
 import { bookNetworkFor, entriesForNetwork, loadAddressBook, type AddressBookEntry } from "../send/address-book.ts";
 import type { SendController, SendView, Tone } from "../send/send-session.ts";
 
@@ -24,6 +25,8 @@ export interface SendScreenOptions {
 
 const ADDRESS_URL_DEBOUNCE_MS = 350; // the address bar is rewritten once typing pauses, not per keystroke (Safari rate-limits history.replaceState)
 let addressTimer: ReturnType<typeof setTimeout> | undefined;
+const COACH_DELAY_MS = 900; // let the screen settle before pointing at anything
+let coachTimer: ReturnType<typeof setTimeout> | undefined;
 
 let unsubscribe: (() => void) | null = null;
 let activeOverlay: OpenOverlay | null = null;
@@ -33,6 +36,7 @@ export function unmountSendScreen(): void {
   unsubscribe?.();
   unsubscribe = null;
   clearTimeout(addressTimer);
+  clearTimeout(coachTimer);
   activeOverlay?.close();
   activeOverlay = null;
 }
@@ -96,7 +100,10 @@ export function mountSendScreen(options: SendScreenOptions): void {
   back.type = "button";
   back.setAttribute("aria-label", "Back to token");
   const arrow = icon("arrow-left", { size: 24, strokeWidth: 2, className: "back-arrow" }); // Android shows this instead
-  back.append(el("span", "send-back-chevron", "‹"), el("span", "send-back-label", "Back"), arrow);
+  const chevron = el("span", "send-back-chevron");
+  chevron.setAttribute("aria-hidden", "true");
+  chevron.append(icon("chevron-left", { size: 24, strokeWidth: 2.4 })); // a drawn chevron: the "‹" glyph sits off the text's centre line
+  back.append(chevron, el("span", "send-back-label", "Back"), arrow);
   back.addEventListener("click", () => {
     if (controller.view().backEnabled) options.onBack();
   });
@@ -136,6 +143,31 @@ export function mountSendScreen(options: SendScreenOptions): void {
   bookBtn.setAttribute("aria-haspopup", "dialog");
   bookBtn.append(icon("book-user", { size: 20, strokeWidth: 1.75 }));
   addrField.append(addrInput, bookBtn);
+
+  // --- first-run hint: a pulse on the book button and a short tip under the field (see coach.ts). It is out of the
+  // layout flow (absolute), so showing or hiding it never moves anything; any real use of the screen dismisses it.
+  const coachTip = el("button", "coach-tip");
+  coachTip.type = "button";
+  coachTip.hidden = true;
+  coachTip.append(el("span", "coach-tip-title", "Pick a saved contact"), el("span", "coach-tip-sub", "Aegis checks the address as soon as you choose it"));
+  addrField.prepend(coachTip);
+  function dismissBookHint(): void {
+    clearTimeout(coachTimer);
+    if (coachTip.hidden && !bookBtn.classList.contains("is-coached")) return;
+    coachTip.hidden = true;
+    bookBtn.classList.remove("is-coached");
+    markHintSeen("book");
+  }
+  coachTip.addEventListener("click", dismissBookHint);
+  // ?coach in the page URL replays the hints on every visit (for demos and review): it forgets what was seen first.
+  if (new URLSearchParams(window.location.search).has("coach")) resetHints();
+  if (!hasSeenHint("book") && controller.state.address === "") {
+    coachTimer = setTimeout(() => {
+      if (!root.isConnected || controller.state.address !== "" || controller.view().phase !== "form") return;
+      bookBtn.classList.add("is-coached");
+      coachTip.hidden = false;
+    }, COACH_DELAY_MS);
+  }
   const identityRow = el("div", "send-identity");
   identityRow.hidden = true;
   const identityBadge = el("span", "send-owner");
@@ -229,7 +261,12 @@ export function mountSendScreen(options: SendScreenOptions): void {
     }
   });
   bookBtn.addEventListener("click", () => {
+    dismissBookHint();
+    markHintSeen("book");
+    const coachPick = !hasSeenHint("pick");
     void openAddressBookSheet({
+      coachFirstRow: coachPick,
+      onCoachDone: () => markHintSeen("pick"),
       frame,
       screen,
       chromeStyle: options.chromeStyle,
@@ -273,6 +310,7 @@ export function mountSendScreen(options: SendScreenOptions): void {
 
   function patch(view: SendView): void {
     title.textContent = view.title;
+    if (view.address.value !== "" || view.phase !== "form") dismissBookHint();
     // The name shows only while the field holds exactly a saved address: type or paste any other and it goes away.
     const saved = bookEntries.find((e) => e.address === view.address.value);
     const savedKey = saved ? `${saved.comment}\n${saved.avatar ?? ""}` : "";

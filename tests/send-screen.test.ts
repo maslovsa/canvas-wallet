@@ -4,6 +4,7 @@ import { mountSendScreen, unmountSendScreen } from "../src/ui/send-screen.ts";
 import { SendController, type SendDeps, type SendTokenInfo } from "../src/send/send-session.ts";
 import { validateTronAddress } from "../src/send/tron-address.ts";
 import { resetAddressBookCache } from "../src/send/address-book.ts";
+import { hasSeenHint, resetHints } from "../src/ui/coach.ts";
 import type { RiskResult } from "../src/send/risk-client.ts";
 
 const CLEAR = "TMuA6YqfCeX8EhbfYEg5y7S4DqzSJireY9";
@@ -412,5 +413,94 @@ describe("Android skin", () => {
     q<HTMLButtonElement>(".send-submit").click();
     expect(frame.querySelector(".phone-overlay")!.classList.contains("chrome-android")).toBe(true);
     expect([...frame.querySelectorAll(".phone-dialog button")].map((b) => b.textContent)).toEqual(["Cancel", "Continue"]);
+  });
+});
+
+describe("first-run coaching", () => {
+  const BOOK = { version: 1, entries: [{ network: "TRON", address: CLEAR, comment: "Binance hot wallet" }, { network: "TRON", address: RISKY, comment: "Saved contact" }] };
+  const emptyScreen = async () => {
+    const m = mount();
+    await m.controller.setAddress("");
+    return m;
+  };
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.unstubAllGlobals();
+    resetHints();
+  });
+
+  it("points at the book button on the first visit, once the screen has settled, without moving the layout", async () => {
+    resetHints();
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+    const { q } = await emptyScreen();
+    expect(q<HTMLElement>(".coach-tip").hidden).toBe(true);
+    vi.advanceTimersByTime(1000);
+    expect(q<HTMLElement>(".coach-tip").hidden).toBe(false);
+    expect(q(".send-book-btn").classList.contains("is-coached")).toBe(true);
+    expect(q(".send-book-btn").parentElement!.lastElementChild).toBe(q(".send-book-btn"));
+  });
+
+  it("goes away for good once an address is entered", async () => {
+    resetHints();
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+    const { q, controller } = await emptyScreen();
+    vi.advanceTimersByTime(1000);
+    await controller.setAddress(CLEAR);
+    expect(q<HTMLElement>(".coach-tip").hidden).toBe(true);
+    expect(q(".send-book-btn").classList.contains("is-coached")).toBe(false);
+    expect(hasSeenHint("book")).toBe(true);
+  });
+
+  it("is not shown again once seen, and never when the address is already filled", async () => {
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+    resetHints();
+    const prefilled = mount();
+    await prefilled.controller.setAddress(CLEAR); // an address arrives (link or paste) before the hint's delay is over
+    vi.advanceTimersByTime(1000);
+    expect(document.querySelector<HTMLElement>(".coach-tip")!.hidden).toBe(true);
+    expect(hasSeenHint("book")).toBe(false); // not marked: nothing was shown
+
+    unmountSendScreen();
+    document.body.innerHTML = "";
+    const { q } = await emptyScreen();
+    vi.advanceTimersByTime(1000);
+    q<HTMLButtonElement>(".coach-tip").click(); // tapping the tip dismisses it
+    expect(hasSeenHint("book")).toBe(true);
+    unmountSendScreen();
+    document.body.innerHTML = "";
+    const again = await emptyScreen();
+    vi.advanceTimersByTime(1000);
+    expect(again.q<HTMLElement>(".coach-tip").hidden).toBe(true);
+  });
+
+  it("the first time the book opens, the first contact is ringed and labelled; the hint ends with the sheet", async () => {
+    resetHints();
+    resetAddressBookCache();
+    vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify(BOOK))));
+    const { q, frame } = await emptyScreen();
+    q<HTMLButtonElement>(".send-book-btn").click();
+    await vi.waitFor(() => expect(frame.querySelector(".book-row")).not.toBeNull());
+    const rows = [...frame.querySelectorAll(".book-row")];
+    expect(rows.map((r) => r.classList.contains("is-coached"))).toEqual([true, false]);
+    expect(rows[0]!.querySelector(".coach-pill")!.textContent).toBe("Tap to choose");
+    (rows[0] as HTMLButtonElement).click();
+    await vi.waitFor(() => expect(hasSeenHint("pick")).toBe(true));
+  });
+
+  it("a book opened after the hint was seen has no ring", async () => {
+    resetHints();
+    resetAddressBookCache();
+    vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify(BOOK))));
+    const first = await emptyScreen();
+    first.q<HTMLButtonElement>(".send-book-btn").click();
+    await vi.waitFor(() => expect(first.frame.querySelector(".book-row")).not.toBeNull());
+    first.frame.querySelector<HTMLButtonElement>(".book-row")!.click();
+    await vi.waitFor(() => expect(hasSeenHint("pick")).toBe(true));
+    unmountSendScreen();
+    document.body.innerHTML = "";
+    const second = await emptyScreen();
+    second.q<HTMLButtonElement>(".send-book-btn").click();
+    await vi.waitFor(() => expect(second.frame.querySelector(".book-row")).not.toBeNull());
+    expect(second.frame.querySelector(".is-coached, .coach-pill")).toBeNull();
   });
 });

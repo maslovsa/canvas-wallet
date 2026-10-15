@@ -11,7 +11,6 @@ const options = (over: Partial<PhoneFrameOptions> = {}): PhoneFrameOptions => ({
   registryNetworks: [{ name: "Tron", tokens: [token] }] as unknown as PhoneFrameOptions["registryNetworks"],
   allNetworkInfo: [],
   listName: "Test list",
-  listDescription: "",
   onSelectNetwork: () => {},
   onSelectToken: () => {},
   ...over,

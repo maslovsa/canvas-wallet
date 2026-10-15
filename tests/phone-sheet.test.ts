@@ -122,7 +122,8 @@ describe("openAddressBookSheet", () => {
     await openAddressBookSheet({ frame, screen, chromeStyle: "ios", network: "TRON", networkLabel: "Tron", onPick, load: async () => entries });
     const rows = [...frame.querySelectorAll<HTMLButtonElement>(".book-row")];
     expect(rows.map((r) => r.querySelector(".book-name")!.textContent)).toEqual(["Binance hot wallet", "HTX hot wallet"]);
-    expect(rows[0]!.querySelector(".book-address")!.textContent).toBe("TAzsQ9Gx…HzA8wr");
+    expect(rows[0]!.querySelector(".book-address")!.textContent).toBe("TAzsQ9Gx8eqFNFSKbeXrbi45CuVPHzA8wr");
+    expect([...rows[0]!.querySelectorAll(".book-address-edge")].map((e) => e.textContent)).toEqual(["TAzs", "A8wr"]);
     expect(frame.querySelector(".phone-sheet-subtitle")!.textContent).toBe("Tron · 2 saved");
     expect(rows[0]!.getAttribute("aria-label")).toBe("Binance hot wallet, TAzsQ9Gx8eqFNFSKbeXrbi45CuVPHzA8wr");
     rows[1]!.click();

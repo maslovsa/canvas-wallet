@@ -63,6 +63,17 @@ export function shortAddress(address: string, head = 8, tail = 6): string {
   return address.length <= head + tail + 1 ? address : `${address.slice(0, head)}…${address.slice(-tail)}`;
 }
 
+/**
+ * An address in three parts for display: the first and last four characters (the ones people compare by eye) and
+ * everything between. An EVM address keeps its "0x" out of the highlighted head, since every one starts with it.
+ */
+export function splitAddress(address: string, edge = 4): { prefix: string; head: string; middle: string; tail: string } {
+  const prefix = /^0x/i.test(address) ? address.slice(0, 2) : "";
+  const body = address.slice(prefix.length);
+  if (body.length <= edge * 2) return { prefix, head: body, middle: "", tail: "" };
+  return { prefix, head: body.slice(0, edge), middle: body.slice(edge, -edge), tail: body.slice(-edge) };
+}
+
 let bookPromise: Promise<AddressBookEntry[]> | undefined;
 
 /** Loads public/address-book.json once per page load (through BASE_URL: the site lives under a sub-path on GitHub Pages). */

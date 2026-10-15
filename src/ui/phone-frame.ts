@@ -28,9 +28,8 @@ export interface PhoneFrameOptions {
   registryNetworks: Network[];
   /** Branding lookup for every network, not just the selected one (for the in-phone network filter's logos). */
   allNetworkInfo: NetworkInfo[];
-  /** The current list's own name/description (state.listMeta in main.ts) — headlines the wallet-home screen. */
+  /** The current list's own name (state.listMeta in main.ts) — headlines the wallet-home screen. */
   listName: string;
-  listDescription: string;
   onSelectNetwork: (network: string) => void;
   onSelectToken: (token: Token) => void;
   /** Called after every render, so the caller can mirror the phone's screen (list / token) into the URL. */
@@ -255,12 +254,6 @@ function renderListScreen(container: HTMLElement, screen: HTMLElement, options: 
   title.textContent = options.listName;
   header.append(title);
 
-  if (options.listDescription) {
-    const desc = document.createElement("div");
-    desc.className = "phone-list-desc";
-    desc.textContent = options.listDescription;
-    header.append(desc);
-  }
   screen.append(header);
   bindBarCollapse(screen, bar, () => title.offsetTop + title.offsetHeight - bar.offsetHeight);
 
@@ -476,7 +469,8 @@ function renderDetailScreen(
   backBtn.setAttribute("aria-label", "Back to wallet");
   const chevron = document.createElement("span");
   chevron.className = "card-back-chevron";
-  chevron.textContent = "‹";
+  chevron.setAttribute("aria-hidden", "true");
+  chevron.append(icon("chevron-left", { size: 24, strokeWidth: 2.4 })); // a drawn chevron: the "‹" glyph sits off the text's centre line
   const label = document.createElement("span");
   label.className = "card-back-label";
   label.textContent = "Back";
