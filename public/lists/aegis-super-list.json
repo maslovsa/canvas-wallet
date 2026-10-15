@@ -207,26 +207,6 @@
               ]
             },
             {
-              "type": "banner",
-              "title": "Mint & Redeem",
-              "description": "Mint or redeem USDT 1:1 via the issuer's app",
-              "action": "mint_dapp"
-            },
-            {
-              "type": "key_value",
-              "title": "Reserve Info",
-              "items": [
-                {
-                  "label": "Peg",
-                  "value": "1 USDT = 1 USD"
-                },
-                {
-                  "label": "Redemption",
-                  "value": "Same-day"
-                }
-              ]
-            },
-            {
               "type": "price_chart",
               "coingeckoId": "tether",
               "days": 1
@@ -1772,26 +1752,6 @@
               ]
             },
             {
-              "type": "banner",
-              "title": "Mint & Redeem",
-              "description": "Mint or redeem USDT 1:1 via the issuer's app",
-              "action": "mint_dapp"
-            },
-            {
-              "type": "key_value",
-              "title": "Reserve Info",
-              "items": [
-                {
-                  "label": "Peg",
-                  "value": "1 USDT = 1 USD"
-                },
-                {
-                  "label": "Redemption",
-                  "value": "Same-day"
-                }
-              ]
-            },
-            {
               "type": "price_chart",
               "coingeckoId": "binance-bridged-usdt-bnb-smart-chain",
               "days": 1
@@ -3018,26 +2978,6 @@
                 {
                   "label": "Receive",
                   "action": "receive"
-                }
-              ]
-            },
-            {
-              "type": "banner",
-              "title": "Mint & Redeem",
-              "description": "Mint or redeem USDT 1:1 via the issuer's app",
-              "action": "mint_dapp"
-            },
-            {
-              "type": "key_value",
-              "title": "Reserve Info",
-              "items": [
-                {
-                  "label": "Peg",
-                  "value": "1 USDT = 1 USD"
-                },
-                {
-                  "label": "Redemption",
-                  "value": "Same-day"
                 }
               ]
             },

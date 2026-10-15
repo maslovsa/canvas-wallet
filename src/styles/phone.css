@@ -125,12 +125,13 @@
   opacity: 0.75;
 }
 .card-back-chevron {
-  font-size: 26px;
-  font-weight: 500;
-  line-height: 1;
+  display: grid;
+  place-items: center;
+  margin-left: -6px; /* the drawn chevron's visible edge, not its empty box, sits at the screen margin */
 }
 .card-back-label {
   font-size: 17px;
+  line-height: 1;
 }
 .badge-chip {
   background: rgba(255, 255, 255, 0.2);
@@ -231,16 +232,6 @@
   font-size: 28px;
   letter-spacing: -0.035em;
   line-height: 1.1;
-}
-.phone-list-desc {
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  margin-top: 6px;
-  font-size: 14px;
-  line-height: 1.45;
-  color: var(--phone-dim);
 }
 .phone-network-filter {
   display: flex;
@@ -595,24 +586,101 @@
 .price-chart-down {
   color: #d63b40;
 }
+.price-chart-when {
+  margin-left: auto;
+  font-size: 11.5px;
+  color: var(--phone-dim);
+}
 .price-chart-svg {
   width: 100%;
-  height: 64px;
+  height: auto;
   display: block;
+  overflow: visible;
+  touch-action: pan-y; /* a vertical swipe still scrolls the card; a horizontal one scrubs the chart */
+  cursor: crosshair;
+  user-select: none;
 }
-.price-chart-line-up {
+.price-chart-svg-up {
+  color: #1f9d4c;
+}
+.price-chart-svg-down {
+  color: #d63b40;
+}
+.phone-frame.theme-dark .price-chart-svg-up {
+  color: #3fb96b;
+}
+.phone-frame.theme-dark .price-chart-svg-down {
+  color: #f0686c;
+}
+.price-chart-stop {
+  stop-color: currentColor;
+}
+.price-chart-grid {
+  stroke: var(--ph-line, rgba(127, 127, 127, 0.25));
+  stroke-width: 1;
+  stroke-dasharray: 2 4;
+  vector-effect: non-scaling-stroke;
+}
+.price-chart-axis {
+  fill: var(--phone-dim);
+  font-size: 9.5px;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.85;
+  stroke: var(--ph-card); /* a card-coloured outline keeps the label legible where the line crosses it */
+  stroke-width: 3px;
+  paint-order: stroke;
+}
+.price-chart-line {
   fill: none;
-  stroke: #1f9d4c;
-  stroke-width: 2;
+  stroke: currentColor;
+  stroke-width: 2.25;
   stroke-linecap: round;
   stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
 }
-.price-chart-line-down {
-  fill: none;
-  stroke: #d63b40;
+.price-chart-halo {
+  fill: currentColor;
+  opacity: 0.22;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: chart-halo 2.2s ease-out infinite;
+}
+.price-chart-dot {
+  fill: currentColor;
+}
+@keyframes chart-halo {
+  from {
+    transform: scale(0.5);
+    opacity: 0.4;
+  }
+  to {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+.price-chart-cursor {
+  stroke: var(--phone-dim);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+.price-chart-cursor-dot {
+  fill: var(--ph-card);
+  stroke: currentColor;
   stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+.price-chart-time {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 4px;
+  font-size: 10.5px;
+  color: var(--phone-dim);
+}
+@media (prefers-reduced-motion: reduce) {
+  .price-chart-halo {
+    animation: none;
+    opacity: 0.2;
+  }
 }
 .price-chart-caption {
   margin-top: 6px;
@@ -731,7 +799,7 @@
 }
 .price-skeleton-chart {
   width: 100%;
-  height: 64px;
+  height: 134px; /* the chart plus its time axis: no jump when it lands */
 }
 
 /* ---- wallet home: balance hero and shortcuts ----------------------------------------------------------- */
@@ -916,10 +984,6 @@
   font-weight: 400;
   letter-spacing: 0;
 }
-.chrome-android .phone-list-desc {
-  font-size: 14px;
-  letter-spacing: 0.1px;
-}
 .chrome-android .wallet-hero {
   border-radius: 28px;
 }
@@ -1052,6 +1116,106 @@
 .send-book-btn:disabled {
   opacity: 0.4;
   cursor: default;
+}
+
+/* ==== First-run coaching (coach.ts): a pulse on the control plus a short tip; never blocks, shown once ======= */
+/* Text on the accent: white on the light theme's blue, dark on the dark theme's lighter blue (contrast). */
+.phone-frame.theme-dark {
+  --coach-ink: #0b1b2e;
+}
+.send-field {
+  position: relative; /* anchors the out-of-flow coach tip */
+}
+.send-book-btn.is-coached {
+  background: var(--ph-fill);
+  animation: coach-pulse 1.6s ease-out 3; /* three pulses, then a steady ring: attention without nagging */
+  box-shadow: 0 0 0 2px var(--send-accent, #2a66ab);
+}
+@keyframes coach-pulse {
+  0% {
+    box-shadow: 0 0 0 2px var(--send-accent, #2a66ab), 0 0 0 0 color-mix(in srgb, var(--send-accent, #2a66ab) 55%, transparent);
+  }
+  70%,
+  100% {
+    box-shadow: 0 0 0 2px var(--send-accent, #2a66ab), 0 0 0 12px transparent;
+  }
+}
+.coach-tip {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-width: 220px;
+  padding: 9px 12px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--send-accent, #2a66ab);
+  color: var(--coach-ink, #fff);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28);
+  animation: coach-tip-in 220ms ease-out both;
+}
+.coach-tip[hidden] {
+  display: none;
+}
+.coach-tip::before {
+  content: "";
+  position: absolute;
+  top: -5px;
+  right: 15px; /* under the centre of the 40px book button */
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  background: inherit;
+  transform: rotate(45deg);
+}
+.coach-tip-title {
+  font-size: 13px;
+  font-weight: 650;
+}
+.coach-tip-sub {
+  font-size: 11.5px;
+  line-height: 1.3;
+  opacity: 0.9;
+}
+@keyframes coach-tip-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+.book-row.is-coached {
+  background: var(--ph-fill);
+  box-shadow: inset 0 0 0 2px var(--send-accent, #2a66ab);
+  animation: coach-row 1.6s ease-in-out 3;
+}
+@keyframes coach-row {
+  50% {
+    background: color-mix(in srgb, var(--send-accent, #2a66ab) 26%, transparent);
+  }
+}
+.coach-pill {
+  flex: none;
+  margin-left: auto;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--send-accent, #2a66ab);
+  color: var(--coach-ink, #fff);
+  font-size: 11.5px;
+  font-weight: 650;
+  white-space: nowrap;
+}
+@media (prefers-reduced-motion: reduce) {
+  .send-book-btn.is-coached,
+  .book-row.is-coached,
+  .coach-tip {
+    animation: none; /* the ring and the tip stay, only the movement goes */
+  }
 }
 
 .phone-overlay.is-sheet {
@@ -1214,9 +1378,17 @@
   letter-spacing: -0.01em;
 }
 .book-address {
+  margin-top: 2px;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 12.5px;
+  font-size: 11.5px;
+  line-height: 1.4;
   color: var(--phone-dim);
+  overflow-wrap: anywhere; /* the whole address, wrapped, never cut off with an ellipsis */
+  word-break: break-all;
+}
+.book-address-edge {
+  color: var(--send-accent, #2a66ab);
+  font-weight: 700;
 }
 .book-empty {
   padding: 40px 16px;

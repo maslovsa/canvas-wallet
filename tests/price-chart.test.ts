@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { fetchPriceHistory, generatePlaceholderSeries, buildSparkline } from "../src/widgets/price-chart.ts";
+import { fetchPriceHistory, generatePlaceholderSeries, buildSparkline, buildChartGeometry, formatAxisPrice, formatPrice, pointTime, rangeLabel } from "../src/widgets/price-chart.ts";
 
 describe("fetchPriceHistory", () => {
   it("returns the flattened price series on a successful fetch", async () => {
@@ -103,5 +103,62 @@ describe("fetchPriceHistory through the Worker", () => {
     const fetchImpl = vi.fn(async () => new Response(JSON.stringify({ prices: [[0, 5], [1, 6]] }))) as unknown as typeof fetch;
     expect(await fetchPriceHistory("proxy-test-d", 7, fetchImpl, "https://worker.example")).toEqual([5, 6]);
     expect(String((fetchImpl as unknown as { mock: { calls: unknown[][] } }).mock.calls[0]![0])).toContain("api.coingecko.com");
+  });
+});
+
+describe("buildChartGeometry", () => {
+  const layout = { width: 320, height: 132, padTop: 10, padBottom: 8, gutterRight: 0 };
+
+  it("spans the whole width, with the high at the top and the low at the baseline", () => {
+    const g = buildChartGeometry([10, 20, 15, 30], layout);
+    expect(g.points[0]!.x).toBe(0);
+    expect(g.points[3]!.x).toBe(320);
+    expect(g.points[3]!.y).toBe(10); // 30 is the high
+    expect(g.points[0]!.y).toBe(124); // 10 is the low
+    expect(g.ticks.map((t) => t.value)).toEqual([30, 20, 10]);
+  });
+
+  it("closes the area down to the bottom edge and keeps a smooth line", () => {
+    const g = buildChartGeometry([1, 2, 1.5, 3], layout);
+    expect(g.linePath.startsWith("M")).toBe(true);
+    expect(g.linePath).toContain("C");
+    expect(g.areaPath.endsWith("Z")).toBe(true);
+    expect(g.areaPath).toContain("L320.0,132");
+  });
+
+  it("never overshoots: no point of the curve control polygon leaves the data's high and low", () => {
+    const g = buildChartGeometry([5, 5, 9, 9, 2, 2], layout);
+    const ys = [...g.linePath.matchAll(/,(-?\d+\.\d)/g)].map((m) => Number(m[1]));
+    expect(Math.min(...ys)).toBeGreaterThanOrEqual(10 - 0.2);
+    expect(Math.max(...ys)).toBeLessThanOrEqual(124 + 0.2);
+  });
+
+  it("a flat series is a centred line, not a divide-by-zero", () => {
+    const g = buildChartGeometry([7, 7, 7], layout);
+    expect(g.points.every((p) => Number.isFinite(p.y) && p.y === g.points[0]!.y)).toBe(true);
+  });
+});
+
+describe("chart formatting", () => {
+  it("formats prices for the headline and the grid", () => {
+    expect(formatPrice(67432.1)).toBe("$67,432.10");
+    expect(formatPrice(0.01234)).toBe("$0.0123");
+    expect(formatAxisPrice(67432.1)).toBe("$67,432");
+    expect(formatAxisPrice(3.416)).toBe("$3.42");
+  });
+
+  it("spreads the points evenly over the range, ending now", () => {
+    const now = Date.UTC(2026, 9, 14, 12);
+    expect(pointTime(4, 5, 1, now).getTime()).toBe(now);
+    expect(pointTime(0, 5, 1, now).getTime()).toBe(now - 86_400_000);
+    expect(rangeLabel(1)).toBe("24h ago");
+    expect(rangeLabel(7)).toBe("7d ago");
+  });
+});
+
+describe("grid labels on a nearly flat chart", () => {
+  it("get enough decimals to tell the lines apart (a stablecoin's day)", () => {
+    const labels = [0.9992, 0.99905, 0.9989].map((v) => formatAxisPrice(v, 0.00015));
+    expect(new Set(labels).size).toBe(3);
   });
 });

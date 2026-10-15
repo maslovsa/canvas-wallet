@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { readFileSync } from "node:fs";
 import { webcrypto } from "node:crypto";
-import { parseAddressBook, entriesForNetwork, bookNetworkFor, shortAddress, loadAddressBook, resetAddressBookCache } from "../src/send/address-book.ts";
+import { parseAddressBook, entriesForNetwork, bookNetworkFor, shortAddress, splitAddress, loadAddressBook, resetAddressBookCache } from "../src/send/address-book.ts";
 import { validateAddressBook, isValidEvmAddress, isValidTonAddress } from "../src/send/address-book-validate.ts";
 
 const subtle = webcrypto.subtle as SubtleCrypto;
@@ -120,5 +120,17 @@ describe("loadAddressBook", () => {
     expect(await loadAddressBook((async () => new Response("", { status: 404 })) as unknown as typeof fetch, "/")).toEqual([]);
     resetAddressBookCache();
     expect(await loadAddressBook((async () => { throw new Error("offline"); }) as unknown as typeof fetch, "/")).toEqual([]);
+  });
+});
+
+describe("splitAddress", () => {
+  it("picks out the first and last four characters, keeping the 0x of an EVM address out of the head", () => {
+    expect(splitAddress("TAzsQ9Gx8eqFNFSKbeXrbi45CuVPHzA8wr")).toMatchObject({ prefix: "", head: "TAzs", tail: "A8wr" });
+    const evm = splitAddress("0x56eddb7aa87536c09ccc2793473599fd21a8b17f");
+    expect(evm).toMatchObject({ prefix: "0x", head: "56ed", tail: "b17f" });
+    expect(evm.prefix + evm.head + evm.middle + evm.tail).toBe("0x56eddb7aa87536c09ccc2793473599fd21a8b17f");
+  });
+  it("never drops or repeats a character on a short input", () => {
+    expect(splitAddress("abcdefgh")).toEqual({ prefix: "", head: "abcdefgh", middle: "", tail: "" });
   });
 });

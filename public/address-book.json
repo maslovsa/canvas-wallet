@@ -22,8 +22,8 @@
     {
       "network": "TRON",
       "address": "TU4vEruvZwLLkSfV9bNw12EJTPvNr7Pvaa",
-      "comment": "Justin Sun Office",
-      "avatar": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/Head_of_the_Grenadian_Delegation_to_the_12th_World_Trade_Organization_Ministerial_Conference_Justin_Sun.jpg/250px-Head_of_the_Grenadian_Delegation_to_the_12th_World_Trade_Organization_Ministerial_Conference_Justin_Sun.jpg"
+      "comment": "Walter White",
+      "avatar": "https://api.dicebear.com/9.x/avataaars/png?seed=White&size=128"
     },
     {
       "network": "ETH",
@@ -107,25 +107,25 @@
       "network": "TRON",
       "address": "TU4tDFRvcKhAZ1jdihojmBWZqvJhQCnJ4F",
       "comment": "Contact 6",
-      "avatar": "https://api.dicebear.com/9.x/avataaars/png?seed=Contact%206&size=128"
+      "avatar": "https://api.dicebear.com/9.x/avataaars/png?seed=Car&size=128"
     },
     {
       "network": "TRON",
       "address": "TNNcaQDVuE5xYqEcZs6XCn66asGShvbZ3y",
       "comment": "Contact 7",
-      "avatar": "https://api.dicebear.com/9.x/avataaars/png?seed=Contact%207&size=128"
+      "avatar": "https://api.dicebear.com/9.x/avataaars/png?seed=Beach&size=128"
     },
     {
       "network": "ETH",
       "address": "0xaf5d53b9682119d0b3fb2afa8bd10a28192dcd91",
       "comment": "Contact 8",
-      "avatar": "https://api.dicebear.com/9.x/avataaars/png?seed=Contact%208&size=128"
+      "avatar": "https://api.dicebear.com/9.x/avataaars/png?seed=Girl&size=128"
     },
     {
       "network": "ETH",
       "address": "0x905b63fff465b9ffbf41dea908ceb12478ec7601",
       "comment": "Contact 9",
-      "avatar": "https://api.dicebear.com/9.x/avataaars/png?seed=Contact%209&size=128"
+      "avatar": "https://api.dicebear.com/9.x/avataaars/png?seed=Cat&size=128"
     },
     {
       "network": "ETH",
@@ -220,13 +220,13 @@
     {
       "network": "TON",
       "address": "UQDKHZ7e70CzqdvZCC83Z4WVR8POC_ZB0J1Y4zo88G-zCSRH",
-      "comment": "Binance Hot Wallet",
+      "comment": "My - Binance",
       "avatar": "https://cdn.jsdelivr.net/gh/maslovsa/kyt-entity-registry@main/logos/exchanges/binance-com.png"
     },
     {
       "network": "TON",
       "address": "UQD5mxRgCuRNLxKxeOjG6r14iSroLF5FtomPnet-sgP5xI-e",
-      "comment": "Binance",
+      "comment": "Wife - Binance",
       "avatar": "https://cdn.jsdelivr.net/gh/maslovsa/kyt-entity-registry@main/logos/exchanges/binance-com.png"
     },
     {
@@ -238,67 +238,67 @@
     {
       "network": "TON",
       "address": "UQBKHz68xmvc76kCRb31QaUK2hxoikh1NLFYer_9kwOINDtf",
-      "comment": "Bybit",
-      "avatar": "https://api.dicebear.com/9.x/shapes/png?seed=Bybit&size=128"
+      "comment": "My - Bybit",
+      "avatar": "https://cdn.jsdelivr.net/gh/maslovsa/kyt-entity-registry@main/logos/exchanges/bybit.png"
     },
     {
       "network": "TON",
       "address": "UQDN9_DXwJA28GQnLjxCntVwvknvKes6c1tku8F5FQc3Mhut",
-      "comment": "Bitget",
+      "comment": "My - Bitget",
       "avatar": "https://cdn.jsdelivr.net/gh/maslovsa/kyt-entity-registry@main/logos/exchanges/bitget-com.png"
     },
     {
       "network": "TON",
       "address": "UQDYh9Di0cT8QSbnHJcNM6sYlpQAAOrnA7sats7Mgwd344Mm",
-      "comment": "MEXC",
+      "comment": "My - MEXC",
       "avatar": "https://cdn.jsdelivr.net/gh/maslovsa/kyt-entity-registry@main/logos/exchanges/mexc-com.png"
     },
     {
       "network": "TON",
       "address": "UQChSx9FI4Wyu5hK0sREHh0jyuBx_fwJbfulPrujtv8dEIro",
-      "comment": "LBank",
+      "comment": "My - LBank",
       "avatar": "https://cdn.jsdelivr.net/gh/maslovsa/kyt-entity-registry@main/logos/exchanges/lbank-com.png"
     },
     {
       "network": "TON",
       "address": "UQC0lrj3O0af8GotieYsTXChA_wijIIVN7Sd_wkgYLwoHxMv",
-      "comment": "Gate.io",
+      "comment": "My - Gate.io",
       "avatar": "https://cdn.jsdelivr.net/gh/maslovsa/kyt-entity-registry@main/logos/exchanges/gate-io.png"
     },
     {
       "network": "TON",
       "address": "UQCFr3jo0DXpIBF82mVGFc3zcdRkSAtinhENPFMQ2FqzYv0E",
-      "comment": "Huobi (HTX)",
+      "comment": "My - Huobi (HTX)",
       "avatar": "https://cdn.jsdelivr.net/gh/maslovsa/kyt-entity-registry@main/logos/exchanges/htx-com-huobi-com.png"
     },
     {
       "network": "TON",
       "address": "UQCzflcDPbIdELlQ5hQ7ZYwQw79CW9GTAllgrvfyLbz0_Lup",
-      "comment": "KuCoin",
+      "comment": "My - KuCoin",
       "avatar": "https://cdn.jsdelivr.net/gh/maslovsa/kyt-entity-registry@main/logos/exchanges/kucoin-com.png"
     },
     {
       "network": "TON",
       "address": "UQBAL11PT4vqewvVEbnTdxg0waIru7yKMmA16weqJPXJ-cql",
-      "comment": "Crypto.com",
+      "comment": "My - Crypto.com",
       "avatar": "https://cdn.jsdelivr.net/gh/maslovsa/kyt-entity-registry@main/logos/exchanges/crypto-com.png"
     },
     {
       "network": "TON",
       "address": "UQABGo8KCza3ea8DNHMnSWZmbRzW-05332eTdfvW-XDQEmnJ",
-      "comment": "xRocket Bot",
+      "comment": "My - xRocket Bot",
       "avatar": "https://api.dicebear.com/9.x/bottts/png?seed=xRocket%20Bot&size=128"
     },
     {
       "network": "TON",
       "address": "UQCtiv7PrMJImWiF2L5oJCgPnzp-VML2CAt5cbn1VsKAxOVB",
-      "comment": "Crypto Bot",
+      "comment": "My - Crypto Bot",
       "avatar": "https://api.dicebear.com/9.x/bottts/png?seed=Crypto%20Bot&size=128"
     },
     {
       "network": "TON",
       "address": "UQDd3NPNrWCvTA1pOJ9WetUdDCY_pJaNZVq0JMaara-TIsKx",
-      "comment": "Wallet Bot",
+      "comment": "My - Wallet Bot",
       "avatar": "https://api.dicebear.com/9.x/bottts/png?seed=Wallet%20Bot&size=128"
     }
   ]

@@ -196,12 +196,6 @@ function listDisplayName(): string {
   return "My Wallet";
 }
 
-function listDisplayDescription(): string {
-  if (state.listMeta?.description) return state.listMeta.description;
-  if (state.source?.kind === "github") return "Viewing an external GitHub-hosted registry.";
-  return "";
-}
-
 function phoneOptions(): PhoneFrameOptions {
   const options: PhoneFrameOptions = {
     chromeStyle: state.chromeStyle,
@@ -211,7 +205,6 @@ function phoneOptions(): PhoneFrameOptions {
     registryNetworks: state.registry?.networks ?? [],
     allNetworkInfo: state.networks,
     listName: listDisplayName(),
-    listDescription: listDisplayDescription(),
     onSelectNetwork: (network) => selectNetwork(network),
     onSelectToken: (token) => selectToken(token, { confirmDiscard: true }),
     onScreenChange: syncUrl,

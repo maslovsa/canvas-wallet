@@ -202,7 +202,11 @@
   pointer-events: none;
 }
 .send-back-chevron {
-  font-size: 28px;
+  display: grid;
+  place-items: center;
+  margin-left: -8px; /* the drawn chevron has ~8 px of empty box on its left: its visible edge lines up with the 20 px content edge */
+}
+.send-back-label {
   line-height: 1;
 }
 .send-nav-title-box {

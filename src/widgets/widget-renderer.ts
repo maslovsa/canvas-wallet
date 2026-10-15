@@ -1,6 +1,6 @@
 import type { Widget, Token } from "../types.ts";
 import { loadIcon } from "../icon/icon-loader.ts";
-import { fetchPriceHistory, generatePlaceholderSeries, buildSparkline } from "./price-chart.ts";
+import { fetchPriceHistory, generatePlaceholderSeries, buildSparkline, buildChartGeometry, formatAxisPrice, formatPrice, formatPointTime, pointTime, rangeLabel } from "./price-chart.ts";
 import { generateHistory, formatAmount, formatHistoryTimestamp } from "./history.ts";
 import { readableTextColor } from "./color.ts";
 import { icon } from "../ui/icons.ts";
@@ -111,38 +111,122 @@ const renderNotice: WidgetRenderer<Extract<Widget, { type: "notice" }>> = (widge
   return el;
 };
 
-const SPARKLINE_WIDTH = 260;
-const SPARKLINE_HEIGHT = 56;
+/** "+1.23%", "-0.40%", and a plain "0.00%" (not a red "-0.00%") when the move rounds to nothing. */
+function formatChange(pct: number): string {
+  const rounded = pct.toFixed(2);
+  return Number(rounded) === 0 ? "0.00%" : `${pct > 0 ? "+" : ""}${rounded}%`;
+}
 
-function renderSparklineInto(container: HTMLElement, prices: number[], isPlaceholder: boolean): void {
+const CHART_LAYOUT = { width: 320, height: 132, padTop: 10, padBottom: 8, gutterRight: 0 };
+const SVG_NS = "http://www.w3.org/2000/svg";
+let chartCounter = 0;
+
+function svgEl<K extends keyof SVGElementTagNameMap>(tag: K, attrs: Record<string, string | number> = {}): SVGElementTagNameMap[K] {
+  const node = document.createElementNS(SVG_NS, tag);
+  for (const [name, value] of Object.entries(attrs)) node.setAttribute(name, String(value));
+  return node;
+}
+
+function renderChartInto(container: HTMLElement, prices: number[], days: number, isPlaceholder: boolean): void {
   container.innerHTML = "";
   container.removeAttribute("aria-busy");
   container.removeAttribute("aria-label");
-  const { pathD, latest, changePct, isRising } = buildSparkline(prices, SPARKLINE_WIDTH, SPARKLINE_HEIGHT);
+  const { latest, changePct, isRising } = buildSparkline(prices, CHART_LAYOUT.width, CHART_LAYOUT.height);
+  // the line runs the full width of the card; grid labels sit just above their grid line, at the left
+  const geo = buildChartGeometry(prices, CHART_LAYOUT);
+  const direction = isRising ? "up" : "down";
 
   const stats = document.createElement("div");
   stats.className = "price-chart-stats";
   const price = document.createElement("span");
   price.className = "price-chart-price";
-  price.textContent = isPlaceholder ? "Price unavailable" : `$${latest < 1 ? latest.toPrecision(3) : latest.toFixed(2)}`;
+  price.textContent = isPlaceholder ? "Price unavailable" : formatPrice(latest);
   stats.append(price);
+  let change: HTMLElement | null = null;
+  let when: HTMLElement | null = null;
   if (!isPlaceholder) {
     // A sample series has no real price or change, so none is shown (an invented "+18%" on a stablecoin misleads).
-    const change = document.createElement("span");
-    change.className = `price-chart-change ${isRising ? "price-chart-up" : "price-chart-down"}`;
-    change.textContent = `${isRising ? "+" : ""}${changePct.toFixed(2)}%`;
-    stats.append(change);
+    change = document.createElement("span");
+    change.className = `price-chart-change price-chart-${direction}`;
+    change.textContent = formatChange(changePct);
+    when = document.createElement("span");
+    when.className = "price-chart-when";
+    when.textContent = rangeLabel(days).replace(" ago", "");
+    stats.append(change, when);
   }
   container.append(stats);
 
-  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-  svg.setAttribute("viewBox", `0 0 ${SPARKLINE_WIDTH} ${SPARKLINE_HEIGHT}`);
-  svg.classList.add("price-chart-svg");
-  const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-  path.setAttribute("d", pathD);
-  path.setAttribute("class", isRising ? "price-chart-line-up" : "price-chart-line-down");
-  svg.append(path);
+  const gradientId = `pc-fill-${++chartCounter}`;
+  const svg = svgEl("svg", { viewBox: `0 0 ${CHART_LAYOUT.width} ${CHART_LAYOUT.height}`, role: "img" });
+  svg.setAttribute("aria-label", isPlaceholder ? "Sample chart" : `Price over the last ${days <= 1 ? "24 hours" : `${Math.round(days)} days`}`);
+  svg.classList.add("price-chart-svg", `price-chart-svg-${direction}`);
+  const defs = svgEl("defs");
+  const gradient = svgEl("linearGradient", { id: gradientId, x1: 0, y1: 0, x2: 0, y2: 1 });
+  gradient.append(svgEl("stop", { offset: "0%", "stop-opacity": 0.28, class: "price-chart-stop" }), svgEl("stop", { offset: "100%", "stop-opacity": 0, class: "price-chart-stop" }));
+  defs.append(gradient);
+  svg.append(defs);
+
+  for (const tick of geo.ticks) {
+    svg.append(svgEl("line", { x1: 0, x2: geo.plotRight, y1: tick.y.toFixed(1), y2: tick.y.toFixed(1), class: "price-chart-grid" }));
+    if (!isPlaceholder) {
+      const label = svgEl("text", { x: 0, y: (tick.y - 3.5).toFixed(1), "text-anchor": "start", class: "price-chart-axis" });
+      label.textContent = formatAxisPrice(tick.value, (geo.ticks[0]!.value - geo.ticks[1]!.value) || 0);
+      svg.append(label);
+    }
+  }
+  svg.append(svgEl("path", { d: geo.areaPath, fill: `url(#${gradientId})`, class: "price-chart-area" }));
+  svg.append(svgEl("path", { d: geo.linePath, class: `price-chart-line price-chart-line-${direction}` }));
+  const end = geo.points[geo.points.length - 1]!;
+  svg.append(svgEl("circle", { cx: end.x.toFixed(1), cy: end.y.toFixed(1), r: 7, class: "price-chart-halo" }), svgEl("circle", { cx: end.x.toFixed(1), cy: end.y.toFixed(1), r: 3.5, class: "price-chart-dot" }));
+
+  // Scrub: a crosshair follows the finger or pointer and the headline shows that moment's price and move.
+  const cursor = svgEl("line", { y1: 0, y2: CHART_LAYOUT.height, class: "price-chart-cursor" });
+  const cursorDot = svgEl("circle", { r: 4.5, class: "price-chart-cursor-dot" });
+  cursor.style.display = "none";
+  cursorDot.style.display = "none";
+  svg.append(cursor, cursorDot);
   container.append(svg);
+
+  const axis = document.createElement("div");
+  axis.className = "price-chart-time";
+  const startLabel = document.createElement("span");
+  startLabel.textContent = rangeLabel(days);
+  const endLabel = document.createElement("span");
+  endLabel.textContent = "Now";
+  axis.append(startLabel, endLabel);
+  container.append(axis);
+
+  if (!isPlaceholder && change && when) {
+    const first = prices[0]!;
+    const now = Date.now();
+    const show = (index: number | null) => {
+      const i = index ?? prices.length - 1;
+      const value = prices[i]!;
+      const pct = first === 0 ? 0 : ((value - first) / first) * 100;
+      price.textContent = formatPrice(value);
+      change!.textContent = formatChange(pct);
+      change!.className = `price-chart-change price-chart-${pct >= 0 ? "up" : "down"}`;
+      when!.textContent = index === null ? rangeLabel(days).replace(" ago", "") : formatPointTime(pointTime(i, prices.length, days, now), days);
+      const hidden = index === null ? "none" : "";
+      cursor.style.display = hidden;
+      cursorDot.style.display = hidden;
+      if (index !== null) {
+        const point = geo.points[i]!;
+        cursor.setAttribute("x1", point.x.toFixed(1));
+        cursor.setAttribute("x2", point.x.toFixed(1));
+        cursorDot.setAttribute("cx", point.x.toFixed(1));
+        cursorDot.setAttribute("cy", point.y.toFixed(1));
+      }
+    };
+    const indexAt = (clientX: number): number => {
+      const rect = svg.getBoundingClientRect();
+      const x = ((clientX - rect.left) / (rect.width || 1)) * CHART_LAYOUT.width;
+      return Math.max(0, Math.min(prices.length - 1, Math.round((x / geo.plotRight) * (prices.length - 1))));
+    };
+    svg.addEventListener("pointermove", (e) => show(indexAt(e.clientX)));
+    svg.addEventListener("pointerdown", (e) => show(indexAt(e.clientX)));
+    for (const type of ["pointerleave", "pointercancel", "pointerup"] as const) svg.addEventListener(type, () => show(null));
+  }
 
   if (isPlaceholder) {
     const caption = document.createElement("div");
@@ -176,9 +260,9 @@ const renderPriceChart: WidgetRenderer<Extract<Widget, { type: "price_chart" }>>
   const days = widget.days ?? 1;
   fetchPriceHistory(widget.coingeckoId, days).then((prices) => {
     if (prices && prices.length > 1) {
-      renderSparklineInto(body, prices, false);
+      renderChartInto(body, prices, days, false);
     } else {
-      renderSparklineInto(body, generatePlaceholderSeries(widget.coingeckoId), true);
+      renderChartInto(body, generatePlaceholderSeries(widget.coingeckoId), days, true);
     }
   });
 
