@@ -35,3 +35,12 @@ class_name = "RiskCounter"
 [[migrations]]
 tag = "v1"
 new_sqlite_classes = ["RiskCounter"]
+
+# Preview deploys (`wrangler preview`, run by Workers Builds for non-production branches).
+# Deliberately no RISK_CACHE KV and no secrets: previews do not touch production resources, and with
+# RISK_ENABLED unset the live Aegis check stays off. Budgets are small in case it is ever turned on.
+[previews.vars]
+ALLOWED_ORIGIN = "http://localhost:5173,http://127.0.0.1:5173"
+AEGIS_BASE_URL = "https://api.aegis-kyt.com"
+DAILY_BUDGET = "10"
+PER_VISITOR_PER_HOUR = "5"
